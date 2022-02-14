@@ -5,6 +5,8 @@
 Solana blockchain client, written in pure Java.
 Solanaj is an API for integrating with Solana blockchain using the [Solana RPC API](https://docs.solana.com/apps/jsonrpc-api)
 
+gm
+
 This fork includes functionality for multiple Solana programs, including the Serum DEX.
 
 # solanaj-programs
