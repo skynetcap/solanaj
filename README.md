@@ -1,18 +1,13 @@
 # solanaj
 
-![Github Actions](https://github.com/skynetcapital/solanaj/actions/workflows/maven.yml/badge.svg)
 
 Solana blockchain client, written in pure Java.
 Solanaj is an API for integrating with Solana blockchain using the [Solana RPC API](https://docs.solana.com/apps/jsonrpc-api)
 
-gm
-NEW TWITTER: https://twitter.com/1111_michael
-NEW INSTAGRAM: https://www.instagram.com/michael_morrell11/
-
 This fork includes functionality for multiple Solana programs, including the Serum DEX.
 
 # solanaj-programs
-For SolanaJ implementations of popular Solana programs such as Serum, please visit: https://github.com/skynetcapital/solanaj-programs
+For SolanaJ implementations of popular Solana programs such as Serum, please visit: https://github.com/skynetcap/solanaj-programs
 
 ## Requirements
 - Java 11+
