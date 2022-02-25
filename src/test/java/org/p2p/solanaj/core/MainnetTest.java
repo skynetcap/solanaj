@@ -115,7 +115,7 @@ public class MainnetTest extends AccountBasedTest {
 
         // Add instruction to write memo
         transaction.addInstruction(
-                MemoProgram.writeUtf8(feePayer.getPublicKey(),"Hello from SolanaJ :)")
+                MemoProgram.writeUtf8(feePayer.getPublicKey(),"My new twitter is: 1111_michael")
         );
 
         // Call sendTransaction
