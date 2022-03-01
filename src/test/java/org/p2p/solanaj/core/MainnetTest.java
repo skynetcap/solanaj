@@ -385,6 +385,7 @@ public class MainnetTest extends AccountBasedTest {
     }
 
     @Test
+    @Ignore
     public void getTokenLargestAccountsTest() throws RpcException {
         List<TokenAccount> tokenAccounts = client.getApi().getTokenLargestAccounts(PublicKey.valueOf(
                 "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R"));
@@ -411,6 +412,7 @@ public class MainnetTest extends AccountBasedTest {
     }
 
     @Test
+    @Ignore
     public void getTokenAccountsByDelegateTest() throws RpcException {
         Map<String, Object> requiredParams = Map.of("mint", USDC_TOKEN_MINT);
         TokenAccountInfo tokenAccount = client.getApi().getTokenAccountsByDelegate(PublicKey.valueOf(
