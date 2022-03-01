@@ -98,7 +98,7 @@ public class MainnetTest extends AccountBasedTest {
     @Test
     @Ignore
     public void transactionMemoTest() {
-        final int lamports = 1337;
+        final int lamports = 1111;
         final PublicKey destination = solDestination;
 
         // Create account from private key
@@ -115,7 +115,7 @@ public class MainnetTest extends AccountBasedTest {
 
         // Add instruction to write memo
         transaction.addInstruction(
-                MemoProgram.writeUtf8(feePayer.getPublicKey(),"My new twitter is: 1111_michael")
+                MemoProgram.writeUtf8(feePayer.getPublicKey(),"Twitter: skynetcap")
         );
 
         // Call sendTransaction
