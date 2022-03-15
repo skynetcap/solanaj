@@ -105,13 +105,16 @@ public class MainnetTest extends AccountBasedTest {
         final Account feePayer = testAccount;
 
         final Transaction transaction = new Transaction();
-        transaction.addInstruction(
-                SystemProgram.transfer(
-                        feePayer.getPublicKey(),
-                        destination,
-                        lamports
-                )
-        );
+
+        // First intruction it adds here is a small amount of SOL (like 0.000001) just to have some content in the tx
+        // Probably not really needed
+//        transaction.addInstruction(
+//                SystemProgram.transfer(
+//                        feePayer.getPublicKey(),
+//                        destination,
+//                        lamports
+//                )
+//        );
 
         // Add instruction to write memo
         transaction.addInstruction(

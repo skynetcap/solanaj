@@ -82,6 +82,13 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
 
     }
 
+    /**
+     * For example, used to "listen" to an private key's "tweets"
+     * By accountSubscribing to their private key(s)
+     *
+     * @param key
+     * @param listener
+     */
     public void accountSubscribe(String key, NotificationEventListener listener) {
         List<Object> params = new ArrayList<>();
         params.add(key);
