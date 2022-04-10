@@ -19,4 +19,8 @@ public class ProgramAccountConfig {
     public ProgramAccountConfig(Encoding encoding) {
         this.encoding = encoding;
     }
+
+    public void setEncoding(Encoding encoding) {
+        this.encoding = encoding;
+    }
 }
