@@ -19,7 +19,7 @@ For SolanaJ implementations of popular Solana programs such as Serum, please vis
 
 ## Installation
 1. Build SolanaJ:
-   `mvn clean install -DskipTests`
+   `mvn clean install`
 2. To use in another project, add this dependency to Maven:
     ```xml
     <dependency>
