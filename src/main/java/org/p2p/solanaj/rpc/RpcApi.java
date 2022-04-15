@@ -359,6 +359,21 @@ public class RpcApi {
         return client.call("getFeeRateGovernor", new ArrayList<>(), FeeRateGovernorInfo.class);
     }
 
+    public Long getFeeForMessage(String message) throws RpcException {
+        return getFeeForMessage(message, null);
+    }
+
+    public Long getFeeForMessage(String message, Commitment commitment) throws RpcException {
+        List<Object> params = new ArrayList<>();
+        params.add(message);
+
+        if (null != commitment) {
+            params.add(Map.of("commitment", commitment.getValue()));
+        }
+
+        return client.call("getFeeForMessage", params, ValueLong.class).getValue();
+    }
+
     public FeesInfo getFees() throws RpcException {
         return getFees(null);
     }

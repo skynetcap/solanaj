@@ -10,7 +10,7 @@ public class RpcResultTypes {
     @ToString
     public static class ValueLong extends RpcResultObject {
         @Json(name = "value")
-        private long value;
+        private Long value;
     }
 
 }
