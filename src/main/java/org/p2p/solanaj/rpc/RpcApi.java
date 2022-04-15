@@ -468,6 +468,15 @@ public class RpcApi {
         return client.call("getBlock", params, Block.class);
     }
 
+    /**
+     * Returns information about the highest snapshot slot
+     *
+     * @throws RpcException
+     */
+    public SnapshotSlot getHighestSnapshotSlot() throws RpcException {
+        List<Object> params = new ArrayList<Object>();
+        return client.call("getHighestSnapshotSlot", params, SnapshotSlot.class);
+    }
 
     /**
      * Returns information about the current epoch

@@ -225,6 +225,15 @@ public class MainnetTest extends AccountBasedTest {
     }
 
     @Test
+    public void getHighestSnapshotSlotTest() throws RpcException {
+        final SnapshotSlot highestSnapshotSlot = client.getApi().getHighestSnapshotSlot();
+        assertNotNull(highestSnapshotSlot);
+
+        LOGGER.info(String.format("Highest full snapshot slot: %d", highestSnapshotSlot.getFullSnapshotSlot()));
+        assertTrue(highestSnapshotSlot.getFullSnapshotSlot() > 0);
+    }
+
+    @Test
     public void getEpochScheduleTest() throws RpcException {
         final EpochSchedule epochSchedule = client.getApi().getEpochSchedule();
         assertNotNull(epochSchedule);
