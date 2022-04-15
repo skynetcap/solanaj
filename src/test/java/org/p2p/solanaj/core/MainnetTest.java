@@ -479,6 +479,12 @@ public class MainnetTest extends AccountBasedTest {
     }
 
     @Test
+    public void getFeeForMessageTest() throws RpcException {
+        Long result = client.getApi().getFeeForMessage("AQABAgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEBAQAA");
+        LOGGER.info("feeForMessageTest = " + result);
+    }
+
+    @Test
     public void getMaxRetransmitSlotTest() throws RpcException {
         long maxRetransmitSlot = client.getApi().getMaxRetransmitSlot();
         assertTrue(maxRetransmitSlot > 0);
