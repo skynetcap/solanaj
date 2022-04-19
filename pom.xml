@@ -80,7 +80,7 @@
         <repository>
             <id>github</id>
             <name>GitHub Packages</name>
-            <url>https://maven.pkg.github.com/skynetcapital/solanaj</url>
+            <url>https://maven.pkg.github.com/skynetcap/solanaj</url>
         </repository>
     </distributionManagement>
 </project>
