@@ -52,12 +52,8 @@ public class PublicKey {
     }
 
     @Override
-    public final int hashCode() {
-        int result = 17;
-        if (pubkey != null) {
-            result = 31 * result + Arrays.hashCode(pubkey);
-        }
-        return result;
+    public int hashCode() {
+        return Arrays.hashCode(pubkey);
     }
 
     @Override
