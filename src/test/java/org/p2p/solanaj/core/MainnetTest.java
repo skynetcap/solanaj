@@ -20,7 +20,7 @@ import static org.junit.Assert.*;
 
 public class MainnetTest extends AccountBasedTest {
 
-    private final RpcClient client = new RpcClient(Cluster.MAINNET);
+    private final RpcClient client = new RpcClient("https://ssc-dao.genesysgo.net/", 45);
     public final TokenManager tokenManager = new TokenManager(client);
 
     private static final PublicKey USDC_TOKEN_MINT = new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
@@ -514,7 +514,7 @@ public class MainnetTest extends AccountBasedTest {
     @Test
     public void getStakeActivationTest() throws RpcException {
         StakeActivation stakeActivation = client.getApi().getStakeActivation(
-                        PublicKey.valueOf("H8VT3V6EDiYiQqmeDgqZJf4Tt76Qe6WZjPhighAGPL5T"),
+                        PublicKey.valueOf("EvnRmnMrd69kFdbLMxWkTn1icZ7DCceRhvmb2SJXqDo4"),
                 155L,
                 null);
 
