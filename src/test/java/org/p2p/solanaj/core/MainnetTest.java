@@ -492,7 +492,7 @@ public class MainnetTest extends AccountBasedTest {
 
     @Test
     public void getBalanceTest() throws RpcException {
-        long balance = client.getApi().getBalance(PublicKey.valueOf("H8VT3V6EDiYiQqmeDgqZJf4Tt76Qe6WZjPhighAGPL5T"));
+        long balance = client.getApi().getBalance(PublicKey.valueOf("CuieVDEDtLo7FypA9SbLM9saXFdb1dsshEkyErMqkRQq"));
         LOGGER.info(String.format("Balance = %d", balance));
         assertTrue(balance > 0);
     }
