@@ -485,8 +485,10 @@ public class MainnetTest extends AccountBasedTest {
     }
 
     @Test
+    @Ignore
     public void getMaxRetransmitSlotTest() throws RpcException {
         long maxRetransmitSlot = client.getApi().getMaxRetransmitSlot();
+        LOGGER.info("maxRetransmitSlot = " + maxRetransmitSlot);
         assertTrue(maxRetransmitSlot > 0);
     }
 
