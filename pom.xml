@@ -4,7 +4,7 @@
     <groupId>org.p2p</groupId>
     <artifactId>solanaj</artifactId>
     <packaging>jar</packaging>
-    <version>1.6-SNAPSHOT</version>
+    <version>1.7-SNAPSHOT</version>
     <name>solanaj</name>
     <url>https://github.com/skynetcap/solanaj</url>
     <build>
