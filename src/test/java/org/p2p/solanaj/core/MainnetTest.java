@@ -511,12 +511,12 @@ public class MainnetTest extends AccountBasedTest {
         assertNotNull(recentBlockhash);
     }
 
+    @Ignore
     @Test
     public void getStakeActivationTest() throws RpcException {
         StakeActivation stakeActivation = client.getApi().getStakeActivation(
-                        PublicKey.valueOf("EvnRmnMrd69kFdbLMxWkTn1icZ7DCceRhvmb2SJXqDo4"),
-                155L,
-                null);
+                        PublicKey.valueOf("CYRJWqiSjLitBAcRxPvWpgX3s5TvmN2SuRY3eEYypFvT")
+        );
 
         LOGGER.info(stakeActivation.toString());
 
