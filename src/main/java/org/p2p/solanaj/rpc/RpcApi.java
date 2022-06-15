@@ -582,7 +582,9 @@ public class RpcApi {
 
         List<InflationReward> result = new ArrayList<>();
         for (AbstractMap item : rawResult) {
-            result.add(new InflationReward(item));
+            if (item != null) {
+                result.add(new InflationReward(item));
+            }
         }
 
         return result;

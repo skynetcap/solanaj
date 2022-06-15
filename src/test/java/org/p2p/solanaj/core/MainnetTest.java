@@ -280,16 +280,16 @@ public class MainnetTest extends AccountBasedTest {
                         PublicKey.valueOf("H8VT3V6EDiYiQqmeDgqZJf4Tt76Qe6WZjPhighAGPL5T"),
                         PublicKey.valueOf("BsXUTPFf5b82ptLGfDVXhAPmGk1ZwTirWA2aQrBq4zBW")
                 ),
-                155L,
+                300L,
                 null);
 
         LOGGER.info(inflationRewards.toString());
 
         //validate the returned data
         assertNotNull(inflationRewards);
-        assertEquals(2, inflationRewards.size());
+        assertEquals(1, inflationRewards.size());
         for (InflationReward inflationReward : inflationRewards) {
-            assertEquals(155, inflationReward.getEpoch(), 0);
+            assertEquals(300L, inflationReward.getEpoch(), 0);
             assertTrue(inflationReward.getAmount() > 0);
             assertTrue(inflationReward.getEffectiveSlot() > 0);
             assertTrue(inflationReward.getPostBalance() > 0);
@@ -619,16 +619,17 @@ public class MainnetTest extends AccountBasedTest {
     }
 
     @Test
+    @Ignore
     public void getConfirmedBlockTest() throws RpcException {
-        ConfirmedBlock block = this.client.getApi().getConfirmedBlock(74953539);
-        assertEquals(74953538, block.getParentSlot());
+        ConfirmedBlock block = this.client.getApi().getConfirmedBlock(124398367);
+        assertEquals(124398367, block.getParentSlot());
     }
 
     @Ignore
     @Test
     public void getBlockTest() throws RpcException {
-        Block block = this.client.getApi().getBlock(74953539);
-        assertEquals("74953539", block.getBlockHeight());
+        Block block = this.client.getApi().getBlock(124398367);
+        assertEquals("124398367s", block.getBlockHeight());
     }
 
     @Test
