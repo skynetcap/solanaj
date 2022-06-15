@@ -23,9 +23,9 @@ For SolanaJ implementations of popular Solana programs such as Serum, please vis
 2. To use in another project, add this dependency to Maven:
     ```xml
     <dependency>
-            <groupId>org.p2p</groupId>
+            <groupId>com.mmorrell</groupId>
             <artifactId>solanaj</artifactId>
-            <version>1.6-SNAPSHOT</version>
+            <version>1.8</version>
     </dependency>
     ```
 
