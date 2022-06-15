@@ -632,7 +632,9 @@ public class MainnetTest extends AccountBasedTest {
         assertEquals("124398367s", block.getBlockHeight());
     }
 
+    // Ignored since some validators can only get recent blocks
     @Test
+    @Ignore
     public void getConfirmedBlocksTest() throws RpcException {
         List<Double> blocks = this.client.getApi().getConfirmedBlocks(5);
         List<Double> singleBlock = this.client.getApi().getConfirmedBlocks(5, 5);
