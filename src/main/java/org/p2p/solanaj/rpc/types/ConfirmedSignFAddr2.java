@@ -1,6 +1,7 @@
 package org.p2p.solanaj.rpc.types;
 
 import com.squareup.moshi.Json;
+import org.p2p.solanaj.rpc.types.config.Commitment;
 
 public class ConfirmedSignFAddr2 {
 
@@ -13,7 +14,11 @@ public class ConfirmedSignFAddr2 {
     @Json(name = "until")
     private String until;
 
-    public ConfirmedSignFAddr2(int limit) {
+    @Json(name = "commitment")
+    private String commitment;
+
+    public ConfirmedSignFAddr2(int limit, Commitment commitment) {
         this.limit = limit;
+        this.commitment = commitment.getValue();
     }
 }

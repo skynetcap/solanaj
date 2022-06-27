@@ -630,7 +630,8 @@ public class MainnetTest extends AccountBasedTest {
     public void getSignaturesForAddressTest() throws RpcException {
         List<SignatureInformation> confirmedSignatures = client.getApi().getSignaturesForAddress(
                 solDestination,
-                15
+                15,
+                Commitment.CONFIRMED
         );
 
         confirmedSignatures.forEach(signatureInformation -> System.out.println(signatureInformation.getSlot() + ": " + signatureInformation.getSignature()));
