@@ -98,6 +98,12 @@ public class RpcApi {
         return client.call("getBalance", params, ValueLong.class).getValue();
     }
 
+    public ConfirmedTransaction getTransaction(String signature) throws RpcException {
+        List<Object> params = new ArrayList<Object>();
+        params.add(signature);
+        return client.call("getTransaction", params, ConfirmedTransaction.class);
+    }
+
     public ConfirmedTransaction getConfirmedTransaction(String signature) throws RpcException {
         List<Object> params = new ArrayList<Object>();
 
@@ -118,6 +124,23 @@ public class RpcApi {
         params.add(new ConfirmedSignFAddr2(limit));
 
         List<AbstractMap> rawResult = client.call("getConfirmedSignaturesForAddress2", params, List.class);
+
+        List<SignatureInformation> result = new ArrayList<SignatureInformation>();
+        for (AbstractMap item : rawResult) {
+            result.add(new SignatureInformation(item));
+        }
+
+        return result;
+    }
+
+    public List<SignatureInformation> getSignaturesForAddress(PublicKey account, int limit)
+            throws RpcException {
+        List<Object> params = new ArrayList<Object>();
+
+        params.add(account.toString());
+        params.add(new ConfirmedSignFAddr2(limit));
+
+        List<AbstractMap> rawResult = client.call("getSignaturesForAddress", params, List.class);
 
         List<SignatureInformation> result = new ArrayList<SignatureInformation>();
         for (AbstractMap item : rawResult) {

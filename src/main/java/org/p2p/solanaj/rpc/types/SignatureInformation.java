@@ -22,13 +22,17 @@ public class SignatureInformation {
     private String signature;
 
     @Json(name = "slot")
-    private long slot;
+    private double slot;
+
+    @Json(name = "blockTime")
+    private double blockTime;
 
     @SuppressWarnings({ "rawtypes" })
     public SignatureInformation(AbstractMap info) {
         this.err = info.get("err");
         this.memo = info.get("memo");
         this.signature = (String) info.get("signature");
-        this.err = info.get("slot");
+        this.slot = (Double) info.get("slot");
+        this.blockTime = (Double) info.get("blockTime");
     }
 }

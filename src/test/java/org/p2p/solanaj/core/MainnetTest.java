@@ -37,7 +37,7 @@ public class MainnetTest extends AccountBasedTest {
     public void getAccountInfoBase64() throws RpcException {
         // Get account Info
         final AccountInfo accountInfo = client.getApi().getAccountInfo(PublicKey.valueOf("So11111111111111111111111111111111111111112"));
-        final double balance = (double) accountInfo.getValue().getLamports()/ LAMPORTS_PER_SOL;
+        final double balance = (double) accountInfo.getValue().getLamports() / LAMPORTS_PER_SOL;
 
         // Account data list
         final List<String> accountData = accountInfo.getValue().getData();
@@ -51,7 +51,7 @@ public class MainnetTest extends AccountBasedTest {
     public void getAccountInfoBase58() throws RpcException {
         // Get account Info
         final AccountInfo accountInfo = client.getApi().getAccountInfo(PublicKey.valueOf("So11111111111111111111111111111111111111112"), Map.of("encoding", "base58"));
-        final double balance = (double) accountInfo.getValue().getLamports()/ LAMPORTS_PER_SOL;
+        final double balance = (double) accountInfo.getValue().getLamports() / LAMPORTS_PER_SOL;
 
         // Account data list
         final List<String> accountData = accountInfo.getValue().getData();
@@ -67,7 +67,7 @@ public class MainnetTest extends AccountBasedTest {
             // Get account Info
             final AccountInfo accountInfo = client.getApi().getAccountInfo(PublicKey.valueOf(
                     "So11111111111111111111111111111111111111112"), Map.of("commitment", Commitment.ROOT));
-            final double balance = (double) accountInfo.getValue().getLamports()/ LAMPORTS_PER_SOL;
+            final double balance = (double) accountInfo.getValue().getLamports() / LAMPORTS_PER_SOL;
 
             // Verify any balance
             assertTrue(balance > 0);
@@ -118,7 +118,7 @@ public class MainnetTest extends AccountBasedTest {
 
         // Add instruction to write memo
         transaction.addInstruction(
-                MemoProgram.writeUtf8(feePayer.getPublicKey(),"Twitter: skynetcap")
+                MemoProgram.writeUtf8(feePayer.getPublicKey(), "Twitter: skynetcap")
         );
 
         // Call sendTransaction
@@ -517,7 +517,7 @@ public class MainnetTest extends AccountBasedTest {
     @Test
     public void getStakeActivationTest() throws RpcException {
         StakeActivation stakeActivation = client.getApi().getStakeActivation(
-                        PublicKey.valueOf("CYRJWqiSjLitBAcRxPvWpgX3s5TvmN2SuRY3eEYypFvT")
+                PublicKey.valueOf("CYRJWqiSjLitBAcRxPvWpgX3s5TvmN2SuRY3eEYypFvT")
         );
 
         LOGGER.info(stakeActivation.toString());
@@ -623,6 +623,18 @@ public class MainnetTest extends AccountBasedTest {
     public void getConfirmedBlockTest() throws RpcException {
         ConfirmedBlock block = this.client.getApi().getConfirmedBlock(124398367);
         assertEquals(124398367, block.getParentSlot());
+    }
+
+    @Test
+    @Ignore
+    public void getSignaturesForAddressTest() throws RpcException {
+        List<SignatureInformation> confirmedSignatures = client.getApi().getSignaturesForAddress(
+                solDestination,
+                15
+        );
+
+        confirmedSignatures.forEach(signatureInformation -> System.out.println(signatureInformation.getSlot() + ": " + signatureInformation.getSignature()));
+        assertTrue(confirmedSignatures.size() > 0);
     }
 
     @Ignore
