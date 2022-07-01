@@ -992,4 +992,27 @@ public class RpcApi {
         return result;
     }
 
+    public Map<PublicKey, Optional<AccountInfo.Value>> getMultipleAccountsMap(List<PublicKey> publicKeys) throws RpcException {
+        List<Object> params = new ArrayList<>();
+        Map<PublicKey, Optional<AccountInfo.Value>> result = new HashMap<>();
+        params.add(publicKeys.stream().map(PublicKey::toBase58).collect(Collectors.toList()));
+
+        Map<String, Object> parameterMap = new HashMap<>();
+        parameterMap.put("encoding", "base64");
+        params.add(parameterMap);
+
+        Map<String, Object> rawResult = client.call("getMultipleAccounts", params, Map.class);
+
+        List<AbstractMap<String, Object>> resultList = (List<AbstractMap<String, Object>>) rawResult.get("value");
+        for (int i = 0; i < resultList.size(); i++) {
+            if (resultList.get(i) == null) {
+                result.put(publicKeys.get(i), Optional.empty());
+            } else {
+                result.put(publicKeys.get(i), Optional.of(new AccountInfo.Value(resultList.get(i))));
+            }
+        }
+
+        return result;
+    }
+
 }

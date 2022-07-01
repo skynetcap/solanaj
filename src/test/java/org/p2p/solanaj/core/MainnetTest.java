@@ -728,4 +728,20 @@ public class MainnetTest extends AccountBasedTest {
         assertNotNull(accounts);
         assertEquals(2, accounts.size());
     }
+
+    @Test
+    public void getMultipleAccountsMapTest() throws RpcException {
+        Map<PublicKey, Optional<AccountInfo.Value>> accounts = client.getApi().getMultipleAccountsMap(
+                List.of(
+                        PublicKey.valueOf("skynetDj29GH6o6bAqoixCpDuYtWqi1rm8ZNx1hB3vq"),
+                        PublicKey.valueOf("EQFKqRty2TfpdTiB7Fyw8wquFxJSRrCD5gP5SPRWzKFZ"), // doesn't exist
+                        PublicKey.valueOf("namesLPneVptA9Z5rqUDD9tMTWEJwofgaYwp8cawRkX")
+                )
+        );
+
+        assertNotNull(accounts);
+        assertTrue(accounts.get(PublicKey.valueOf("EQFKqRty2TfpdTiB7Fyw8wquFxJSRrCD5gP5SPRWzKFZ")).isEmpty());
+        assertTrue(accounts.get(PublicKey.valueOf("skynetDj29GH6o6bAqoixCpDuYtWqi1rm8ZNx1hB3vq")).isPresent());
+        assertEquals(3, accounts.size());
+    }
 }
