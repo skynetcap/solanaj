@@ -45,6 +45,21 @@ public class RpcClient {
         rpcApi = new RpcApi(this);
     }
 
+    public RpcClient(String endpoint, String userAgent) {
+        this.endpoint = endpoint;
+        this.httpClient = new OkHttpClient.Builder()
+                .addNetworkInterceptor(
+                        chain -> chain.proceed(
+                                chain.request()
+                                        .newBuilder()
+                                        .header("User-Agent", userAgent)
+                                        .build()
+                        ))
+                .readTimeout(20, TimeUnit.SECONDS)
+                .build();
+        rpcApi = new RpcApi(this);
+    }
+
     public RpcClient(String endpoint, int timeout) {
         this.endpoint = endpoint;
         this.httpClient = new OkHttpClient.Builder()
@@ -97,6 +112,7 @@ public class RpcClient {
      * Returns RPC Endpoint based on a list of weighted endpoints
      * Weighted endpoints can be given a integer weight, with higher weights used more than lower weights
      * Total weights across all endpoints do not need to sum up to any specific number
+     *
      * @return String RPCEndpoint
      */
     private String getWeightedEndpoint() {
@@ -104,7 +120,7 @@ public class RpcClient {
         int randomMultiplier = cluster.endpoints.stream().mapToInt(WeightedEndpoint::getWeight).sum();
         double randomNumber = Math.random() * randomMultiplier;
         String currentEndpoint = "";
-        for (WeightedEndpoint endpoint: cluster.endpoints) {
+        for (WeightedEndpoint endpoint : cluster.endpoints) {
             if (randomNumber > currentNumber + endpoint.getWeight()) {
                 currentNumber += endpoint.getWeight();
             } else if (randomNumber >= currentNumber && randomNumber <= currentNumber + endpoint.getWeight()) {
