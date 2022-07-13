@@ -255,6 +255,10 @@ public class RpcApi {
             parameterMap.put("dataSlice", additionalParams.get("dataSlice"));
         }
 
+        if (additionalParams.containsKey("minContextSlot")) {
+            parameterMap.put("minContextSlot", additionalParams.get("minContextSlot"));
+        }
+
         params.add(account.toString());
         params.add(parameterMap);
 
