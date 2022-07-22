@@ -9,9 +9,6 @@ import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Class for creating Token Program {@link TransactionInstruction}s
- */
 public class BPFLoader extends Program {
 
     public static final PublicKey PROGRAM_ID = new PublicKey("BPFLoaderUpgradeab1e11111111111111111111111");

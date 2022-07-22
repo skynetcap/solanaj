@@ -1,5 +1,6 @@
 package org.p2p.solanaj.programs;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.p2p.solanaj.core.Account;
 import org.p2p.solanaj.core.PublicKey;
@@ -17,6 +18,7 @@ public class BPFLoaderTest {
     private final RpcClient client = new RpcClient("https://ssc-dao.genesysgo.net/");
 
     @Test
+    @Ignore
     public void initializeBufferTest() throws RpcException {
         Account account = null;
         try {
