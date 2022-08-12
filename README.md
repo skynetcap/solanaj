@@ -18,6 +18,7 @@ For SolanaJ implementations of popular Solana programs such as Serum, please vis
 
 ## Installation
 1. Add Sonatype repository to your project's pom.xml file.
+
 ```xml
 <repositories>
   <repository>
@@ -26,14 +27,16 @@ For SolanaJ implementations of popular Solana programs such as Serum, please vis
   </repository>
 </repositories>
 ```
+
 2. Add dependency:
-    ```xml
-    <dependency>
-            <groupId>com.mmorrell</groupId>
-            <artifactId>solanaj</artifactId>
-            <version>1.10</version>
-    </dependency>
-    ```
+
+```xml
+<dependency>
+      <groupId>com.mmorrell</groupId>
+      <artifactId>solanaj</artifactId>
+      <version>1.10</version>
+</dependency>
+```
 
 ## Example
 ##### Transfer lamports
