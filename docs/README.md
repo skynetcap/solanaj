@@ -17,7 +17,7 @@ For SolanaJ implementations of popular Solana programs such as Serum, please vis
 - Moshi
 
 ## Installation
-1. Add Sonatype repository to your project's pom.xml file.
+1. Add Sonatype repository to your project's pom.xml file:
 
 ```xml
 <repositories>
