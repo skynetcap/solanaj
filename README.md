@@ -1,16 +1,15 @@
-# solanaj
-
+# SolanaJ
 
 Solana blockchain client, written in pure Java.
 Solanaj is an API for integrating with Solana blockchain using the [Solana RPC API](https://docs.solana.com/apps/jsonrpc-api)
 
 This fork includes functionality for multiple Solana programs, including the Serum DEX.
 
-# solanaj-programs
+# SolanaJ-Programs
 For SolanaJ implementations of popular Solana programs such as Serum, please visit: https://github.com/skynetcap/solanaj-programs
 
 ## Requirements
-- Java 11+
+- Java 17+
 
 ## Dependencies
 - bitcoinj
@@ -25,7 +24,7 @@ For SolanaJ implementations of popular Solana programs such as Serum, please vis
     <dependency>
             <groupId>com.mmorrell</groupId>
             <artifactId>solanaj</artifactId>
-            <version>1.8</version>
+            <version>1.10</version>
     </dependency>
     ```
 
@@ -81,11 +80,6 @@ transaction.addInstruction(
 String response = result = client.getApi().sendTransaction(transaction, feePayer);
 ```
 
-## Contribution
-
-Welcome to contribute, feel free to change and open a PR.
-
-
 ## License
 
-Solanaj is available under the MIT license. See the LICENSE file for more info.
+MIT License
