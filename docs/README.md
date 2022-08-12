@@ -1,16 +1,15 @@
-# solanaj
-
+# SolanaJ
 
 Solana blockchain client, written in pure Java.
 Solanaj is an API for integrating with Solana blockchain using the [Solana RPC API](https://docs.solana.com/apps/jsonrpc-api)
 
 This fork includes functionality for multiple Solana programs, including the Serum DEX.
 
-# solanaj-programs
+# SolanaJ-Programs
 For SolanaJ implementations of popular Solana programs such as Serum, please visit: https://github.com/skynetcap/solanaj-programs
 
 ## Requirements
-- Java 11+
+- Java 17+
 
 ## Dependencies
 - bitcoinj
@@ -18,16 +17,26 @@ For SolanaJ implementations of popular Solana programs such as Serum, please vis
 - Moshi
 
 ## Installation
-1. Build SolanaJ:
-   `mvn clean install`
-2. To use in another project, add this dependency to Maven:
-    ```xml
-    <dependency>
-            <groupId>com.mmorrell</groupId>
-            <artifactId>solanaj</artifactId>
-            <version>1.8</version>
-    </dependency>
-    ```
+1. Add Sonatype repository to your project's pom.xml file:
+
+```xml
+<repositories>
+  <repository>
+      <id>Sonatype Releases</id>
+      <url>https://oss.sonatype.org/content/repositories/releases/</url>
+  </repository>
+</repositories>
+```
+
+2. Add dependency:
+
+```xml
+<dependency>
+      <groupId>com.mmorrell</groupId>
+      <artifactId>solanaj</artifactId>
+      <version>1.10</version>
+</dependency>
+```
 
 ## Example
 ##### Transfer lamports
@@ -81,11 +90,6 @@ transaction.addInstruction(
 String response = result = client.getApi().sendTransaction(transaction, feePayer);
 ```
 
-## Contribution
-
-Welcome to contribute, feel free to change and open a PR.
-
-
 ## License
 
-Solanaj is available under the MIT license. See the LICENSE file for more info.
+MIT License
