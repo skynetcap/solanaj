@@ -17,9 +17,16 @@ For SolanaJ implementations of popular Solana programs such as Serum, please vis
 - Moshi
 
 ## Installation
-1. Build SolanaJ:
-   `mvn clean install`
-2. To use in another project, add this dependency to Maven:
+1. Add Sonatype repository to your project's pom.xml file.
+```xml
+<repositories>
+  <repository>
+      <id>Sonatype Releases</id>
+      <url>https://oss.sonatype.org/content/repositories/releases/</url>
+  </repository>
+</repositories>
+```
+2. Add dependency:
     ```xml
     <dependency>
             <groupId>com.mmorrell</groupId>
