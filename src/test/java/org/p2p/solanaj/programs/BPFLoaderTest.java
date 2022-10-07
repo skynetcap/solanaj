@@ -57,4 +57,52 @@ public class BPFLoaderTest {
         System.out.println("TX: " + client.getApi().sendTransaction(transaction, List.of(account, bufferAccount), hash));
 
     }
+
+    @Test
+    @Ignore
+    public void writeTest() throws RpcException {
+        Account account = null;
+        try {
+            account = Account.fromJson(Files.readString(Paths.get("src/test/resources/serumxC66ZvFShbPmT1EHjQjiersZAWnYeHAsSLuMW4.json")));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println(account.getPublicKey().toBase58());
+
+        Transaction transaction = new Transaction();
+
+        // initialize buffer
+        Account bufferAccount = new Account();
+
+        transaction.addInstruction(
+                SystemProgram.createAccount(
+                        account.getPublicKey(),
+                        bufferAccount.getPublicKey(),
+                        3290880,
+                        165L,
+                        PublicKey.valueOf("BPFLoaderUpgradeab1e11111111111111111111111")
+                )
+        );
+
+        transaction.addInstruction(
+                BPFLoader.initializeBuffer(
+                        bufferAccount.getPublicKey(),
+                        account.getPublicKey()
+                )
+        );
+
+        transaction.addInstruction(
+                BPFLoader.write(
+                        bufferAccount.getPublicKey(),
+                        account.getPublicKey()
+                )
+        );
+
+        String hash = client.getApi().getRecentBlockhash();
+        transaction.setRecentBlockHash(hash);
+
+        System.out.println("TX: " + client.getApi().sendTransaction(transaction, List.of(account, bufferAccount), hash));
+
+    }
 }
