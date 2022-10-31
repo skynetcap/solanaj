@@ -1,7 +1,6 @@
 package org.p2p.solanaj.rpc.types;
 
 import com.squareup.moshi.Json;
-import lombok.Data;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -15,10 +14,10 @@ public class Block {
     private int blockTime;
 
     @Json(name = "blockHeight")
-    private String blockHeight;
+    private int blockHeight;
 
     @Json(name = "blockhash")
-    private String blockhash;
+    private String blockHash;
 
     @Json(name = "parentSlot")
     private int parentSlot;

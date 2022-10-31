@@ -638,11 +638,10 @@ public class MainnetTest extends AccountBasedTest {
         assertTrue(confirmedSignatures.size() > 0);
     }
 
-    @Ignore
     @Test
     public void getBlockTest() throws RpcException {
         Block block = this.client.getApi().getBlock(124398367);
-        assertEquals("124398367s", block.getBlockHeight());
+        assertEquals(112516757, block.getBlockHeight());
     }
 
     // Ignored since some validators can only get recent blocks
