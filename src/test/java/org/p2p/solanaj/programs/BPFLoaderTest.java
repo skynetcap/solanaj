@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.p2p.solanaj.core.Account;
 import org.p2p.solanaj.core.PublicKey;
 import org.p2p.solanaj.core.Transaction;
+import org.p2p.solanaj.rpc.Cluster;
 import org.p2p.solanaj.rpc.RpcClient;
 import org.p2p.solanaj.rpc.RpcException;
 
@@ -15,7 +16,7 @@ import java.util.List;
 
 public class BPFLoaderTest {
 
-    private final RpcClient client = new RpcClient("https://ssc-dao.genesysgo.net/");
+    private final RpcClient client = new RpcClient(Cluster.MAINNET);
 
     @Test
     @Ignore

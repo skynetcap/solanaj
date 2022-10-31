@@ -20,7 +20,7 @@ import static org.junit.Assert.*;
 
 public class MainnetTest extends AccountBasedTest {
 
-    private final RpcClient client = new RpcClient("https://ssc-dao.genesysgo.net/", 45);
+    private final RpcClient client = new RpcClient("https://solana-api.projectserum.com");
     public final TokenManager tokenManager = new TokenManager(client);
 
     private static final PublicKey USDC_TOKEN_MINT = new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
