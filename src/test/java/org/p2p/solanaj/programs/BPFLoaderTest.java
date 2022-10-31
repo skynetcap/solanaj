@@ -1,5 +1,6 @@
 package org.p2p.solanaj.programs;
 
+import org.bitcoinj.core.Base58;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.p2p.solanaj.core.Account;
@@ -81,19 +82,41 @@ public class BPFLoaderTest {
                         bufferAccount.getPublicKey(),
                         3290880,
                         165L,
-                        PublicKey.valueOf("BPFLoaderUpgradeab1e11111111111111111111111")
+                        PublicKey.valueOf("ABbdZW8gJcXEB9XkRZLwDDuGmom3hBwWEsG2y49bHv45")
                 )
         );
 
+//        transaction.addInstruction(
+//                SystemProgram.assign(
+//                        bufferAccount.getPublicKey(),
+//
+//                )
+//        )
+
+//        transaction.addInstruction(
+//                BPFLoader.initializeBuffer(
+//                        bufferAccount.getPublicKey(),
+//                        account.getPublicKey()
+//                )
+//        );
+
+//        transaction.addInstruction(
+//                BPFLoader.write(
+//                        bufferAccount.getPublicKey(),
+//                        account.getPublicKey()
+//                )
+//        );
+
         transaction.addInstruction(
-                BPFLoader.initializeBuffer(
+                SharedMemory.initializeBuffer(
                         bufferAccount.getPublicKey(),
-                        account.getPublicKey()
+                        Base58.decode("7dLqCLkoQZxSeWE2XJ1Avi3oatemUpbRNnjPWGytzgRk"),
+                        0
                 )
         );
 
         transaction.addInstruction(
-                BPFLoader.write(
+                SystemProgram.assign(
                         bufferAccount.getPublicKey(),
                         account.getPublicKey()
                 )

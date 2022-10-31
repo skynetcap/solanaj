@@ -41,4 +41,15 @@ public class SystemProgram extends Program {
 
         return createTransactionInstruction(PROGRAM_ID, keys, data);
     }
+
+    public static TransactionInstruction assign(PublicKey owner, PublicKey newOwner) {
+        ArrayList<AccountMeta> keys = new ArrayList<AccountMeta>();
+        keys.add(new AccountMeta(owner, true, true));
+
+        byte[] data = new byte[4 + 32];
+        uint32ToByteArrayLE(1, data, 0);
+        System.arraycopy(newOwner.toByteArray(), 0, data, 4, 32);
+
+        return createTransactionInstruction(PROGRAM_ID, keys, data);
+    }
 }

@@ -4,7 +4,7 @@
     <groupId>com.mmorrell</groupId>
     <artifactId>solanaj</artifactId>
     <packaging>jar</packaging>
-    <version>1.10</version>
+    <version>1.10-SNAPSHOT</version>
     <name>${project.groupId}:${project.artifactId}</name>
     <description>Java client for Solana RPC</description>
     <url>https://github.com/skynetcap/solanaj</url>
@@ -52,12 +52,12 @@
         <dependency>
             <groupId>com.squareup.moshi</groupId>
             <artifactId>moshi</artifactId>
-            <version>1.13.0</version>
+            <version>1.14.0</version>
         </dependency>
         <dependency>
             <groupId>com.squareup.moshi</groupId>
             <artifactId>moshi-adapters</artifactId>
-            <version>1.13.0</version>
+            <version>1.14.0</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
