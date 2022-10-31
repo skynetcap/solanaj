@@ -1,6 +1,5 @@
 package org.p2p.solanaj.programs;
 
-import org.bitcoinj.core.Base58;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.p2p.solanaj.core.Account;
@@ -47,76 +46,6 @@ public class BPFLoaderTest {
 
         transaction.addInstruction(
                 BPFLoader.initializeBuffer(
-                        bufferAccount.getPublicKey(),
-                        account.getPublicKey()
-                )
-        );
-
-        String hash = client.getApi().getRecentBlockhash();
-        transaction.setRecentBlockHash(hash);
-
-        System.out.println("TX: " + client.getApi().sendTransaction(transaction, List.of(account, bufferAccount), hash));
-
-    }
-
-    @Test
-    @Ignore
-    public void writeTest() throws RpcException {
-        Account account = null;
-        try {
-            account = Account.fromJson(Files.readString(Paths.get("src/test/resources/serumxC66ZvFShbPmT1EHjQjiersZAWnYeHAsSLuMW4.json")));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        System.out.println(account.getPublicKey().toBase58());
-
-        Transaction transaction = new Transaction();
-
-        // initialize buffer
-        Account bufferAccount = new Account();
-
-        transaction.addInstruction(
-                SystemProgram.createAccount(
-                        account.getPublicKey(),
-                        bufferAccount.getPublicKey(),
-                        3290880,
-                        165L,
-                        PublicKey.valueOf("ABbdZW8gJcXEB9XkRZLwDDuGmom3hBwWEsG2y49bHv45")
-                )
-        );
-
-//        transaction.addInstruction(
-//                SystemProgram.assign(
-//                        bufferAccount.getPublicKey(),
-//
-//                )
-//        )
-
-//        transaction.addInstruction(
-//                BPFLoader.initializeBuffer(
-//                        bufferAccount.getPublicKey(),
-//                        account.getPublicKey()
-//                )
-//        );
-
-//        transaction.addInstruction(
-//                BPFLoader.write(
-//                        bufferAccount.getPublicKey(),
-//                        account.getPublicKey()
-//                )
-//        );
-
-        transaction.addInstruction(
-                SharedMemory.initializeBuffer(
-                        bufferAccount.getPublicKey(),
-                        Base58.decode("7dLqCLkoQZxSeWE2XJ1Avi3oatemUpbRNnjPWGytzgRk"),
-                        0
-                )
-        );
-
-        transaction.addInstruction(
-                SystemProgram.assign(
                         bufferAccount.getPublicKey(),
                         account.getPublicKey()
                 )
