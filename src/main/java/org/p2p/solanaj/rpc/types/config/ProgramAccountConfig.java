@@ -23,4 +23,8 @@ public class ProgramAccountConfig {
     public void setEncoding(Encoding encoding) {
         this.encoding = encoding;
     }
+
+    public void setFilters(List<Object> filters) {
+        this.filters = filters;
+    }
 }
