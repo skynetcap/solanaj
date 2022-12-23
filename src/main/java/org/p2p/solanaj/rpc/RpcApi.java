@@ -161,7 +161,9 @@ public class RpcApi {
 
     public List<ProgramAccount> getProgramAccountsBase64(PublicKey account, long offset, String bytes) throws RpcException {
         List<Object> filters = new ArrayList<Object>();
-        filters.add(new Filter(new Memcmp(offset, bytes)));
+        Memcmp memcmp = new Memcmp(offset, bytes);
+
+        filters.add(new Filter(memcmp));
 
         ProgramAccountConfig programAccountConfig = new ProgramAccountConfig(Encoding.base64);
         programAccountConfig.setFilters(filters);

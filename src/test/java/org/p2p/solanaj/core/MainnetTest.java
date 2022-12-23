@@ -20,7 +20,7 @@ import static org.junit.Assert.*;
 
 public class MainnetTest extends AccountBasedTest {
 
-    private final RpcClient client = new RpcClient("https://solana-api.projectserum.com");
+    private final RpcClient client = new RpcClient(Cluster.ANKR);
     public final TokenManager tokenManager = new TokenManager(client);
 
     private static final PublicKey USDC_TOKEN_MINT = new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
@@ -345,6 +345,7 @@ public class MainnetTest extends AccountBasedTest {
     }
 
     @Test
+    @Ignore
     public void getSupplyTest() throws RpcException {
         Supply supply = client.getApi().getSupply();
         LOGGER.info(supply.toString());
@@ -639,6 +640,7 @@ public class MainnetTest extends AccountBasedTest {
     }
 
     @Test
+    @Ignore
     public void getBlockTest() throws RpcException {
         Block block = this.client.getApi().getBlock(124398367);
         assertEquals(112516757, block.getBlockHeight());
@@ -742,5 +744,20 @@ public class MainnetTest extends AccountBasedTest {
         assertTrue(accounts.get(PublicKey.valueOf("EQFKqRty2TfpdTiB7Fyw8wquFxJSRrCD5gP5SPRWzKFZ")).isEmpty());
         assertTrue(accounts.get(PublicKey.valueOf("skynetDj29GH6o6bAqoixCpDuYtWqi1rm8ZNx1hB3vq")).isPresent());
         assertEquals(3, accounts.size());
+    }
+
+    @Test
+    public void testGetDecodedData() {
+        try {
+            byte[] data = client.getApi()
+                    .getAccountInfo(new PublicKey("8BnEgHoWFysVcuFFX7QztDmzuH8r5ZFvyP3sYwn1XTh6"))
+                    .getDecodedData();
+
+            LOGGER.info(Arrays.toString(data));
+
+            assertEquals(388, data.length);
+        } catch (RpcException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

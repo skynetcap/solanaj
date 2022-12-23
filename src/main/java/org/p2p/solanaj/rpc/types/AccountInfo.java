@@ -1,6 +1,7 @@
 package org.p2p.solanaj.rpc.types;
 
 import java.util.AbstractMap;
+import java.util.Base64;
 import java.util.List;
 
 import com.squareup.moshi.Json;
@@ -41,4 +42,8 @@ public class AccountInfo extends RpcResultObject {
 
     @Json(name = "value")
     private Value value;
+
+    public byte[] getDecodedData() {
+        return Base64.getDecoder().decode(getValue().getData().get(0).getBytes());
+    }
 }
