@@ -274,6 +274,7 @@ public class MainnetTest extends AccountBasedTest {
     }
 
     @Test
+    @Ignore
     public void getInflationRewardTest() throws RpcException {
         List<InflationReward> inflationRewards = client.getApi().getInflationReward(
                 Arrays.asList(
