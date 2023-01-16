@@ -4,7 +4,7 @@
     <groupId>com.mmorrell</groupId>
     <artifactId>solanaj</artifactId>
     <packaging>jar</packaging>
-    <version>1.13</version>
+    <version>1.14</version>
     <name>${project.groupId}:${project.artifactId}</name>
     <description>Java client for Solana RPC</description>
     <url>https://github.com/skynetcap/solanaj</url>
@@ -158,7 +158,8 @@
                             <goal>sign</goal>
                         </goals>
                         <configuration>
-                            <keyname>0x67A54591</keyname>
+                            <homedir>c:/Users/Michael/.gnupg/</homedir>
+                            <keyname>0x27FAE7D2</keyname>
                         </configuration>
                     </execution>
                 </executions>
