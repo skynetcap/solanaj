@@ -26,4 +26,7 @@ public class RpcSendTransactionConfig {
     @Json(name ="skipPreflight")
     private boolean skipPreFlight = true;
 
+    @Json(name = "maxRetries")
+    private long maxRetries = 1;
+
 }
