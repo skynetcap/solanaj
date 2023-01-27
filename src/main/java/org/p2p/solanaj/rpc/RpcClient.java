@@ -68,6 +68,16 @@ public class RpcClient {
         rpcApi = new RpcApi(this);
     }
 
+    public RpcClient(String endpoint, int readTimeoutMs, int connectTimeoutMs, int writeTimeoutMs) {
+        this.endpoint = endpoint;
+        this.httpClient = new OkHttpClient.Builder()
+                .readTimeout(readTimeoutMs, TimeUnit.MILLISECONDS)
+                .connectTimeout(connectTimeoutMs, TimeUnit.MILLISECONDS)
+                .writeTimeout(writeTimeoutMs, TimeUnit.MILLISECONDS)
+                .build();
+        rpcApi = new RpcApi(this);
+    }
+
     public <T> T call(String method, List<Object> params, Class<T> clazz) throws RpcException {
         RpcRequest rpcRequest = new RpcRequest(method, params);
 
