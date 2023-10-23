@@ -4,7 +4,7 @@
     <groupId>com.mmorrell</groupId>
     <artifactId>solanaj</artifactId>
     <packaging>jar</packaging>
-    <version>1.13.3</version>
+    <version>1.16.0</version>
     <name>${project.groupId}:${project.artifactId}</name>
     <description>Java client for Solana RPC</description>
     <url>https://github.com/skynetcap/solanaj</url>
@@ -53,7 +53,7 @@
         <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-javalite</artifactId>
-            <version>3.21.12</version>
+            <version>3.22.2</version>
         </dependency>
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
@@ -63,12 +63,12 @@
         <dependency>
             <groupId>com.squareup.moshi</groupId>
             <artifactId>moshi</artifactId>
-            <version>1.14.0</version>
+            <version>1.15.0</version>
         </dependency>
         <dependency>
             <groupId>com.squareup.moshi</groupId>
             <artifactId>moshi-adapters</artifactId>
-            <version>1.14.0</version>
+            <version>1.15.0</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -84,7 +84,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.24</version>
+            <version>1.18.26</version>
         </dependency>
         <dependency>
             <groupId>net.i2p.crypto</groupId>
