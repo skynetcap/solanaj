@@ -20,7 +20,7 @@ import static org.junit.Assert.*;
 
 public class MainnetTest extends AccountBasedTest {
 
-    private final RpcClient client = new RpcClient(Cluster.ANKR);
+    private final RpcClient client = new RpcClient(Cluster.BLOCKDAEMON);
     public final TokenManager tokenManager = new TokenManager(client);
 
     private static final PublicKey USDC_TOKEN_MINT = new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");

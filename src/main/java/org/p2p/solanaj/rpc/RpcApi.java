@@ -564,6 +564,7 @@ public class RpcApi {
         Map<String, Object> parameterMap = new HashMap<>();
         parameterMap.put("mint", tokenMint.toBase58());
         params.add(parameterMap);
+        params.add(Map.of("encoding", "jsonParsed"));
 
         Map<String, Object> rawResult = client.call("getTokenAccountsByOwner", params, Map.class);
 
