@@ -4,13 +4,15 @@ import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.Sha256Hash;
 import org.p2p.solanaj.utils.ByteUtils;
+import org.p2p.solanaj.utils.PublicKeySerializer;
 import org.p2p.solanaj.utils.TweetNaclFast;
 
+@JsonSerialize(using = PublicKeySerializer.class)
 public class PublicKey {
 
     public static final int PUBLIC_KEY_LENGTH = 32;
