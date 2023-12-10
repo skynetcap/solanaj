@@ -8,6 +8,7 @@ import com.squareup.moshi.Json;
 
 import lombok.Getter;
 import lombok.ToString;
+import org.p2p.solanaj.core.PublicKey;
 import org.p2p.solanaj.rpc.types.config.RpcSendTransactionConfig.Encoding;
 
 import org.bitcoinj.core.Base58;
@@ -70,6 +71,10 @@ public class ProgramAccount {
 
     @Json(name = "pubkey")
     private String pubkey;
+
+    public PublicKey getPublicKey() {
+        return new PublicKey(pubkey);
+    }
 
     @SuppressWarnings({ "rawtypes" })
     public ProgramAccount(AbstractMap pa) {
