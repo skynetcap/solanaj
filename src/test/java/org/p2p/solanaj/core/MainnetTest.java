@@ -762,4 +762,11 @@ public class MainnetTest extends AccountBasedTest {
             throw new RuntimeException(e);
         }
     }
+
+    @Test
+    public void isBlockhashValidTest() throws RpcException, InterruptedException {
+        String recentBlockHash = client.getApi().getRecentBlockhash();
+        Thread.sleep(500L);
+        assertTrue(client.getApi().isBlockhashValid(recentBlockHash));
+    }
 }

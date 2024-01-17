@@ -1038,15 +1038,21 @@ public class RpcApi {
     @SuppressWarnings("unchecked")
     public boolean isBlockhashValid(String blockHash, Commitment commitment, Long minContextSlot) throws RpcException {
         Map<String, Object> parameterMap = new HashMap<>();
-        parameterMap.put("commitment", commitment);
-        parameterMap.put("minContextSlot", minContextSlot);
+        if (commitment != null) {
+            parameterMap.put("commitment", commitment);
+        }
 
+        if (minContextSlot != null) {
+            parameterMap.put("minContextSlot", minContextSlot);
+        }
         List<Object> params = new ArrayList<>();
         params.add(blockHash);
         params.add(parameterMap);
 
         Map<Object, Object> call = client.call("isBlockhashValid", params, Map.class);
-        return call.get("value").equals("true");
+        Boolean result = (Boolean) call.get("value");
+
+        return result;
     }
 
 }
