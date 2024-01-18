@@ -611,17 +611,6 @@ public class MainnetTest extends AccountBasedTest {
 
     @Test
     @Ignore
-    public void getConfirmedTransactionTest() throws RpcException {
-        String txId = "46VcVPoecvVASnX9vHEZLA8JMS6BVXhvMMhqtGBcn9eg4bHehK6uA2icuTjwjWLZxwfxdT2z1CqYxCHHvjorvWDi";
-        ConfirmedTransaction confirmedTransaction = client.getApi().getConfirmedTransaction(txId);
-
-        if (confirmedTransaction != null) {
-            LOGGER.info(String.format("Tx: %s", confirmedTransaction));
-        }
-    }
-
-    @Test
-    @Ignore
     public void getConfirmedBlockTest() throws RpcException {
         ConfirmedBlock block = this.client.getApi().getConfirmedBlock(124398367);
         assertEquals(124398367, block.getParentSlot());
@@ -761,5 +750,19 @@ public class MainnetTest extends AccountBasedTest {
         } catch (RpcException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Test
+    public void getTransactionTest() throws RpcException {
+        String transactionSignature =
+                "25XzdvPoirNY8kFALxVZXWbdU6LmMitNceHciYRSNV4S5zjUPjeJaWHCP9dingewmrsrcoKtAP57JXyVXtSsV6Bv";
+
+        ConfirmedTransaction transactionInfo = client.getApi().getTransaction(transactionSignature);
+
+        String fromKey = transactionInfo.getTransaction().getMessage().getAccountKeys().get(0);
+        String toKey = transactionInfo.getTransaction().getMessage().getAccountKeys().get(1);
+
+        assertEquals("HHntUXQbUBdx8HZQQaT7W1ZSgKRitMtForz4YJXc6qF6", fromKey);
+        assertEquals("6QcgNYEqHeUohoJWR5ppuRg9Ugh6scMzJY4j4tFnrZMu", toKey);
     }
 }
