@@ -30,7 +30,7 @@ public class MainnetTest extends AccountBasedTest {
     @Before
     public void beforeMethod() throws InterruptedException {
         // Prevent RPCPool rate limit
-        Thread.sleep(100L);
+        Thread.sleep(200L);
     }
 
     @Test
