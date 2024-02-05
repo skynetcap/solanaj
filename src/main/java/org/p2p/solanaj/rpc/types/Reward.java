@@ -12,7 +12,7 @@ public class Reward {
     private String pubkey;
 
     @Json(name = "lamports")
-    private int lamports;
+    private double lamports;
 
     @Json(name = "postBalance")
     private String postBalance;

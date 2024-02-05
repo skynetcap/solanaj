@@ -106,7 +106,7 @@ public class TokenResultObjects {
         private boolean executable;
 
         @Json(name = "lamports")
-        private long lamports;
+        private double lamports;
 
         @Json(name = "owner")
         private String owner;
