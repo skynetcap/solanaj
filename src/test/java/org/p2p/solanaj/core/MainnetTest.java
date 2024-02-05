@@ -772,4 +772,15 @@ public class MainnetTest extends AccountBasedTest {
         Thread.sleep(500L);
         assertTrue(client.getApi().isBlockhashValid(recentBlockHash));
     }
+
+    @Test
+    public void rentEpochTest() {
+        PublicKey testMarket = new PublicKey("52fF6wBZdSL8niV2tGuPu5gap15qLu6vMbmDoPVEDRqL");
+
+        try {
+            client.getApi().getAccountInfo(testMarket);
+        } catch (RpcException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
