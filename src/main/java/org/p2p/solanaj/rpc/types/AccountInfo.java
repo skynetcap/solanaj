@@ -37,7 +37,7 @@ public class AccountInfo extends RpcResultObject {
         private String owner;
 
         @Json(name = "rentEpoch")
-        private long rentEpoch;
+        private double rentEpoch;
     }
 
     @Json(name = "value")
