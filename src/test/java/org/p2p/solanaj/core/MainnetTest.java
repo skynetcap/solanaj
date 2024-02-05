@@ -783,4 +783,14 @@ public class MainnetTest extends AccountBasedTest {
             throw new RuntimeException(e);
         }
     }
+
+    @Test
+    public void getLatestBlockhashTest() throws RpcException {
+        String recentBlockhash = client.getApi().getLatestBlockhash();
+
+        assertNotNull(recentBlockhash);
+        assertFalse(recentBlockhash.isEmpty());
+
+        LOGGER.info("Latest block hash: " + recentBlockhash);
+    }
 }
