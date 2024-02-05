@@ -23,7 +23,7 @@ For SolanaJ implementations of popular Solana programs such as Serum, please vis
 <dependency>
       <groupId>com.mmorrell</groupId>
       <artifactId>solanaj</artifactId>
-      <version>1.16.5</version>
+      <version>1.17.0</version>
 </dependency>
 ```
 
