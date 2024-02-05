@@ -112,6 +112,6 @@ public class TokenResultObjects {
         private String owner;
 
         @Json(name = "rentEpoch")
-        private long rentEpoch;
+        private double rentEpoch;
     }
 }
