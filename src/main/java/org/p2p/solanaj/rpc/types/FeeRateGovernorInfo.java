@@ -15,16 +15,16 @@ public class FeeRateGovernorInfo extends RpcResultObject
         private int burnPercent;
 
         @Json(name = "maxLamportsPerSignature")
-        private long maxLamportsPerSignature;
+        private double maxLamportsPerSignature;
 
         @Json(name = "minLamportsPerSignature")
-        private long minLamportsPerSignature;
+        private double minLamportsPerSignature;
 
         @Json(name = "targetLamportsPerSignature")
-        private long targetLamportsPerSignature;
+        private double targetLamportsPerSignature;
 
         @Json(name = "targetSignaturesPerSlot")
-        private long targetSignaturesPerSlot;
+        private double targetSignaturesPerSlot;
     }
 
     @Getter

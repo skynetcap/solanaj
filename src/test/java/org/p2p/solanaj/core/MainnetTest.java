@@ -778,7 +778,8 @@ public class MainnetTest extends AccountBasedTest {
         PublicKey testMarket = new PublicKey("52fF6wBZdSL8niV2tGuPu5gap15qLu6vMbmDoPVEDRqL");
 
         try {
-            client.getApi().getAccountInfo(testMarket);
+            AccountInfo accountInfo = client.getApi().getAccountInfo(testMarket);
+            LOGGER.info(String.format("Account: %s", accountInfo.toString()));
         } catch (RpcException e) {
             throw new RuntimeException(e);
         }

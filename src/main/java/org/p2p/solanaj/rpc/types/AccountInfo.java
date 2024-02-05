@@ -19,9 +19,9 @@ public class AccountInfo extends RpcResultObject {
         public Value(AbstractMap am) {
             this.data = (List) am.get("data");
             this.executable = (boolean) am.get("executable");
-            this.lamports = (long) (double) am.get("lamports");
+            this.lamports = (double) am.get("lamports");
             this.owner = (String) am.get("owner");
-            this.rentEpoch = (long) (double) am.get("rentEpoch");
+            this.rentEpoch = (double) am.get("rentEpoch");
         }
 
         @Json(name = "data")
@@ -31,7 +31,7 @@ public class AccountInfo extends RpcResultObject {
         private boolean executable;
 
         @Json(name = "lamports")
-        private long lamports;
+        private double lamports;
 
         @Json(name = "owner")
         private String owner;

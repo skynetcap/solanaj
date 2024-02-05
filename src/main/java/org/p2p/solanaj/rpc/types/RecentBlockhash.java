@@ -13,7 +13,7 @@ public class RecentBlockhash extends RpcResultObject {
     public static class FeeCalculator {
 
         @Json(name = "lamportsPerSignature")
-        private long lamportsPerSignature;
+        private double lamportsPerSignature;
     }
 
     @Getter
