@@ -110,7 +110,7 @@ public class Account {
 
         // Convert each String character into byte and put it in the buffer
         Arrays.stream(chars).forEach(character -> {
-            byte byteValue = (byte) Integer.parseInt(character);
+            byte byteValue = (byte) Integer.parseInt(character.trim());
             buffer.put(byteValue);
         });
 
