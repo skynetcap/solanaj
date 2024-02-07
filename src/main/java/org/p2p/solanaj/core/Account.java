@@ -102,7 +102,10 @@ public class Account {
         ByteBuffer buffer = ByteBuffer.allocate(64);
 
         // Convert json array into String array
-        String sanitizedJson = characters.replaceAll("\\[", "").replaceAll("]", "");
+        String sanitizedJson = characters.replaceAll("\\[", "")
+                .replaceAll("]", "")
+                .trim();
+
         String[] chars = sanitizedJson.split(",");
 
         // Convert each String character into byte and put it in the buffer
