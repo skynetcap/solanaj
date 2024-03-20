@@ -70,7 +70,18 @@ public class RpcApi {
         return sendTransaction(transaction, Collections.singletonList(signer), null);
     }
 
-    public String sendTransaction(Transaction transaction, List<Account> signers, String recentBlockHash)
+    /**
+     * Sends a transaction to the RPC server.
+     *
+     * @param transaction             The transaction to send.
+     * @param signers                 The list of accounts signing the transaction.
+     * @param recentBlockHash         The recent block hash. If null, it will be obtained from the RPC server.
+     * @param rpcSendTransactionConfig The configuration object for sending transactions via RPC.
+     * @return The transaction ID as a string.
+     * @throws RpcException If an error occurs during the RPC call.
+     */
+    public String sendTransaction(Transaction transaction, List<Account> signers, String recentBlockHash,
+                                  RpcSendTransactionConfig rpcSendTransactionConfig)
             throws RpcException {
         if (recentBlockHash == null) {
             recentBlockHash = getRecentBlockhash();
@@ -84,9 +95,24 @@ public class RpcApi {
         List<Object> params = new ArrayList<Object>();
 
         params.add(base64Trx);
-        params.add(new RpcSendTransactionConfig());
+        params.add(rpcSendTransactionConfig);
 
         return client.call("sendTransaction", params, String.class);
+    }
+
+    /**
+     * Sends a transaction to the network for processing.
+     * A default RpcSendTransactionConfig is used.
+     *
+     * @param transaction    the transaction to send
+     * @param signers        the list of accounts that will sign the transaction
+     * @param recentBlockHash    the recent block hash to include in the transaction
+     * @return the result of the transaction
+     * @throws RpcException    if an error occurs during the RPC call
+     */
+    public String sendTransaction(Transaction transaction, List<Account> signers, String recentBlockHash)
+            throws RpcException {
+        return sendTransaction(transaction, signers, recentBlockHash, new RpcSendTransactionConfig());
     }
 
     public void sendAndConfirmTransaction(Transaction transaction, List<Account> signers,
