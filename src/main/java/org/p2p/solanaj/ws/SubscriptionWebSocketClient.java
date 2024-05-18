@@ -12,6 +12,8 @@ import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 import com.squareup.moshi.Types;
 
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import org.p2p.solanaj.rpc.types.RpcNotificationResult;
@@ -35,10 +37,12 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
     private Map<String, SubscriptionParams> subscriptions = new ConcurrentHashMap<>();
     private Map<String, Long> subscriptionIds = new ConcurrentHashMap<>();
     private Map<Long, NotificationEventListener> subscriptionListeners = new ConcurrentHashMap<>();
-    private static final Logger LOGGER = Logger.getLogger(SubscriptionWebSocketClient.class.getName());
+    private static final Logger log = Logger.getLogger(SubscriptionWebSocketClient.class.getName());
+
+    @Getter
+    private static URI serverURI;
 
     public static SubscriptionWebSocketClient getExactPathInstance(String endpoint) {
-        URI serverURI;
         SubscriptionWebSocketClient instance;
 
         try {
@@ -57,7 +61,6 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
     }
 
     public static SubscriptionWebSocketClient getInstance(String endpoint) {
-        URI serverURI;
         URI endpointURI;
         SubscriptionWebSocketClient instance;
 
@@ -142,7 +145,7 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
 
     @Override
     public void onOpen(ServerHandshake handshakedata) {
-        LOGGER.info("Websocket connection opened");
+        log.info("Websocket connection opened");
         updateSubscriptions();
     }
 
@@ -192,14 +195,31 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
 
     @Override
     public void onClose(int code, String reason, boolean remote) {
-        System.out.println(
+        log.warning(
                 "Connection closed by " + (remote ? "remote peer" : "us") + " Code: " + code + " Reason: " + reason);
 
+        reconnectAndSubscribe();
+        log.info("Reconnected after onClose");
     }
 
     @Override
     public void onError(Exception ex) {
-        ex.printStackTrace();
+        log.warning("WSS onError: {}" + ex.getMessage());
+
+        reconnectAndSubscribe();
+        log.info("Reconnected after onError");
+    }
+
+    private void reconnectAndSubscribe() {
+        // Reconnect
+        SubscriptionWebSocketClient instance;
+        instance = new SubscriptionWebSocketClient(serverURI);
+
+        if (!instance.isOpen()) {
+            instance.connect();
+        }
+
+        updateSubscriptions();
     }
 
     private void updateSubscriptions() {
