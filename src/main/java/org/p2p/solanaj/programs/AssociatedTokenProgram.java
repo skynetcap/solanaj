@@ -40,7 +40,7 @@ public class AssociatedTokenProgram extends Program {
 
         keys.add(new AccountMeta(fundingAccount, true, true));
         keys.add(new AccountMeta(pda, false, true));
-        keys.add(new AccountMeta(fundingAccount, false, false));
+        keys.add(new AccountMeta(walletAddress, false, false));
         keys.add(new AccountMeta(mint, false, false));
         keys.add(new AccountMeta(SystemProgram.PROGRAM_ID, false, false));
         keys.add(new AccountMeta(TokenProgram.PROGRAM_ID, false, false));
