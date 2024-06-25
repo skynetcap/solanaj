@@ -27,6 +27,18 @@ For SolanaJ implementations of popular Solana programs such as Serum, please vis
 </dependency>
 ```
 
+## Build
+In pom.xml update the plugin maven-gpg-plugin configuration with your homedir and keyname.  
+To see if you have a gpg key run `gpg --list-secret-keys`  
+If nothing is returned create one with `gpg --full-generate-key`  
+Then run `mvn install` and the build should complete successfully.  
+```xml
+<configuration>
+    <homedir>/home/phil/.gnupg/</homedir>
+    <keyname>AE2D00367F40E980F7C62FF792C4533F3EE03477</keyname>
+</configuration>
+```
+
 ## Example
 ##### Transfer lamports
 
