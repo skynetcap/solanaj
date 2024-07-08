@@ -764,6 +764,14 @@ public class MainnetTest extends AccountBasedTest {
 
         assertEquals("HHntUXQbUBdx8HZQQaT7W1ZSgKRitMtForz4YJXc6qF6", fromKey);
         assertEquals("6QcgNYEqHeUohoJWR5ppuRg9Ugh6scMzJY4j4tFnrZMu", toKey);
+
+        ConfirmedTransaction transactionInfoCommitted = client.getApi().getTransaction(transactionSignature, Commitment.CONFIRMED);
+
+        String fromKeyCommitted = transactionInfoCommitted.getTransaction().getMessage().getAccountKeys().get(0);
+        String toKeyCommitted = transactionInfoCommitted.getTransaction().getMessage().getAccountKeys().get(1);
+
+        assertEquals("HHntUXQbUBdx8HZQQaT7W1ZSgKRitMtForz4YJXc6qF6", fromKeyCommitted);
+        assertEquals("6QcgNYEqHeUohoJWR5ppuRg9Ugh6scMzJY4j4tFnrZMu", toKeyCommitted);
     }
 
     @Test
