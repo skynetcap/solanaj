@@ -634,6 +634,11 @@ public class MainnetTest extends AccountBasedTest {
     public void getBlockTest() throws RpcException {
         Block block = this.client.getApi().getBlock(124398367);
         assertEquals(112516757, block.getBlockHeight());
+
+        Block blockWithVersion = this.client.getApi().getBlock(124398367, Map.of(
+                "maxSupportedTransactionVersion", 0
+        ));
+        assertEquals(112516757, blockWithVersion.getBlockHeight());
     }
 
     // Ignored since some validators can only get recent blocks

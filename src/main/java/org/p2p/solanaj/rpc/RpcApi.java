@@ -556,6 +556,11 @@ public class RpcApi {
                 Commitment commitment = (Commitment) optionalParams.get("commitment");
                 blockConfig.setCommitment(commitment.getValue());
             }
+
+            if (optionalParams.containsKey("maxSupportedTransactionVersion")) {
+                blockConfig.setMaxSupportedTransactionVersion((Integer) optionalParams.get("maxSupportedTransactionVersion"));
+            }
+
             params.add(blockConfig);
         }
 

@@ -12,4 +12,6 @@ public class BlockConfig {
     private Boolean rewards = true;
 
     private String commitment;
+
+    private Integer maxSupportedTransactionVersion = null;
 }
