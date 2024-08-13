@@ -91,7 +91,6 @@ public class RpcClient {
         try {
             Response response = httpClient.newCall(request).execute();
             final String result = response.body().string();
-            // System.out.println("Response = " + result);
             RpcResponse<T> rpcResult = resultAdapter.fromJson(result);
 
             if (rpcResult.getError() != null) {

@@ -46,7 +46,7 @@ public class AnchorBasicTutorialProgram extends Program {
      * @return byte array containing sighash for "global::initialize"
      */
     private static byte[] encodeInitializeData() {
-        MessageDigest digest = null;
+        MessageDigest digest;
         byte[] encodedHash = null;
         int sigHashStart = 0;
         int sigHashEnd = 8;

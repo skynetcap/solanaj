@@ -3,8 +3,8 @@ package org.p2p.solanaj.programs;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.p2p.solanaj.core.Account;
+import org.p2p.solanaj.core.LegacyTransaction;
 import org.p2p.solanaj.core.PublicKey;
-import org.p2p.solanaj.core.Transaction;
 import org.p2p.solanaj.rpc.Cluster;
 import org.p2p.solanaj.rpc.RpcClient;
 import org.p2p.solanaj.rpc.RpcException;
@@ -30,12 +30,12 @@ public class BPFLoaderTest {
 
         System.out.println(account.getPublicKey().toBase58());
 
-        Transaction transaction = new Transaction();
+        LegacyTransaction legacyTransaction = new LegacyTransaction();
 
         // initialize buffer
         Account bufferAccount = new Account();
 
-        transaction.addInstruction(
+        legacyTransaction.addInstruction(
                 SystemProgram.createAccount(
                         account.getPublicKey(),
                         bufferAccount.getPublicKey(),
@@ -45,7 +45,7 @@ public class BPFLoaderTest {
                 )
         );
 
-        transaction.addInstruction(
+        legacyTransaction.addInstruction(
                 BPFLoader.initializeBuffer(
                         bufferAccount.getPublicKey(),
                         account.getPublicKey()
@@ -53,9 +53,9 @@ public class BPFLoaderTest {
         );
 
         String hash = client.getApi().getRecentBlockhash();
-        transaction.setRecentBlockHash(hash);
+        legacyTransaction.setRecentBlockHash(hash);
 
-        System.out.println("TX: " + client.getApi().sendTransaction(transaction, List.of(account, bufferAccount), hash));
+        System.out.println("TX: " + client.getApi().sendLegacyTransaction(legacyTransaction, List.of(account, bufferAccount), hash));
 
     }
 }

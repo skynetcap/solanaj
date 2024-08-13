@@ -10,7 +10,7 @@ import org.p2p.solanaj.utils.bip32.wallet.SolanaBip44;
 import org.p2p.solanaj.utils.bip32.wallet.DerivableType;
 
 public class Account {
-    private TweetNaclFast.Signature.KeyPair keyPair;
+    private final TweetNaclFast.Signature.KeyPair keyPair;
 
     public Account() {
         this.keyPair = TweetNaclFast.Signature.keyPair();

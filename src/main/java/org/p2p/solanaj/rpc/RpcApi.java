@@ -3,6 +3,7 @@ package org.p2p.solanaj.rpc;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.p2p.solanaj.core.Account;
+import org.p2p.solanaj.core.LegacyTransaction;
 import org.p2p.solanaj.core.PublicKey;
 import org.p2p.solanaj.core.Transaction;
 import org.p2p.solanaj.rpc.types.*;
@@ -27,7 +28,7 @@ import org.p2p.solanaj.ws.SubscriptionWebSocketClient;
 import org.p2p.solanaj.ws.listeners.NotificationEventListener;
 
 public class RpcApi {
-    private RpcClient client;
+    private final RpcClient client;
 
     public RpcApi(RpcClient client) {
         this.client = client;
@@ -61,6 +62,69 @@ public class RpcApi {
         return client.call("getRecentBlockhash", params, RecentBlockhash.class).getValue().getBlockhash();
     }
 
+
+    public String sendLegacyTransaction(LegacyTransaction legacyTransaction, Account signer, String recentBlockHash) throws
+            RpcException {
+        return sendLegacyTransaction(legacyTransaction, Collections.singletonList(signer), recentBlockHash);
+    }
+
+    public String sendLegacyTransaction(LegacyTransaction legacyTransaction, Account signer) throws RpcException {
+        return sendLegacyTransaction(legacyTransaction, Collections.singletonList(signer), null);
+    }
+
+    /**
+     * Sends a transaction to the RPC server.
+     *
+     * @param legacyTransaction             The transaction to send.
+     * @param signers                 The list of accounts signing the transaction.
+     * @param recentBlockHash         The recent block hash. If null, it will be obtained from the RPC server.
+     * @param rpcSendTransactionConfig The configuration object for sending transactions via RPC.
+     * @return The transaction ID as a string.
+     * @throws RpcException If an error occurs during the RPC call.
+     */
+    public String sendLegacyTransaction(LegacyTransaction legacyTransaction, List<Account> signers, String recentBlockHash,
+                                        RpcSendTransactionConfig rpcSendTransactionConfig)
+            throws RpcException {
+        if (recentBlockHash == null) {
+            recentBlockHash = getRecentBlockhash();
+        }
+        legacyTransaction.setRecentBlockHash(recentBlockHash);
+        legacyTransaction.sign(signers);
+        byte[] serializedTransaction = legacyTransaction.serialize();
+
+        String base64Trx = Base64.getEncoder().encodeToString(serializedTransaction);
+
+        List<Object> params = new ArrayList<>();
+
+        params.add(base64Trx);
+        params.add(rpcSendTransactionConfig);
+
+        return client.call("sendLegacyTransaction", params, String.class);
+    }
+
+    /**
+     * Sends a transaction to the network for processing.
+     * A default RpcSendTransactionConfig is used.
+     *
+     * @param legacyTransaction    the transaction to send
+     * @param signers        the list of accounts that will sign the transaction
+     * @param recentBlockHash    the recent block hash to include in the transaction
+     * @return the result of the transaction
+     * @throws RpcException    if an error occurs during the RPC call
+     */
+    public String sendLegacyTransaction(LegacyTransaction legacyTransaction, List<Account> signers, String recentBlockHash)
+            throws RpcException {
+        return sendLegacyTransaction(legacyTransaction, signers, recentBlockHash, new RpcSendTransactionConfig());
+    }
+
+    public void sendAndConfirmLegacyTransaction(LegacyTransaction legacyTransaction, List<Account> signers,
+                                          NotificationEventListener listener) throws RpcException {
+        String signature = sendLegacyTransaction(legacyTransaction, signers, null);
+
+        SubscriptionWebSocketClient subClient = SubscriptionWebSocketClient.getInstance(client.getEndpoint());
+        subClient.signatureSubscribe(signature, listener);
+    }
+
     public String sendTransaction(Transaction transaction, Account signer, String recentBlockHash) throws
             RpcException {
         return sendTransaction(transaction, Collections.singletonList(signer), recentBlockHash);
@@ -81,7 +145,7 @@ public class RpcApi {
      * @throws RpcException If an error occurs during the RPC call.
      */
     public String sendTransaction(Transaction transaction, List<Account> signers, String recentBlockHash,
-                                  RpcSendTransactionConfig rpcSendTransactionConfig)
+                                        RpcSendTransactionConfig rpcSendTransactionConfig)
             throws RpcException {
         if (recentBlockHash == null) {
             recentBlockHash = getRecentBlockhash();
@@ -92,12 +156,12 @@ public class RpcApi {
 
         String base64Trx = Base64.getEncoder().encodeToString(serializedTransaction);
 
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
 
         params.add(base64Trx);
         params.add(rpcSendTransactionConfig);
 
-        return client.call("sendTransaction", params, String.class);
+        return client.call("sendLegacyTransaction", params, String.class);
     }
 
     /**
@@ -116,7 +180,7 @@ public class RpcApi {
     }
 
     public void sendAndConfirmTransaction(Transaction transaction, List<Account> signers,
-            NotificationEventListener listener) throws RpcException {
+                                          NotificationEventListener listener) throws RpcException {
         String signature = sendTransaction(transaction, signers, null);
 
         SubscriptionWebSocketClient subClient = SubscriptionWebSocketClient.getInstance(client.getEndpoint());
@@ -159,14 +223,14 @@ public class RpcApi {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public List<SignatureInformation> getConfirmedSignaturesForAddress2(PublicKey account, int limit)
             throws RpcException {
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
 
         params.add(account.toString());
         params.add(new ConfirmedSignFAddr2(limit, Commitment.CONFIRMED));
 
         List<AbstractMap> rawResult = client.call("getConfirmedSignaturesForAddress2", params, List.class);
 
-        List<SignatureInformation> result = new ArrayList<SignatureInformation>();
+        List<SignatureInformation> result = new ArrayList<>();
         for (AbstractMap item : rawResult) {
             result.add(new SignatureInformation(item));
         }
@@ -176,14 +240,14 @@ public class RpcApi {
 
     public List<SignatureInformation> getSignaturesForAddress(PublicKey account, int limit, Commitment commitment)
             throws RpcException {
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
 
         params.add(account.toString());
         params.add(new ConfirmedSignFAddr2(limit, commitment));
 
         List<AbstractMap> rawResult = client.call("getSignaturesForAddress", params, List.class);
 
-        List<SignatureInformation> result = new ArrayList<SignatureInformation>();
+        List<SignatureInformation> result = new ArrayList<>();
         for (AbstractMap item : rawResult) {
             result.add(new SignatureInformation(item));
         }
@@ -192,7 +256,7 @@ public class RpcApi {
     }
 
     public List<ProgramAccount> getProgramAccounts(PublicKey account, long offset, String bytes) throws RpcException {
-        List<Object> filters = new ArrayList<Object>();
+        List<Object> filters = new ArrayList<>();
         filters.add(new Filter(new Memcmp(offset, bytes)));
 
         ProgramAccountConfig programAccountConfig = new ProgramAccountConfig(filters);
@@ -200,7 +264,7 @@ public class RpcApi {
     }
 
     public List<ProgramAccount> getProgramAccountsBase64(PublicKey account, long offset, String bytes) throws RpcException {
-        List<Object> filters = new ArrayList<Object>();
+        List<Object> filters = new ArrayList<>();
         Memcmp memcmp = new Memcmp(offset, bytes);
 
         filters.add(new Filter(memcmp));
@@ -217,7 +281,7 @@ public class RpcApi {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public List<ProgramAccount> getProgramAccounts(PublicKey account, ProgramAccountConfig programAccountConfig)
             throws RpcException {
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
 
         params.add(account.toString());
 
@@ -227,7 +291,7 @@ public class RpcApi {
 
         List<AbstractMap> rawResult = client.call("getProgramAccounts", params, List.class);
 
-        List<ProgramAccount> result = new ArrayList<ProgramAccount>();
+        List<ProgramAccount> result = new ArrayList<>();
         for (AbstractMap item : rawResult) {
             result.add(new ProgramAccount(item));
         }
@@ -243,9 +307,7 @@ public class RpcApi {
         params.add(account.toString());
 
         List<Object> filters = new ArrayList<>();
-        memcmpList.forEach(memcmp -> {
-            filters.add(new Filter(memcmp));
-        });
+        memcmpList.forEach(memcmp -> filters.add(new Filter(memcmp)));
 
         filters.add(new DataSize(dataSize));
 
@@ -270,9 +332,7 @@ public class RpcApi {
         params.add(account.toString());
 
         List<Object> filters = new ArrayList<>();
-        memcmpList.forEach(memcmp -> {
-            filters.add(new Filter(memcmp));
-        });
+        memcmpList.forEach(memcmp -> filters.add(new Filter(memcmp)));
 
         ProgramAccountConfig programAccountConfig = new ProgramAccountConfig(filters);
         params.add(programAccountConfig);
@@ -400,7 +460,7 @@ public class RpcApi {
     }
 
     public String requestAirdrop(PublicKey address, long lamports, Commitment commitment) throws RpcException {
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
 
         params.add(address.toString());
         params.add(lamports);
@@ -412,7 +472,7 @@ public class RpcApi {
     }
 
     public BlockCommitment getBlockCommitment(long block) throws RpcException {
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
 
         params.add(block);
 
@@ -511,7 +571,7 @@ public class RpcApi {
 
 
     public List<ClusterNode> getClusterNodes() throws RpcException {
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
 
         // TODO - fix uncasted type stuff
         List<AbstractMap> rawResult = client.call("getClusterNodes", params, List.class);
@@ -573,7 +633,7 @@ public class RpcApi {
      * @throws RpcException
      */
     public SnapshotSlot getHighestSnapshotSlot() throws RpcException {
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
         return client.call("getHighestSnapshotSlot", params, SnapshotSlot.class);
     }
 
@@ -597,7 +657,7 @@ public class RpcApi {
     }
 
     public EpochSchedule getEpochSchedule() throws RpcException {
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
 
         return client.call("getEpochSchedule", params, EpochSchedule.class);
     }

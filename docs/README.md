@@ -51,10 +51,10 @@ int lamports = 3000;
 
 Account signer = new Account(secret_key);
 
-Transaction transaction = new Transaction();
-transaction.addInstruction(SystemProgram.transfer(fromPublicKey, toPublickKey, lamports));
+Transaction legacyTransaction = new Transaction();
+legacyTransaction.addInstruction(SystemProgram.transfer(fromPublicKey, toPublickKey, lamports));
 
-String signature = client.getApi().sendTransaction(transaction, signer);
+String signature = client.getApi().sendTransaction(legacyTransaction, signer);
 ```
 
 ##### Get balance
@@ -77,18 +77,18 @@ final Market solUsdcMarket = new MarketBuilder()
 final OrderBook bids = solUsdcMarket.getBidOrderBook();
 ```
 
-##### Send a transaction with call to the "Memo" program
+##### Send a legacyTransaction with call to the "Memo" program
 ```java
 // Create account from private key
 final Account feePayer = new Account(Base58.decode(new String(data)));
-final Transaction transaction = new Transaction();
+final Transaction legacyTransaction = new Transaction();
 
 // Add instruction to write memo
-transaction.addInstruction(
+legacyTransaction.addInstruction(
         MemoProgram.writeUtf8(feePayer.getPublicKey(),"Hello from SolanaJ :)")
 );
 
-String response = result = client.getApi().sendTransaction(transaction, feePayer);
+String response = result = client.getApi().sendTransaction(legacyTransaction, feePayer);
 ```
 
 ## License

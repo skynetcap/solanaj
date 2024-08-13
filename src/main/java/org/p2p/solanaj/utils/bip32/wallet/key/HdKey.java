@@ -1,5 +1,7 @@
 package org.p2p.solanaj.utils.bip32.wallet.key;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.p2p.solanaj.utils.bip32.crypto.Hash;
 
 import java.io.ByteArrayOutputStream;
@@ -11,12 +13,17 @@ import java.util.Arrays;
  * <p>
  * Will probably be migrated to builder pattern.
  */
+@Setter
 public class HdKey {
+    @Getter
     private byte[] version;
+    @Getter
     private int depth;
     private byte[] fingerprint;
     private byte[] childNumber;
+    @Getter
     private byte[] chainCode;
+    @Getter
     private byte[] keyData;
 
     HdKey(byte[] version, int depth, byte[] fingerprint, byte[] childNumber, byte[] chainCode, byte[] keyData) {
@@ -29,34 +36,6 @@ public class HdKey {
     }
 
     HdKey() {
-    }
-
-    public void setVersion(byte[] version) {
-        this.version = version;
-    }
-
-    public void setDepth(int depth) {
-        this.depth = depth;
-    }
-
-    public void setFingerprint(byte[] fingerprint) {
-        this.fingerprint = fingerprint;
-    }
-
-    public void setChildNumber(byte[] childNumber) {
-        this.childNumber = childNumber;
-    }
-
-    public void setChainCode(byte[] chainCode) {
-        this.chainCode = chainCode;
-    }
-
-    public void setKeyData(byte[] keyData) {
-        this.keyData = keyData;
-    }
-
-    public byte[] getChainCode() {
-        return chainCode;
     }
 
     /**
@@ -83,15 +62,4 @@ public class HdKey {
         return key.toByteArray();
     }
 
-    public int getDepth() {
-        return depth;
-    }
-
-    public byte[] getKeyData() {
-        return keyData;
-    }
-
-    public byte[] getVersion() {
-        return version;
-    }
 }

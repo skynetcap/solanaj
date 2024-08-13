@@ -6,10 +6,10 @@ import java.util.Comparator;
 import java.util.HashMap;
 
 public class AccountKeysList {
-    private HashMap<String, AccountMeta> accounts;
+    private final HashMap<String, AccountMeta> accounts;
 
     public AccountKeysList() {
-        accounts = new HashMap<String, AccountMeta>();
+        accounts = new HashMap<>();
     }
 
     public void add(AccountMeta accountMeta) {
@@ -31,29 +31,31 @@ public class AccountKeysList {
     }
 
     public ArrayList<AccountMeta> getList() {
-        ArrayList<AccountMeta> accountKeysList = new ArrayList<AccountMeta>(accounts.values());
+        ArrayList<AccountMeta> accountKeysList = new ArrayList<>(accounts.values());
         accountKeysList.sort(metaComparator);
 
         return accountKeysList;
     }
 
-    private static final Comparator<AccountMeta> metaComparator = new Comparator<AccountMeta>() {
+    private static final Comparator<AccountMeta> metaComparator = (am1, am2) -> {
 
-        @Override
-        public int compare(AccountMeta am1, AccountMeta am2) {
-
-            int cmpSigner = am1.isSigner() == am2.isSigner() ? 0 : am1.isSigner() ? -1 : 1;
-            if (cmpSigner != 0) {
-                return cmpSigner;
-            }
-
-            int cmpkWritable = am1.isWritable() == am2.isWritable() ? 0 : am1.isWritable() ? -1 : 1;
-            if (cmpkWritable != 0) {
-                return cmpkWritable;
-            }
-
-            return Integer.compare(cmpSigner, cmpkWritable);
+        int cmpSigner = am1.isSigner() == am2.isSigner() ? 0 : am1.isSigner() ? -1 : 1;
+        if (cmpSigner != 0) {
+            return cmpSigner;
         }
+
+        int cmpkWritable = am1.isWritable() == am2.isWritable() ? 0 : am1.isWritable() ? -1 : 1;
+        if (cmpkWritable != 0) {
+            return cmpkWritable;
+        }
+
+        return Integer.compare(cmpSigner, cmpkWritable);
     };
 
+    @Override
+    public String toString() {
+        return "AccountKeysList{" +
+                "accounts=" + accounts +
+                '}';
+    }
 }
