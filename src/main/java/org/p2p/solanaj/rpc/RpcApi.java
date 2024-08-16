@@ -255,6 +255,28 @@ public class RpcApi {
         return result;
     }
 
+    public List<SignatureInformation> getSignaturesForAddress(PublicKey account, String beforeSignature, int limit,
+                                                              Commitment commitment)
+            throws RpcException {
+        if (beforeSignature == null) {
+            return getSignaturesForAddress(account, limit, commitment);
+        }
+
+        List<Object> params = new ArrayList<>();
+
+        params.add(account.toString());
+        params.add(new ConfirmedSignFAddr2(beforeSignature, limit, commitment));
+
+        List<AbstractMap> rawResult = client.call("getSignaturesForAddress", params, List.class);
+
+        List<SignatureInformation> result = new ArrayList<>();
+        for (AbstractMap item : rawResult) {
+            result.add(new SignatureInformation(item));
+        }
+
+        return result;
+    }
+
     public List<ProgramAccount> getProgramAccounts(PublicKey account, long offset, String bytes) throws RpcException {
         List<Object> filters = new ArrayList<>();
         filters.add(new Filter(new Memcmp(offset, bytes)));
