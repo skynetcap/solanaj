@@ -15,6 +15,7 @@ import java.util.stream.IntStream;
 public class ByteUtils {
     public static final int UINT_32_LENGTH = 4;
     public static final int UINT_64_LENGTH = 8;
+    public static final int UINT_128_LENGTH = 16;
     public static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
 
     public static byte[] readBytes(byte[] buf, int offset, int length) {
@@ -46,6 +47,10 @@ public class ByteUtils {
             for (int i = 0; i < 8 - bytes.length; i++)
                 stream.write(0);
         }
+    }
+
+    public static BigInteger readUint128(byte[] buf, int offset) {
+        return new BigInteger(reverseBytes(readBytes(buf, offset, UINT_128_LENGTH)));
     }
 
     public static String bytesToHex(byte[] bytes) {
