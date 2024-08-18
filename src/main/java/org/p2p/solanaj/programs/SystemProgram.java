@@ -15,7 +15,7 @@ public class SystemProgram extends Program {
     public static final int PROGRAM_INDEX_TRANSFER = 2;
 
     public static TransactionInstruction transfer(PublicKey fromPublicKey, PublicKey toPublickKey, long lamports) {
-        ArrayList<AccountMeta> keys = new ArrayList<AccountMeta>();
+        ArrayList<AccountMeta> keys = new ArrayList<>();
         keys.add(new AccountMeta(fromPublicKey, true, true));
         keys.add(new AccountMeta(toPublickKey, false, true));
 
@@ -29,7 +29,7 @@ public class SystemProgram extends Program {
 
     public static TransactionInstruction createAccount(PublicKey fromPublicKey, PublicKey newAccountPublikkey,
             long lamports, long space, PublicKey programId) {
-        ArrayList<AccountMeta> keys = new ArrayList<AccountMeta>();
+        ArrayList<AccountMeta> keys = new ArrayList<>();
         keys.add(new AccountMeta(fromPublicKey, true, true));
         keys.add(new AccountMeta(newAccountPublikkey, true, true));
 
@@ -43,7 +43,7 @@ public class SystemProgram extends Program {
     }
 
     public static TransactionInstruction assign(PublicKey owner, PublicKey newOwner) {
-        ArrayList<AccountMeta> keys = new ArrayList<AccountMeta>();
+        ArrayList<AccountMeta> keys = new ArrayList<>();
         keys.add(new AccountMeta(owner, true, true));
 
         byte[] data = new byte[4 + 32];

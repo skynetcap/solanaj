@@ -1,15 +1,21 @@
 package org.p2p.solanaj.utils;
 
+import com.google.common.primitives.Bytes;
+
 import static org.bitcoinj.core.Utils.*;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class ByteUtils {
     public static final int UINT_32_LENGTH = 4;
     public static final int UINT_64_LENGTH = 8;
+    public static final int UINT_128_LENGTH = 16;
     public static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
 
     public static byte[] readBytes(byte[] buf, int offset, int length) {
@@ -43,6 +49,10 @@ public class ByteUtils {
         }
     }
 
+    public static BigInteger readUint128(byte[] buf, int offset) {
+        return new BigInteger(reverseBytes(readBytes(buf, offset, UINT_128_LENGTH)));
+    }
+
     public static String bytesToHex(byte[] bytes) {
         char[] hexChars = new char[bytes.length * 2];
         for (int j = 0; j < bytes.length; j++) {
@@ -72,4 +82,17 @@ public class ByteUtils {
         return valInt;
     }
 
+    public static byte[] toByteArray(List<Byte> byteList) {
+        return Bytes.toArray(byteList);
+    }
+
+    public static List<Byte> toByteList(byte[] bytes) {
+        return IntStream.range(0, bytes.length)
+                .mapToObj(i -> bytes[i])
+                .collect(Collectors.toList());
+    }
+
+    public static byte[] emptyByteArray() {
+        return new byte[]{};
+    }
 }

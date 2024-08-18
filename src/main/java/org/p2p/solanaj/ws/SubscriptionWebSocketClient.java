@@ -22,7 +22,7 @@ import org.p2p.solanaj.ws.listeners.NotificationEventListener;
 
 public class SubscriptionWebSocketClient extends WebSocketClient {
 
-    private class SubscriptionParams {
+    private static class SubscriptionParams {
         RpcRequest request;
         NotificationEventListener listener;
 
@@ -32,9 +32,9 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
         }
     }
 
-    private Map<String, SubscriptionParams> subscriptions = new ConcurrentHashMap<>();
-    private Map<String, Long> subscriptionIds = new ConcurrentHashMap<>();
-    private Map<Long, NotificationEventListener> subscriptionListeners = new ConcurrentHashMap<>();
+    private final Map<String, SubscriptionParams> subscriptions = new ConcurrentHashMap<>();
+    private final Map<String, Long> subscriptionIds = new ConcurrentHashMap<>();
+    private final Map<Long, NotificationEventListener> subscriptionListeners = new ConcurrentHashMap<>();
     private static final Logger LOGGER = Logger.getLogger(SubscriptionWebSocketClient.class.getName());
 
     public static SubscriptionWebSocketClient getExactPathInstance(String endpoint) {
@@ -103,7 +103,7 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
     }
 
     public void signatureSubscribe(String signature, NotificationEventListener listener) {
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
         params.add(signature);
 
         RpcRequest rpcRequest = new RpcRequest("signatureSubscribe", params);
@@ -115,7 +115,7 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
     }
 
     public void logsSubscribe(String mention, NotificationEventListener listener) {
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
         params.add(Map.of("mentions", List.of(mention)));
         params.add(Map.of("commitment", "finalized"));
 
@@ -128,7 +128,7 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
     }
 
     public void logsSubscribe(List<String> mentions, NotificationEventListener listener) {
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
         params.add(Map.of("mentions", mentions));
         params.add(Map.of("commitment", "finalized"));
 
@@ -203,7 +203,7 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
     }
 
     private void updateSubscriptions() {
-        if (isOpen() && subscriptions.size() > 0) {
+        if (isOpen() && !subscriptions.isEmpty()) {
             JsonAdapter<RpcRequest> rpcRequestJsonAdapter = new Moshi.Builder().build().adapter(RpcRequest.class);
 
             for (SubscriptionParams sub : subscriptions.values()) {

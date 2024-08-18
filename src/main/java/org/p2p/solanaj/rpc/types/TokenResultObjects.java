@@ -68,6 +68,21 @@ public class TokenResultObjects {
 
         @Json(name = "tokenAmount")
         private TokenAmountInfo tokenAmount;
+
+        @Json(name = "decimals")
+        private Integer decimals;
+
+        @Json(name = "freezeAuthority")
+        private String freezeAuthority;
+
+        @Json(name = "isInitialized")
+        private Boolean isInitialized;
+
+        @Json(name = "mintAuthority")
+        private String mintAuthority;
+
+        @Json(name = "supply")
+        private String supply;
     }
 
     @Getter

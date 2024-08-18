@@ -1,30 +1,34 @@
 package org.p2p.solanaj.utils.bip32.wallet;
 
+import lombok.Getter;
 import org.p2p.solanaj.utils.bip32.wallet.key.SolanaCurve;
 
 public class SolanaCoin {
-    private final SolanaCurve curve = new SolanaCurve();
-    private final long coinType = 501;
-    private final long purpose = 44;
-    private final boolean alwaysHardened = true;
-
     /**
-     * Get the curve
+     * -- GETTER --
+     *  Get the curve
      *
      * @return curve
      */
-    public SolanaCurve getCurve() {
-        return curve;
-    }
-
+    @Getter
+    private final SolanaCurve curve = new SolanaCurve();
     /**
-     * get the coin type
+     * -- GETTER --
+     *  get the coin type
      *
      * @return coin type
      */
-    public long getCoinType() {
-        return coinType;
-    }
+    @Getter
+    private final long coinType = 501;
+    /**
+     * -- GETTER --
+     *  get the coin purpose
+     *
+     * @return purpose
+     */
+    @Getter
+    private final long purpose = 44;
+    private final boolean alwaysHardened = true;
 
     /**
      * get whether the addresses must always be hardened
@@ -35,12 +39,4 @@ public class SolanaCoin {
         return alwaysHardened;
     }
 
-    /**
-     * get the coin purpose
-     *
-     * @return purpose
-     */
-    public long getPurpose() {
-        return purpose;
-    }
 }

@@ -2,35 +2,92 @@ package org.p2p.solanaj.core;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import lombok.Getter;
 import org.bitcoinj.core.Base58;
 
-import org.p2p.solanaj.utils.ShortvecEncoding;
+import org.p2p.solanaj.utils.GuardedArrayUtils;
+import org.p2p.solanaj.utils.Shortvec;
 
 public class Message {
-    private class MessageHeader {
+    @Getter
+    public static class MessageHeader {
         static final int HEADER_LENGTH = 3;
 
-        byte numRequiredSignatures = 0;
-        byte numReadonlySignedAccounts = 0;
-        byte numReadonlyUnsignedAccounts = 0;
+        private final byte numRequiredSignatures;
+        private final byte numReadonlySignedAccounts;
+        private final byte numReadonlyUnsignedAccounts;
 
         byte[] toByteArray() {
             return new byte[] { numRequiredSignatures, numReadonlySignedAccounts, numReadonlyUnsignedAccounts };
         }
+
+        MessageHeader(byte[] byteArray) {
+            numRequiredSignatures = byteArray[0];
+            numReadonlySignedAccounts = byteArray[1];
+            numReadonlyUnsignedAccounts = byteArray[2];
+        }
+
+        @Override
+        public String toString() {
+            return "MessageHeader{" +
+                    "numRequiredSignatures=" + numRequiredSignatures +
+                    ", numReadonlySignedAccounts=" + numReadonlySignedAccounts +
+                    ", numReadonlyUnsignedAccounts=" + numReadonlyUnsignedAccounts +
+                    '}';
+        }
     }
 
-    private class CompiledInstruction {
-        byte programIdIndex;
-        byte[] keyIndicesCount;
-        byte[] keyIndices;
-        byte[] dataLength;
-        byte[] data;
+    @Getter
+    public static class CompiledInstruction {
+        private byte programIdIndex;
+        private byte[] keyIndicesCount;
+        private byte[] keyIndices;
+        private byte[] dataLength;
+        private byte[] data;
 
         int getLength() {
             // 1 = programIdIndex length
             return 1 + keyIndicesCount.length + keyIndices.length + dataLength.length + data.length;
+        }
+
+        @Override
+        public String toString() {
+            return "CompiledInstruction{" +
+                    "programIdIndex=" + programIdIndex +
+                    ", keyIndicesCount=" + Arrays.toString(keyIndicesCount) +
+                    ", keyIndices=" + Arrays.toString(keyIndices) +
+                    ", dataLength=" + Arrays.toString(dataLength) +
+                    ", data=" + Arrays.toString(data) +
+                    '}';
+        }
+    }
+
+    @Getter
+    public static class MessageAddressTableLookup {
+        private PublicKey accountKey;
+        private byte[] writableIndexesCountLength;
+        private byte[] writableIndexes;
+        private byte[] readonlyIndexesCountLength;
+        private byte[] readonlyIndexes;
+
+        int getLength() {
+            // 1 = programIdIndex length
+            return PublicKey.PUBLIC_KEY_LENGTH + writableIndexesCountLength.length + writableIndexes.length +
+                    readonlyIndexesCountLength.length + readonlyIndexes.length;
+        }
+
+        @Override
+        public String toString() {
+            return "MessageAddressTableLookup{" +
+                    "accountKey=" + accountKey +
+                    ", writableIndexesCountLength=" + Arrays.toString(writableIndexesCountLength) +
+                    ", writableIndexes=" + Arrays.toString(writableIndexes) +
+                    ", readonlyIndexesCountLength=" + Arrays.toString(readonlyIndexesCountLength) +
+                    ", readonlyIndexes=" + Arrays.toString(readonlyIndexes) +
+                    '}';
         }
     }
 
@@ -38,20 +95,44 @@ public class Message {
 
     private MessageHeader messageHeader;
     private String recentBlockhash;
-    private AccountKeysList accountKeys;
-    private List<TransactionInstruction> instructions;
+    private final AccountKeysList accountKeys;
+    private final List<CompiledInstruction> compiledInstructions;
+    private final List<MessageAddressTableLookup> addressTableLookups;
     private Account feePayer;
 
     public Message() {
         this.accountKeys = new AccountKeysList();
-        this.instructions = new ArrayList<TransactionInstruction>();
+        this.compiledInstructions = new ArrayList<>();
+        this.addressTableLookups = new ArrayList<>();
+    }
+
+    public Message(MessageHeader messageHeader, String recentBlockhash, AccountKeysList accountKeys,
+                   List<CompiledInstruction> compiledInstructions, List<MessageAddressTableLookup> addressTableLookups) {
+        this.messageHeader = messageHeader;
+        this.recentBlockhash = recentBlockhash;
+        this.accountKeys = accountKeys;
+        this.compiledInstructions = compiledInstructions;
+        this.addressTableLookups = addressTableLookups;
     }
 
     public Message addInstruction(TransactionInstruction instruction) {
         accountKeys.addAll(instruction.getKeys());
         accountKeys.add(new AccountMeta(instruction.getProgramId(), false, false));
-        instructions.add(instruction);
 
+        List<AccountMeta> keysList = getAccountKeys();
+        int keysSize = instruction.getKeys().size();
+
+        CompiledInstruction compiledInstruction = new CompiledInstruction();
+        compiledInstruction.programIdIndex = (byte) findAccountIndex(keysList, instruction.getProgramId());
+        compiledInstruction.keyIndicesCount = Shortvec.encodeLength(keysSize);
+        byte[] keyIndices = new byte[keysSize];
+        for (int i = 0; i < instruction.getKeys().size(); i++) {
+            keyIndices[i] = (byte) findAccountIndex(keysList, instruction.getKeys().get(i).getPublicKey());
+        }
+        compiledInstruction.keyIndices = keyIndices;
+        compiledInstruction.dataLength = Shortvec.encodeLength(instruction.getData().length);
+        compiledInstruction.data = instruction.getData();
+        compiledInstructions.add(compiledInstruction);
         return this;
     }
 
@@ -65,62 +146,35 @@ public class Message {
             throw new IllegalArgumentException("recentBlockhash required");
         }
 
-        if (instructions.size() == 0) {
+        if (compiledInstructions.isEmpty()) {
             throw new IllegalArgumentException("No instructions provided");
         }
-
-        messageHeader = new MessageHeader();
 
         List<AccountMeta> keysList = getAccountKeys();
         int accountKeysSize = keysList.size();
 
-        byte[] accountAddressesLength = ShortvecEncoding.encodeLength(accountKeysSize);
+        byte[] accountAddressesLength = Shortvec.encodeLength(accountKeysSize);
 
+        byte[] instructionsCountLength = Shortvec.encodeLength(compiledInstructions.size());
         int compiledInstructionsLength = 0;
-        List<CompiledInstruction> compiledInstructions = new ArrayList<CompiledInstruction>();
-
-        for (TransactionInstruction instruction : instructions) {
-            int keysSize = instruction.getKeys().size();
-
-            byte[] keyIndices = new byte[keysSize];
-            for (int i = 0; i < keysSize; i++) {
-                keyIndices[i] = (byte) findAccountIndex(keysList, instruction.getKeys().get(i).getPublicKey());
-            }
-
-            CompiledInstruction compiledInstruction = new CompiledInstruction();
-            compiledInstruction.programIdIndex = (byte) findAccountIndex(keysList, instruction.getProgramId());
-            compiledInstruction.keyIndicesCount = ShortvecEncoding.encodeLength(keysSize);
-            compiledInstruction.keyIndices = keyIndices;
-            compiledInstruction.dataLength = ShortvecEncoding.encodeLength(instruction.getData().length);
-            compiledInstruction.data = instruction.getData();
-
-            compiledInstructions.add(compiledInstruction);
-
+        for (CompiledInstruction compiledInstruction : this.compiledInstructions) {
             compiledInstructionsLength += compiledInstruction.getLength();
         }
 
-        byte[] instructionsLength = ShortvecEncoding.encodeLength(compiledInstructions.size());
-
+        byte[] addressTableLookupsCountLength = Shortvec.encodeLength(addressTableLookups.size());
+        int addressTableLookupsLength = 0;
+        for (MessageAddressTableLookup addressTableLookup : this.addressTableLookups) {
+            addressTableLookupsLength += addressTableLookup.getLength();
+        }
         int bufferSize = MessageHeader.HEADER_LENGTH + RECENT_BLOCK_HASH_LENGTH + accountAddressesLength.length
-                + (accountKeysSize * PublicKey.PUBLIC_KEY_LENGTH) + instructionsLength.length
-                + compiledInstructionsLength;
+                + (accountKeysSize * PublicKey.PUBLIC_KEY_LENGTH) + instructionsCountLength.length
+                + compiledInstructionsLength + addressTableLookupsCountLength.length + addressTableLookupsLength;
 
         ByteBuffer out = ByteBuffer.allocate(bufferSize);
 
         ByteBuffer accountKeysBuff = ByteBuffer.allocate(accountKeysSize * PublicKey.PUBLIC_KEY_LENGTH);
         for (AccountMeta accountMeta : keysList) {
             accountKeysBuff.put(accountMeta.getPublicKey().toByteArray());
-
-            if (accountMeta.isSigner()) {
-                messageHeader.numRequiredSignatures += 1;
-                if (!accountMeta.isWritable()) {
-                    messageHeader.numReadonlySignedAccounts += 1;
-                }
-            } else {
-                if (!accountMeta.isWritable()) {
-                    messageHeader.numReadonlyUnsignedAccounts += 1;
-                }
-            }
         }
 
         out.put(messageHeader.toByteArray());
@@ -129,8 +183,7 @@ public class Message {
         out.put(accountKeysBuff.array());
 
         out.put(Base58.decode(recentBlockhash));
-
-        out.put(instructionsLength);
+        out.put(instructionsCountLength);
         for (CompiledInstruction compiledInstruction : compiledInstructions) {
             out.put(compiledInstruction.programIdIndex);
             out.put(compiledInstruction.keyIndicesCount);
@@ -139,18 +192,88 @@ public class Message {
             out.put(compiledInstruction.data);
         }
 
+        out.put(addressTableLookupsCountLength);
+        for (MessageAddressTableLookup addressTableLookup : addressTableLookups) {
+            out.put(addressTableLookup.accountKey.toByteArray());
+            out.put(addressTableLookup.writableIndexesCountLength);
+            out.put(addressTableLookup.writableIndexes);
+            out.put(addressTableLookup.readonlyIndexesCountLength);
+            out.put(addressTableLookup.readonlyIndexes);
+        }
+
         return out.array();
+    }
+
+    public static Message deserialize(List<Byte> serializedMessageList) {
+        // Remove the byte as it is used to indicate legacy Transaction.
+        GuardedArrayUtils.guardedShift(serializedMessageList);
+
+        // Remove three bytes for header
+        byte[] messageHeaderBytes = GuardedArrayUtils.guardedSplice(serializedMessageList, 0, MessageHeader.HEADER_LENGTH);
+        MessageHeader messageHeader = new MessageHeader(messageHeaderBytes);
+
+        // Total static account keys
+        int accountKeysSize = Shortvec.decodeLength(serializedMessageList);
+        List<AccountMeta> accountKeys = new ArrayList<>(accountKeysSize);
+        for (int i = 0; i < accountKeysSize; i++) {
+            byte[] accountMetaPublicKeyByteArray = GuardedArrayUtils.guardedSplice(serializedMessageList, 0,
+                    PublicKey.PUBLIC_KEY_LENGTH);
+            PublicKey publicKey = new PublicKey(accountMetaPublicKeyByteArray);
+            accountKeys.add(new AccountMeta(publicKey, false, false));
+        }
+        AccountKeysList accountKeysList = new AccountKeysList();
+        accountKeysList.addAll(accountKeys);
+
+        // recent_blockhash
+        String recentBlockHash = Base58.encode(GuardedArrayUtils.guardedSplice(serializedMessageList, 0,
+                PublicKey.PUBLIC_KEY_LENGTH));
+
+        // Deserialize instructions
+        int instructionsLength = Shortvec.decodeLength(serializedMessageList);
+        List<CompiledInstruction> compiledInstructions = new ArrayList<>(instructionsLength);
+        for (int i = 0; i < instructionsLength; i++) {
+            CompiledInstruction compiledInstruction = new CompiledInstruction();
+            compiledInstruction.programIdIndex = GuardedArrayUtils.guardedShift(serializedMessageList);
+            int keysSize = Shortvec.decodeLength(serializedMessageList); // keysSize
+            compiledInstruction.keyIndicesCount = Shortvec.encodeLength(keysSize);
+            compiledInstruction.keyIndices = GuardedArrayUtils.guardedSplice(serializedMessageList, 0, keysSize);
+            var dataLength = Shortvec.decodeLength(serializedMessageList);
+            compiledInstruction.dataLength = Shortvec.encodeLength(dataLength);
+            compiledInstruction.data = GuardedArrayUtils.guardedSplice(serializedMessageList, 0, dataLength);
+
+            compiledInstructions.add(compiledInstruction);
+
+        }
+
+        // Deserialize addressTableLookups
+        int addressTableLookupsLength = Shortvec.decodeLength(serializedMessageList);
+        List<MessageAddressTableLookup> addressTableLookups = new ArrayList<>(addressTableLookupsLength);
+        for (int i = 0; i < addressTableLookupsLength; i++) {
+            MessageAddressTableLookup addressTableLookup = new MessageAddressTableLookup();
+            byte[] accountKeyByteArray = GuardedArrayUtils.guardedSplice(serializedMessageList, 0, PublicKey.PUBLIC_KEY_LENGTH);
+            addressTableLookup.accountKey = new PublicKey(accountKeyByteArray);
+            int writableIndexesLength = Shortvec.decodeLength(serializedMessageList); // keysSize
+            addressTableLookup.writableIndexesCountLength = Shortvec.encodeLength(writableIndexesLength);
+            addressTableLookup.writableIndexes = GuardedArrayUtils.guardedSplice(serializedMessageList, 0, writableIndexesLength);
+            int readonlyIndexesLength = Shortvec.decodeLength(serializedMessageList);
+            addressTableLookup.readonlyIndexesCountLength = Shortvec.encodeLength(readonlyIndexesLength);
+            addressTableLookup.readonlyIndexes = GuardedArrayUtils.guardedSplice(serializedMessageList, 0, readonlyIndexesLength);
+
+            addressTableLookups.add(addressTableLookup);
+        }
+
+        return new Message(messageHeader, recentBlockHash, accountKeysList, compiledInstructions, addressTableLookups);
     }
 
     protected void setFeePayer(Account feePayer) {
         this.feePayer = feePayer;
     }
 
-    private List<AccountMeta> getAccountKeys() {
+    public List<AccountMeta> getAccountKeys() {
         List<AccountMeta> keysList = accountKeys.getList();
         int feePayerIndex = findAccountIndex(keysList, feePayer.getPublicKey());
 
-        List<AccountMeta> newList = new ArrayList<AccountMeta>();
+        List<AccountMeta> newList = new ArrayList<>();
         AccountMeta feePayerMeta = keysList.get(feePayerIndex);
         newList.add(new AccountMeta(feePayerMeta.getPublicKey(), true, true));
         keysList.remove(feePayerIndex);
@@ -159,7 +282,7 @@ public class Message {
         return newList;
     }
 
-    private int findAccountIndex(List<AccountMeta> accountMetaList, PublicKey key) {
+    public int findAccountIndex(List<AccountMeta> accountMetaList, PublicKey key) {
         for (int i = 0; i < accountMetaList.size(); i++) {
             if (accountMetaList.get(i).getPublicKey().equals(key)) {
                 return i;
@@ -167,5 +290,17 @@ public class Message {
         }
 
         throw new RuntimeException("unable to find account index");
+    }
+
+    @Override
+    public String toString() {
+        return "Message{" +
+                "messageHeader=" + messageHeader +
+                ", recentBlockhash='" + recentBlockhash + '\'' +
+                ", accountKeys=" + accountKeys +
+                ", compiledInstructions=" + compiledInstructions +
+                ", addressTableLookups=" + addressTableLookups +
+                ", feePayer=" + feePayer +
+                '}';
     }
 }

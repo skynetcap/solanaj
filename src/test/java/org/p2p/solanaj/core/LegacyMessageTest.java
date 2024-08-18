@@ -6,7 +6,7 @@ import org.p2p.solanaj.programs.SystemProgram;
 
 import static org.junit.Assert.assertArrayEquals;
 
-public class MessageTest {
+public class LegacyMessageTest {
 
     @Test
     public void serializeMessage() {
@@ -17,10 +17,10 @@ public class MessageTest {
         Account signer = new Account(Base58
                 .decode("4Z7cXSyeFR8wNGMVXUE1TwtKn5D5Vu7FzEv69dokLv7KrQk7h6pu4LF8ZRR9yQBhc7uSM6RTTZtU1fmaxiNrxXrs"));
 
-        Message message = new Message();
-        message.addInstruction(SystemProgram.transfer(fromPublicKey, toPublickKey, lamports));
-        message.setRecentBlockHash("Eit7RCyhUixAe2hGBS8oqnw59QK3kgMMjfLME5bm9wRn");
-        message.setFeePayer(signer);
+        LegacyMessage legacyMessage = new LegacyMessage();
+        legacyMessage.addInstruction(SystemProgram.transfer(fromPublicKey, toPublickKey, lamports));
+        legacyMessage.setRecentBlockHash("Eit7RCyhUixAe2hGBS8oqnw59QK3kgMMjfLME5bm9wRn");
+        legacyMessage.setFeePayer(signer);
 
         assertArrayEquals(new int[] { 1, 0, 1, 3, 6, 26, 217, 208, 83, 135, 21, 72, 83, 126, 222, 62, 38, 24, 73, 163,
                 223, 183, 253, 2, 250, 188, 117, 178, 35, 200, 228, 106, 219, 133, 61, 12, 235, 122, 188, 208, 216, 117,
@@ -28,7 +28,7 @@ public class MessageTest {
                 188, 173, 205, 229, 170, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0, 0, 203, 226, 136, 193, 153, 148, 240, 50, 230, 98, 9, 79, 221, 179, 243, 174, 90, 67,
                 104, 169, 6, 187, 165, 72, 36, 156, 19, 57, 132, 38, 69, 245, 1, 2, 2, 0, 1, 12, 2, 0, 0, 0, 184, 11, 0,
-                0, 0, 0, 0, 0 }, toUnsignedByteArray(message.serialize()));
+                0, 0, 0, 0, 0 }, toUnsignedByteArray(legacyMessage.serialize()));
     }
 
     int[] toUnsignedByteArray(byte[] in) {

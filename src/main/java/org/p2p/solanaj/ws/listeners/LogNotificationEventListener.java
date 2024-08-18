@@ -10,7 +10,7 @@ public class LogNotificationEventListener implements NotificationEventListener {
 
     private static final Logger LOGGER = Logger.getLogger(LogNotificationEventListener.class.getName());
     private final RpcClient client;
-    private PublicKey listeningPubkey;
+    private final PublicKey listeningPubkey;
 
     public LogNotificationEventListener(RpcClient client, PublicKey listeningPubkey) {
         this.client = client;
@@ -21,7 +21,6 @@ public class LogNotificationEventListener implements NotificationEventListener {
      * Handle Account notification event (change in data or change in lamports). Type of "data" is a Map.
      * @param data Map
      */
-    @SuppressWarnings("rawtypes")
     @Override
     public void onNotificationEvent(Object data) {
         if (data != null) {

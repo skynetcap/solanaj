@@ -1,14 +1,13 @@
 package org.p2p.solanaj.ws;
 
+import lombok.Getter;
+
+@Getter
 public class SignatureNotification {
-    private Object error;
+    private final Object error;
 
     public SignatureNotification(Object error) {
         this.error = error;
-    }
-
-    public Object getError() {
-        return error;
     }
 
     public boolean hasError() {

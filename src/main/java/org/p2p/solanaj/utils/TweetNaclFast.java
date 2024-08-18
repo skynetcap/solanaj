@@ -4,6 +4,8 @@ package org.p2p.solanaj.utils;
 
 // Copyright (c) 2014 Tom Zhou<appnet.link@gmail.com>
 
+import lombok.Getter;
+
 import java.io.UnsupportedEncodingException;
 import java.security.SecureRandom;
 import java.lang.System;
@@ -25,10 +27,10 @@ public final class TweetNaclFast {
 
 		private final static String TAG = "Box";
 
-		private AtomicLong nonce;
+		private final AtomicLong nonce;
 
-		private byte [] theirPublicKey;
-		private byte [] mySecretKey;
+		private final byte [] theirPublicKey;
+		private final byte [] mySecretKey;
 		private byte [] sharedKey;
 
 		public Box(byte [] theirPublicKey, byte [] mySecretKey) {
@@ -337,23 +339,17 @@ public final class TweetNaclFast {
 		 * */
 		public static final int overheadLength  = 16;
 
-		public static class KeyPair {
-			private byte [] publicKey;
-			private byte [] secretKey;
+		@Getter
+        public static class KeyPair {
+			private final byte [] publicKey;
+			private final byte [] secretKey;
 
 			public KeyPair() {
 				publicKey = new byte[publicKeyLength];
 				secretKey = new byte[secretKeyLength];
 			}
 
-			public byte [] getPublicKey() {
-				return publicKey;
-			}
-
-			public byte [] getSecretKey() {
-				return secretKey;
-			}
-		}
+        }
 
 		/*
 		 * @description
@@ -390,9 +386,9 @@ public final class TweetNaclFast {
 
 		private final static String TAG = "SecretBox";
 
-		private AtomicLong nonce;
+		private final AtomicLong nonce;
 
-		private byte [] key;
+		private final byte [] key;
 
 		public SecretBox(byte [] key) {
 			this(key, 68);
@@ -687,8 +683,8 @@ public final class TweetNaclFast {
 
 		private final static String TAG = "Signature";
 
-		private byte [] theirPublicKey;
-		private byte [] mySecretKey;
+		private final byte [] theirPublicKey;
+		private final byte [] mySecretKey;
 
 		public Signature(byte [] theirPublicKey, byte [] mySecretKey) {
 			this.theirPublicKey = theirPublicKey;
@@ -792,23 +788,17 @@ public final class TweetNaclFast {
 		 *   Generates new random key pair for signing and 
 		 *   returns it as an object with publicKey and secretKey members
 		 * */
-		public static class KeyPair {
-			private byte [] publicKey;
-			private byte [] secretKey;
+		@Getter
+        public static class KeyPair {
+			private final byte [] publicKey;
+			private final byte [] secretKey;
 
 			public KeyPair() {
 				publicKey = new byte[publicKeyLength];
 				secretKey = new byte[secretKeyLength];
 			}
 
-			public byte [] getPublicKey() {
-				return publicKey;
-			}
-
-			public byte [] getSecretKey() {
-				return secretKey;
-			}
-		}
+        }
 
 		/*
 		 * @description
@@ -1451,10 +1441,10 @@ public final class TweetNaclFast {
 	*/
 	public static final class poly1305 {
 
-		private byte[] buffer;
-		private int[] r;
-		private int[] h;
-		private int[] pad;
+		private final byte[] buffer;
+		private final int[] r;
+		private final int[] h;
+		private final int[] pad;
 		private int leftover;
 		private int fin;
 

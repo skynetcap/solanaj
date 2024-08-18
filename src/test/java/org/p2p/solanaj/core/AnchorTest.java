@@ -25,19 +25,19 @@ public class AnchorTest extends AccountBasedTest {
     public void basicInitializeTest() {
         final Account feePayer = testAccount;
 
-        final Transaction transaction = new Transaction();
-        transaction.addInstruction(
+        final LegacyTransaction legacyTransaction = new LegacyTransaction();
+        legacyTransaction.addInstruction(
                 AnchorBasicTutorialProgram.initialize(feePayer)
         );
 
-        transaction.addInstruction(
+        legacyTransaction.addInstruction(
                 MemoProgram.writeUtf8(feePayer.getPublicKey(), "I just called an Anchor program from SolanaJ.")
         );
 
         final List<Account> signers = List.of(feePayer);
         String result = null;
         try {
-            result = client.getApi().sendTransaction(transaction, signers, null);
+            result = client.getApi().sendLegacyTransaction(legacyTransaction, signers, null);
         } catch (RpcException e) {
             e.printStackTrace();
         }
