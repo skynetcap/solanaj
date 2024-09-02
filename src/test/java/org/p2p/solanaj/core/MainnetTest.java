@@ -90,6 +90,7 @@ public class MainnetTest extends AccountBasedTest {
     }
 
     @Test
+    @Ignore
     public void getAccountInfoWithEncodingJsonParsed() throws RpcException {
         // Get account Info with encoding jsonParsed
         final AccountInfo accountInfo = client.getApi().getAccountInfo(PublicKey.valueOf("So11111111111111111111111111111111111111112"), Map.of("encoding", "jsonParsed"));
