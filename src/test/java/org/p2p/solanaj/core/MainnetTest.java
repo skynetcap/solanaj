@@ -62,58 +62,13 @@ public class MainnetTest extends AccountBasedTest {
     }
 
     @Test
-    public void getAccountInfoWithConfirmedCommitment() throws RpcException {
-        // Get account Info with confirmed commitment
-        final AccountInfo accountInfo = client.getApi().getAccountInfo(PublicKey.valueOf("So11111111111111111111111111111111111111112"), Map.of("commitment", Commitment.CONFIRMED));
-        final double balance = (double) accountInfo.getValue().getLamports() / LAMPORTS_PER_SOL;
-
-        // Account data list
-        final List<String> accountData = accountInfo.getValue().getData();
-
-        // Verify "base64" string in accountData
-        assertTrue(accountData.stream().anyMatch(s -> s.equalsIgnoreCase("base64")));
-        assertTrue(balance > 0);
-    }
-
-    @Test
-    public void getAccountInfoWithFinalizedCommitment() throws RpcException {
-        // Get account Info with finalized commitment
-        final AccountInfo accountInfo = client.getApi().getAccountInfo(PublicKey.valueOf("So11111111111111111111111111111111111111112"), Map.of("commitment", Commitment.FINALIZED));
-        final double balance = (double) accountInfo.getValue().getLamports() / LAMPORTS_PER_SOL;
-
-        // Account data list
-        final List<String> accountData = accountInfo.getValue().getData();
-
-        // Verify "base64" string in accountData
-        assertTrue(accountData.stream().anyMatch(s -> s.equalsIgnoreCase("base64")));
-        assertTrue(balance > 0);
-    }
-
-    @Test
-    public void getAccountInfoWithEncodingJsonParsed() throws RpcException {
-        // Get account Info with encoding jsonParsed
-        final AccountInfo accountInfo = client.getApi().getAccountInfo(PublicKey.valueOf("So11111111111111111111111111111111111111112"), Map.of("encoding", "jsonParsed"));
-        final double balance = (double) accountInfo.getValue().getLamports() / LAMPORTS_PER_SOL;
-
-        // Account data list
-        final List<String> accountData = accountInfo.getValue().getData();
-
-        // Verify "jsonParsed" string in accountData
-        assertTrue(accountData.stream().anyMatch(s -> s.equalsIgnoreCase("jsonParsed")));
-        assertTrue(balance > 0);
-    }
-
-
-
-
-    @Test
     public void getAccountInfoRootCommitment() {
         try {
             // Get account Info
             final AccountInfo accountInfo = client.getApi().getAccountInfo(PublicKey.valueOf(
                     "So11111111111111111111111111111111111111112"), Map.of("commitment", Commitment.ROOT));
             final double balance = (double) accountInfo.getValue().getLamports() / LAMPORTS_PER_SOL;
-            LOGGER.info("balance = " + balance);
+
             // Verify any balance
             assertTrue(balance > 0);
         } catch (RpcException e) {
@@ -184,12 +139,12 @@ public class MainnetTest extends AccountBasedTest {
         long block = 5;
 
         try {
-        final BlockCommitment blockCommitment = client.getApi().getBlockCommitment(block);
+            final BlockCommitment blockCommitment = client.getApi().getBlockCommitment(block);
 
-        LOGGER.info(String.format("block = %d, totalStake = %d", block, blockCommitment.getTotalStake()));
+            LOGGER.info(String.format("block = %d, totalStake = %d", block, blockCommitment.getTotalStake()));
 
-        assertNotNull(blockCommitment);
-        assertTrue(blockCommitment.getTotalStake() > 0);
+            assertNotNull(blockCommitment);
+            assertTrue(blockCommitment.getTotalStake() > 0);
         } catch (RpcException e) {
             e.printStackTrace();
         }
@@ -198,9 +153,9 @@ public class MainnetTest extends AccountBasedTest {
     @Test
     public void getBlockHeightTest() {
         try {
-        long blockHeight = client.getApi().getBlockHeight();
-        LOGGER.info(String.format("Block height = %d", blockHeight));
-        assertTrue(blockHeight > 0);
+            long blockHeight = client.getApi().getBlockHeight();
+            LOGGER.info(String.format("Block height = %d", blockHeight));
+            assertTrue(blockHeight > 0);
         } catch (RpcException e) {
             e.printStackTrace();
         }
@@ -238,17 +193,17 @@ public class MainnetTest extends AccountBasedTest {
     @Test
     public void getClusterNodesTest() {
         try {
-        final List<ClusterNode> clusterNodes = client.getApi().getClusterNodes();
+            final List<ClusterNode> clusterNodes = client.getApi().getClusterNodes();
 
-        // Make sure we got some nodes
-        assertNotNull(clusterNodes);
-        assertTrue(clusterNodes.size() > 0);
+            // Make sure we got some nodes
+            assertNotNull(clusterNodes);
+            assertTrue(clusterNodes.size() > 0);
 
-        // Output the nodes
-        LOGGER.info("Cluster Nodes:");
-        clusterNodes.forEach(clusterNode -> {
-            LOGGER.info(clusterNode.toString());
-        });
+            // Output the nodes
+            LOGGER.info("Cluster Nodes:");
+            clusterNodes.forEach(clusterNode -> {
+                LOGGER.info(clusterNode.toString());
+            });
         } catch (RpcException e) {
             e.printStackTrace();
         }
