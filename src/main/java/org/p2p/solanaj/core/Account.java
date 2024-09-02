@@ -24,6 +24,14 @@ public class Account {
         this.keyPair = keyPair;
     }
 
+    /**
+     * Deprecated method for creating an Account object from mnemonic using the legacy deviation path.
+     *
+     * @param words      seed words
+     * @param passphrase seed passphrase
+     * @return Account object generated from the mnemonic
+     * @deprecated This method uses a deprecated deviation path. Use the new method fromBip44Mnemonic instead.
+     */
     @Deprecated
     public static Account fromMnemonic(List<String> words, String passphrase) {
         byte[] seed = MnemonicCode.toSeed(words, passphrase);
@@ -116,4 +124,6 @@ public class Account {
 
         return buffer.array();
     }
+
+
 }
