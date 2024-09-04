@@ -68,7 +68,7 @@ public class MainnetTest extends AccountBasedTest {
             final AccountInfo accountInfo = client.getApi().getAccountInfo(PublicKey.valueOf(
                     "So11111111111111111111111111111111111111112"), Map.of("commitment", Commitment.ROOT));
             final double balance = (double) accountInfo.getValue().getLamports() / LAMPORTS_PER_SOL;
-
+            LOGGER.info("balance = " + balance);
             // Verify any balance
             assertTrue(balance > 0);
         } catch (RpcException e) {
@@ -796,5 +796,24 @@ public class MainnetTest extends AccountBasedTest {
         } catch (RpcException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Test
+    public void testGetStakeMinimumDelegationWithoutCommitment() throws RpcException {
+        Long minDelegation = client.getApi().getStakeMinimumDelegation();
+        assertNotNull(minDelegation);
+        assertTrue(minDelegation > 0);
+        LOGGER.info("Minimum stake delegation (without commitment): " + minDelegation);
+    }
+
+    /**
+     * Test getStakeMinimumDelegation with commitment
+     */
+    @Test
+    public void testGetStakeMinimumDelegationWithCommitment() throws RpcException {
+        Long minDelegation = client.getApi().getStakeMinimumDelegation(Commitment.FINALIZED);
+        assertNotNull(minDelegation);
+        assertTrue(minDelegation > 0);
+        LOGGER.info("Minimum stake delegation (with FINALIZED commitment): " + minDelegation);
     }
 }
