@@ -7,10 +7,6 @@ import org.p2p.solanaj.core.PublicKey;
 import org.p2p.solanaj.core.Transaction;
 import org.p2p.solanaj.rpc.types.*;
 import org.p2p.solanaj.rpc.types.config.BlockConfig;
-import org.p2p.solanaj.rpc.types.ConfirmedSignFAddr2;
-import org.p2p.solanaj.rpc.types.DataSize;
-import org.p2p.solanaj.rpc.types.Filter;
-import org.p2p.solanaj.rpc.types.Memcmp;
 import org.p2p.solanaj.rpc.types.config.LargestAccountConfig;
 import org.p2p.solanaj.rpc.types.config.LeaderScheduleConfig;
 import org.p2p.solanaj.rpc.types.config.ProgramAccountConfig;
@@ -25,7 +21,6 @@ import org.p2p.solanaj.rpc.types.config.Commitment;
 import org.p2p.solanaj.rpc.types.config.VoteAccountConfig;
 import org.p2p.solanaj.ws.SubscriptionWebSocketClient;
 import org.p2p.solanaj.ws.listeners.NotificationEventListener;
-import org.p2p.solanaj.rpc.types.RecentPrioritizationFees;
 
 public class RpcApi {
     private RpcClient client;
@@ -1185,6 +1180,74 @@ public class RpcApi {
         Boolean result = (Boolean) call.get("value");
 
         return result;
+    }
+
+    /**
+     * Returns a list of confirmed blocks between two slots
+     *
+     * @param startSlot Start slot (inclusive)
+     * @param endSlot End slot (inclusive)
+     * @return List of block numbers between start_slot and end_slot
+     * @throws RpcException if the RPC call fails
+     */
+    public List<Long> getBlocks(long startSlot, long endSlot) throws RpcException {
+        return getBlocks(startSlot, endSlot, null);
+    }
+
+    /**
+     * Returns a list of confirmed blocks between two slots
+     *
+     * @param startSlot Start slot (inclusive)
+     * @param endSlot End slot (inclusive)
+     * @param commitment Bank state to query
+     * @return List of block numbers between start_slot and end_slot
+     * @throws RpcException if the RPC call fails
+     */
+    public List<Long> getBlocks(long startSlot, long endSlot, Commitment commitment) throws RpcException {
+        List<Object> params = new ArrayList<>();
+        params.add(startSlot);
+        params.add(endSlot);
+
+        if (commitment != null) {
+            params.add(Map.of("commitment", commitment.getValue()));
+        }
+
+        List<Double> result = client.call("getBlocks", params, List.class);
+        return result.stream().map(Double::longValue).collect(Collectors.toList());
+    }
+
+    /**
+     * Returns a list of confirmed blocks starting at the given slot
+     *
+     * @param startSlot Start slot
+     * @param limit Maximum number of blocks to return
+     * @return List of block numbers from start_slot to limit
+     * @throws RpcException if the RPC call fails
+     */
+    public List<Long> getBlocksWithLimit(long startSlot, long limit) throws RpcException {
+        return getBlocksWithLimit(startSlot, limit, null);
+    }
+
+    /**
+     * Returns a list of confirmed blocks starting at the given slot
+     *
+     * @param startSlot Start slot
+     * @param limit Maximum number of blocks to return
+     * @param commitment Bank state to query
+     * @return List of block numbers from start_slot to limit
+     * @throws RpcException if the RPC call fails
+     */
+    public List<Long> getBlocksWithLimit(long startSlot, long limit, Commitment commitment) throws RpcException {
+        List<Object> params = new ArrayList<>();
+        params.add(startSlot);
+        params.add(limit);
+
+        if (commitment != null) {
+            params.add(Map.of("commitment", commitment.getValue()));
+        }
+
+        List<Double> result = client.call("getBlocksWithLimit", params, List.class);
+        return result.stream().map(Double::longValue).collect(Collectors.toList());
     }
 
 }

@@ -816,4 +816,56 @@ public class MainnetTest extends AccountBasedTest {
         assertTrue(minDelegation > 0);
         LOGGER.info("Minimum stake delegation (with FINALIZED commitment): " + minDelegation);
     }
+
+    @Test
+    public void testGetBlocks() throws RpcException {
+        long startSlot = client.getApi().getSlot() - 10; // 10 slots before the current slot
+        long endSlot = client.getApi().getSlot();
+
+        List<Long> blocks = client.getApi().getBlocks(startSlot, endSlot);
+
+        assertNotNull(blocks);
+        assertFalse(blocks.isEmpty());
+        assertTrue(blocks.get(0) >= startSlot);
+        assertTrue(blocks.get(blocks.size() - 1) <= endSlot);
+    }
+
+    @Test
+    public void testGetBlocksWithCommitment() throws RpcException {
+        long startSlot = client.getApi().getSlot() - 10; // 10 slots before the current slot
+        long endSlot = client.getApi().getSlot();
+
+        List<Long> blocks = client.getApi().getBlocks(startSlot, endSlot, Commitment.CONFIRMED);
+
+        assertNotNull(blocks);
+        assertFalse(blocks.isEmpty());
+        assertTrue(blocks.get(0) >= startSlot);
+        assertTrue(blocks.get(blocks.size() - 1) <= endSlot);
+    }
+
+    @Test
+    public void testGetBlocksWithLimit() throws RpcException {
+        long startSlot = client.getApi().getSlot() - 10; // 10 slots before the current slot
+        long limit = 5;
+
+        List<Long> blocks = client.getApi().getBlocksWithLimit(startSlot, limit);
+
+        assertNotNull(blocks);
+        assertFalse(blocks.isEmpty());
+        assertTrue(blocks.get(0) >= startSlot);
+        assertTrue(blocks.size() <= limit);
+    }
+
+    @Test
+    public void testGetBlocksWithLimitAndCommitment() throws RpcException {
+        long startSlot = client.getApi().getSlot() - 10; // 10 slots before the current slot
+        long limit = 5;
+
+        List<Long> blocks = client.getApi().getBlocksWithLimit(startSlot, limit, Commitment.CONFIRMED);
+
+        assertNotNull(blocks);
+        assertFalse(blocks.isEmpty());
+        assertTrue(blocks.get(0) >= startSlot);
+        assertTrue(blocks.size() <= limit);
+    }
 }
