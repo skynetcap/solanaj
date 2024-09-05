@@ -71,4 +71,34 @@ public class AccountTest {
         assertEquals("BeepMww3KwiDeEhEeZmqk4TegvJYNuDERPWm142X6Mx3", account.getPublicKey().toBase58());
     }
 
+    @Test
+    public void testAccountEquality() {
+        byte[] secretKey = Base58.decode("4Z7cXSyeFR8wNGMVXUE1TwtKn5D5Vu7FzEv69dokLv7KrQk7h6pu4LF8ZRR9yQBhc7uSM6RTTZtU1fmaxiNrxXrs");
+        Account account1 = new Account(secretKey);
+        Account account2 = new Account(secretKey);
+        Account account3 = new Account();
+
+        assertEquals(account1.getPublicKey(), account2.getPublicKey());
+        assertNotEquals(account1.getPublicKey(), account3.getPublicKey());
+    }
+
+    @Test
+    public void testInvalidSecretKeyLength() {
+        byte[] invalidSecretKey = new byte[63]; // Invalid length
+        assertThrows(ArrayIndexOutOfBoundsException.class, () -> new Account(invalidSecretKey));
+    }
+
+    @Test
+    public void testFromBip44MnemonicWithPassphrase() {
+        Account acc = Account.fromBip44Mnemonic(
+            Arrays.asList("hint", "begin", "crowd", "dolphin", "drive", "render",
+                "finger", "above", "sponsor", "prize", "runway", "invest", "dizzy", "pony", "bitter", "trial", "ignore",
+                "crop", "please", "industry", "hockey", "wire", "use", "side"),
+            "passphrase123"
+        );
+
+        assertNotNull(acc);
+        assertNotEquals("G75kGJiizyFNdnvvHxkrBrcwLomGJT2CigdXnsYzrFHv", acc.getPublicKey().toString());
+    }
+
 }
