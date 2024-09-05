@@ -3,6 +3,11 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Java Version](https://img.shields.io/badge/Java-17%2B-blue)](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html)
 [![Maven Central](https://img.shields.io/maven-central/v/com.mmorrell/solanaj.svg)](https://search.maven.org/artifact/com.mmorrell/solanaj)
+[![Solana](https://img.shields.io/badge/Solana-Compatible-blueviolet)](https://solana.com/)
+[![Java](https://img.shields.io/badge/Pure-Java-orange)](https://www.java.com/)
+[![Documentation](https://img.shields.io/badge/API-Documentation-lightgrey)](https://docs.solana.com/apps/jsonrpc-api)
+[![Discord](https://img.shields.io/discord/889577356681945098?color=blueviolet)](https://discord.gg/solana)
+[![GitHub Stars](https://img.shields.io/github/stars/skynetcap/solanaj?style=social)](https://github.com/skynetcap/solanaj)
 
 Solana blockchain client, written in pure Java. SolanaJ is an API for integrating with Solana blockchain using the [Solana RPC API](https://docs.solana.com/apps/jsonrpc-api).
 
