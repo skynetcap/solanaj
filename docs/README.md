@@ -1,46 +1,88 @@
 # SolanaJ
 
-Solana blockchain client, written in pure Java.
-Solanaj is an API for integrating with Solana blockchain using the [Solana RPC API](https://docs.solana.com/apps/jsonrpc-api)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Java Version](https://img.shields.io/badge/Java-17%2B-blue)](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html)
+[![Maven Central](https://img.shields.io/maven-central/v/com.mmorrell/solanaj.svg)](https://search.maven.org/artifact/com.mmorrell/solanaj)
+
+Solana blockchain client, written in pure Java. SolanaJ is an API for integrating with Solana blockchain using the [Solana RPC API](https://docs.solana.com/apps/jsonrpc-api).
 
 This fork includes functionality for multiple Solana programs, including the Serum DEX.
 
-# SolanaJ-Programs
-For SolanaJ implementations of popular Solana programs such as Serum, please visit: https://github.com/skynetcap/solanaj-programs
+## Table of Contents
 
-## Requirements
+- [SolanaJ-Programs](#solanaj-programs)
+- [Requirements](#requirements)
+- [Dependencies](#dependencies)
+- [Installation](#installation)
+- [Build](#build)
+- [Examples](#examples)
+    - [Transfer Lamports](#transfer-lamports)
+    - [Get Balance](#get-balance)
+    - [Get Serum Market + Orderbooks](#get-serum-market--orderbooks)
+    - [Send a Transaction with Memo Program](#send-a-transaction-with-memo-program)
+- [Contributing](#contributing)
+- [License](#license)
+
+## SolanaJ-Programs
+
+For SolanaJ implementations of popular Solana programs such as Serum, please visit: [https://github.com/skynetcap/solanaj-programs](https://github.com/skynetcap/solanaj-programs)
+
+## 🛠️ Requirements
+
 - Java 17+
 
-## Dependencies
+## 📚 Dependencies
+
 - bitcoinj
 - OkHttp
 - Moshi
 
-## Installation
-1. Add Maven dependency:
+## 📦 Installation
+
+Add the following Maven dependency to your project's `pom.xml`:
 
 ```xml
 <dependency>
-      <groupId>com.mmorrell</groupId>
-      <artifactId>solanaj</artifactId>
-      <version>1.17.6</version>
+    <groupId>com.mmorrell</groupId>
+    <artifactId>solanaj</artifactId>
+    <version>1.17.6</version>
 </dependency>
 ```
 
-## Build
-In pom.xml update the plugin maven-gpg-plugin configuration with your homedir and keyname.  
-To see if you have a gpg key run `gpg --list-secret-keys`  
-If nothing is returned create one with `gpg --full-generate-key`  
-Then run `mvn install` and the build should complete successfully.  
+## 🏗️ Build
+
+1. In `pom.xml`, update the `maven-gpg-plugin` configuration with your homedir and keyname:
+
 ```xml
 <configuration>
-    <homedir>/home/phil/.gnupg/</homedir>
-    <keyname>AE2D00367F40E980F7C62FF792C4533F3EE03477</keyname>
+    <homedir>/home/your_username/.gnupg/</homedir>
+    <keyname>YOUR_GPG_KEY_ID</keyname>
 </configuration>
 ```
 
-## Example
-##### Transfer lamports
+2. Check if you have a GPG key:
+
+```sh
+gpg --list-secret-keys
+```
+
+3. If no key is returned, create one:
+
+```sh
+gpg --full-generate-key
+```
+
+4. Run the Maven install command:
+
+```sh
+mvn install
+```
+
+The build should complete successfully.
+
+## 🚀 Examples
+
+### Transfer Lamports
 
 ```java
 RpcClient client = new RpcClient(Cluster.TESTNET);
@@ -57,7 +99,7 @@ transaction.addInstruction(SystemProgram.transfer(fromPublicKey, toPublickKey, l
 String signature = client.getApi().sendTransaction(transaction, signer);
 ```
 
-##### Get balance
+### Get Balance
 
 ```java
 RpcClient client = new RpcClient(Cluster.TESTNET);
@@ -65,7 +107,8 @@ RpcClient client = new RpcClient(Cluster.TESTNET);
 long balance = client.getApi().getBalance(new PublicKey("QqCCvshxtqMAL2CVALqiJB7uEeE5mjSPsseQdDzsRUo"));
 ```
 
-##### Get Serum market + orderbooks
+### Get Serum Market + Orderbooks
+
 ```java
 final PublicKey solUsdcPublicKey = new PublicKey("7xMDbYTCqQEcK2aM9LbetGtNFJpzKdfXzLL5juaLh4GJ");
 final Market solUsdcMarket = new MarketBuilder()
@@ -77,7 +120,8 @@ final Market solUsdcMarket = new MarketBuilder()
 final OrderBook bids = solUsdcMarket.getBidOrderBook();
 ```
 
-##### Send a transaction with call to the "Memo" program
+### Send a Transaction with Memo Program
+
 ```java
 // Create account from private key
 final Account feePayer = new Account(Base58.decode(new String(data)));
@@ -88,9 +132,23 @@ transaction.addInstruction(
         MemoProgram.writeUtf8(feePayer.getPublicKey(),"Hello from SolanaJ :)")
 );
 
-String response = result = client.getApi().sendTransaction(transaction, feePayer);
+String response = client.getApi().sendTransaction(transaction, feePayer);
 ```
 
-## License
+## 🤝 Contributing
 
-MIT License
+We welcome contributions to SolanaJ! Here's how you can help:
+
+1. Fork the repository
+2. Create a new branch (`git checkout -b feature/your-feature-name`)
+3. Make your changes
+4. Commit your changes (`git commit -am 'Add some feature'`)
+5. Push to the branch (`git push origin feature/your-feature-name`)
+6. Create a new Pull Request
+
+Please make sure to update tests as appropriate and adhere to the existing coding style.
+
+## 📄 License
+
+SolanaJ is open-source software licensed under the [MIT License](LICENSE). See the LICENSE file for more details.
+```
