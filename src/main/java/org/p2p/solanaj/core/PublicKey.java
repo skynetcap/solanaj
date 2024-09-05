@@ -1,6 +1,7 @@
 package org.p2p.solanaj.core;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -17,23 +18,20 @@ public class PublicKey {
 
     public static final int PUBLIC_KEY_LENGTH = 32;
 
-    private byte[] pubkey;
+    private final byte[] pubkey;
 
     public PublicKey(String pubkey) {
         if (pubkey.length() < PUBLIC_KEY_LENGTH) {
-            throw new IllegalArgumentException("Invalid public key input");
+            throw new IllegalArgumentException("Invalid public key input: length must be at least " + PUBLIC_KEY_LENGTH);
         }
-
         this.pubkey = Base58.decode(pubkey);
     }
 
     public PublicKey(byte[] pubkey) {
-
-        if (pubkey.length > PUBLIC_KEY_LENGTH) {
-            throw new IllegalArgumentException("Invalid public key input");
+        if (pubkey.length != PUBLIC_KEY_LENGTH) {
+            throw new IllegalArgumentException("Invalid public key input: length must be exactly " + PUBLIC_KEY_LENGTH);
         }
-
-        this.pubkey = pubkey;
+        this.pubkey = Arrays.copyOf(pubkey, PUBLIC_KEY_LENGTH);
     }
 
     public static PublicKey readPubkey(byte[] bytes, int offset) {
@@ -60,14 +58,10 @@ public class PublicKey {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (o == null)
-            return false;
-        if (getClass() != o.getClass())
-            return false;
-        PublicKey person = (PublicKey) o;
-        return equals(person);
+        if (this == o) return true;
+        if (!(o instanceof PublicKey)) return false;
+        PublicKey other = (PublicKey) o;
+        return Arrays.equals(this.pubkey, other.pubkey);
     }
 
     public String toString() {
@@ -75,26 +69,26 @@ public class PublicKey {
     }
 
     public static PublicKey createProgramAddress(List<byte[]> seeds, PublicKey programId) {
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
+            for (byte[] seed : seeds) {
+                if (seed.length > 32) {
+                    throw new IllegalArgumentException("Max seed length exceeded: " + seed.length);
+                }
+                buffer.write(seed);
+            }
+            buffer.write(programId.toByteArray());
+            buffer.write("ProgramDerivedAddress".getBytes());
 
-        for (byte[] seed : seeds) {
-            if (seed.length > 32) {
-                throw new IllegalArgumentException("Max seed length exceeded");
+            byte[] hash = Sha256Hash.hash(buffer.toByteArray());
+
+            if (TweetNaclFast.is_on_curve(hash) != 0) {
+                throw new IllegalStateException("Invalid seeds, address must fall off the curve");
             }
 
-            buffer.writeBytes(seed);
+            return new PublicKey(hash);
+        } catch (IOException e) {
+            throw new RuntimeException("Error creating program address", e);
         }
-
-        buffer.writeBytes(programId.toByteArray());
-        buffer.writeBytes("ProgramDerivedAddress".getBytes());
-
-        byte[] hash = Sha256Hash.hash(buffer.toByteArray());
-
-        if (TweetNaclFast.is_on_curve(hash) != 0) {
-            throw new RuntimeException("Invalid seeds, address must fall off the curve");
-        }
-
-        return new PublicKey(hash);
     }
 
     public static class ProgramDerivedAddress {
@@ -116,27 +110,18 @@ public class PublicKey {
 
     }
 
-    public static ProgramDerivedAddress findProgramAddress(List<byte[]> seeds, PublicKey programId) throws Exception {
-        int nonce = 255;
-        PublicKey address;
-
-        List<byte[]> seedsWithNonce = new ArrayList<byte[]>();
-        seedsWithNonce.addAll(seeds);
-
-        while (nonce != 0) {
+    public static ProgramDerivedAddress findProgramAddress(List<byte[]> seeds, PublicKey programId) {
+        for (int nonce = 255; nonce >= 0; nonce--) {
             try {
+                List<byte[]> seedsWithNonce = new ArrayList<>(seeds);
                 seedsWithNonce.add(new byte[] { (byte) nonce });
-                address = createProgramAddress(seedsWithNonce, programId);
-            } catch (Exception e) {
-                seedsWithNonce.remove(seedsWithNonce.size() - 1);
-                nonce--;
-                continue;
+                PublicKey address = createProgramAddress(seedsWithNonce, programId);
+                return new ProgramDerivedAddress(address, nonce);
+            } catch (IllegalStateException e) {
+                // Address was on the curve, try next nonce
             }
-
-            return new ProgramDerivedAddress(address, nonce);
         }
-
-        throw new Exception("Unable to find a viable program address nonce");
+        throw new IllegalStateException("Unable to find a viable program address nonce");
     }
 
     public static PublicKey valueOf(String publicKey) {
