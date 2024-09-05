@@ -11,17 +11,17 @@ This fork includes functionality for multiple Solana programs, including the Ser
 ## Table of Contents
 
 - [SolanaJ-Programs](#solanaj-programs)
-- [Requirements](#requirements)
-- [Dependencies](#dependencies)
-- [Installation](#installation)
-- [Build](#build)
-- [Examples](#examples)
+- [Requirements](#-requirements)
+- [Dependencies](#-dependencies)
+- [Installation](#-installation)
+- [Build](#-build)
+- [Examples](#-examples)
     - [Transfer Lamports](#transfer-lamports)
     - [Get Balance](#get-balance)
     - [Get Serum Market + Orderbooks](#get-serum-market--orderbooks)
     - [Send a Transaction with Memo Program](#send-a-transaction-with-memo-program)
-- [Contributing](#contributing)
-- [License](#license)
+- [Contributing](#-contributing)
+- [License](#-license)
 
 ## SolanaJ-Programs
 
