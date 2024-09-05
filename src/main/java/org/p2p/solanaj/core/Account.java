@@ -5,12 +5,13 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.bitcoinj.crypto.*;
+import org.bitcoinj.core.Base58;
 import org.p2p.solanaj.utils.TweetNaclFast;
 import org.p2p.solanaj.utils.bip32.wallet.SolanaBip44;
 import org.p2p.solanaj.utils.bip32.wallet.DerivableType;
 
 public class Account {
-    private TweetNaclFast.Signature.KeyPair keyPair;
+    private final TweetNaclFast.Signature.KeyPair keyPair;
 
     public Account() {
         this.keyPair = TweetNaclFast.Signature.keyPair();
@@ -115,5 +116,31 @@ public class Account {
         });
 
         return buffer.array();
+    }
+
+    /**
+     * Creates an Account from a base58-encoded private key string.
+     * @param base58PrivateKey The base58-encoded private key
+     * @return A new Account instance
+     */
+    public static Account fromBase58PrivateKey(String base58PrivateKey) {
+        byte[] privateKey = Base58.decode(base58PrivateKey);
+        return new Account(privateKey);
+    }
+
+    /**
+     * Returns the account's public key as a base58-encoded string.
+     * @return The base58-encoded public key
+     */
+    public String getPublicKeyBase58() {
+        return this.getPublicKey().toBase58();
+    }
+
+    /**
+     * Returns the account's private key as a base58-encoded string.
+     * @return The base58-encoded private key
+     */
+    public String getPrivateKeyBase58() {
+        return Base58.encode(this.getSecretKey());
     }
 }
