@@ -16,10 +16,10 @@ This fork includes functionality for multiple Solana programs, including the Ser
 ## Table of Contents
 
 - [SolanaJ-Programs](#solanaj-programs)
-- [Requirements](#-requirements)
+- [Requirements](#%EF%B8%8F-requirements)
 - [Dependencies](#-dependencies)
 - [Installation](#-installation)
-- [Build](#-build)
+- [Build](#%EF%B8%8F-build)
 - [Examples](#-examples)
     - [Transfer Lamports](#transfer-lamports)
     - [Get Balance](#get-balance)

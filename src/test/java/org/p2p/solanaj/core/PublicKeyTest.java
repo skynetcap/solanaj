@@ -107,4 +107,42 @@ public class PublicKeyTest {
         assertEquals(programAddress2.getNonce(), 254);
     }
 
+    @Test
+    public void testToString() {
+        PublicKey key = new PublicKey("CiDwVBFgWV9E5MvXWoLgnEgn2hK7rJikbvfWavzAQz3");
+        assertEquals("CiDwVBFgWV9E5MvXWoLgnEgn2hK7rJikbvfWavzAQz3", key.toString());
+    }
+
+    @Test
+    public void testHashCode() {
+        PublicKey key1 = new PublicKey("11111111111111111111111111111111");
+        PublicKey key2 = new PublicKey("11111111111111111111111111111111");
+        PublicKey key3 = new PublicKey("22222222222222222222222222222222");
+
+        assertEquals(key1.hashCode(), key2.hashCode());
+        assertNotEquals(key1.hashCode(), key3.hashCode());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testInvalidBase58Key() {
+        new PublicKey("InvalidBase58Key");
+    }
+
+    @Test
+    public void testCreateProgramAddressWithEmptySeeds() throws Exception {
+        PublicKey programId = new PublicKey("BPFLoader1111111111111111111111111111111111");
+        PublicKey programAddress = PublicKey.createProgramAddress(Arrays.asList(), programId);
+        assertNotNull(programAddress);
+    }
+
+    @Test
+    public void testFindProgramAddressWithLargeNonce() throws Exception {
+        PublicKey programId = new PublicKey("BPFLoader1111111111111111111111111111111111");
+        ProgramDerivedAddress pda = PublicKey.findProgramAddress(
+            Arrays.asList("LargeNonceTest".getBytes()),
+            programId
+        );
+        assertTrue(pda.getNonce() >= 0 && pda.getNonce() <= 255);
+    }
+
 }
