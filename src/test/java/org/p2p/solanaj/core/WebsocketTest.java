@@ -1,6 +1,5 @@
 package org.p2p.solanaj.core;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.p2p.solanaj.rpc.Cluster;
 import org.p2p.solanaj.ws.SubscriptionWebSocketClient;
@@ -11,7 +10,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import java.util.Map;
-import java.util.LinkedHashMap;
 import java.net.URI;
 import java.net.URISyntaxException;
 
