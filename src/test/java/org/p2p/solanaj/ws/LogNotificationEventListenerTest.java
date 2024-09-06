@@ -20,7 +20,6 @@ import java.util.logging.Logger;
 import java.util.ArrayList;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 
 public class LogNotificationEventListenerTest {
 

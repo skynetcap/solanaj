@@ -42,7 +42,9 @@ public class WebsocketTest {
 
         Map<String, Object> result = future.get(30, TimeUnit.SECONDS);
         assertNotNull("Notification should not be null", result);
-        assertTrue("Notification should contain 'lamports'", result.containsKey("lamports"));
+        assertTrue("Notification should contain 'value'", result.containsKey("value"));
+        Map<String, Object> value = (Map<String, Object>) result.get("value");
+        assertTrue("Value should contain 'lamports'", value.containsKey("lamports"));
     }
 
     @Test
@@ -75,7 +77,11 @@ public class WebsocketTest {
 
         assertNotNull("Notification 1 should not be null", result1);
         assertNotNull("Notification 2 should not be null", result2);
-        assertTrue("Notification 1 should contain 'lamports'", result1.containsKey("lamports"));
-        assertTrue("Notification 2 should contain 'lamports'", result2.containsKey("lamports"));
+        assertTrue("Notification 1 should contain 'value'", result1.containsKey("value"));
+        assertTrue("Notification 2 should contain 'value'", result2.containsKey("value"));
+        Map<String, Object> value1 = (Map<String, Object>) result1.get("value");
+        Map<String, Object> value2 = (Map<String, Object>) result2.get("value");
+        assertTrue("Value 1 should contain 'lamports'", value1.containsKey("lamports"));
+        assertTrue("Value 2 should contain 'lamports'", value2.containsKey("lamports"));
     }
 }

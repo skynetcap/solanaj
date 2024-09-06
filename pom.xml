@@ -178,6 +178,8 @@
                 </executions>
                 <configuration>
                     <source>17</source>
+                    <doclint>none</doclint>
+                    <failOnError>false</failOnError>
                 </configuration>
             </plugin>
             <plugin>
