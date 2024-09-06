@@ -5,7 +5,7 @@ import org.junit.Test;
 import org.p2p.solanaj.rpc.Cluster;
 import org.p2p.solanaj.ws.SubscriptionWebSocketClient;
 import org.p2p.solanaj.ws.listeners.NotificationEventListener;
-
+import java.util.concurrent.CountDownLatch;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -26,12 +26,19 @@ public class WebsocketTest {
 
     @Test
     public void testAccountSubscribe() throws Exception {
+        CountDownLatch latch = new CountDownLatch(1);
         CompletableFuture<Map<String, Object>> future = new CompletableFuture<>();
         
         devnetClient.accountSubscribe(POPULAR_ACCOUNT, (NotificationEventListener) data -> {
             LOGGER.info("Received notification: " + data);
             future.complete((Map<String, Object>) data);
+            latch.countDown(); // Count down the latch
         });
+
+        // Set a timeout for the test
+        if (!latch.await(30, TimeUnit.SECONDS)) {
+            fail("Test timed out waiting for notification");
+        }
 
         Map<String, Object> result = future.get(30, TimeUnit.SECONDS);
         assertNotNull("Notification should not be null", result);
@@ -40,18 +47,28 @@ public class WebsocketTest {
 
     @Test
     public void testMultipleSubscriptions() throws Exception {
+        CountDownLatch latch = new CountDownLatch(3); // Assuming we expect 3 notifications
         CompletableFuture<Map<String, Object>> future1 = new CompletableFuture<>();
         CompletableFuture<Map<String, Object>> future2 = new CompletableFuture<>();
         
         devnetClient.accountSubscribe(POPULAR_ACCOUNT, (NotificationEventListener) data -> {
             LOGGER.info("Received notification for subscription 1: " + data);
             future1.complete((Map<String, Object>) data);
+            latch.countDown(); // Count down the latch
         });
 
         devnetClient.accountSubscribe(POPULAR_ACCOUNT, (NotificationEventListener) data -> {
             LOGGER.info("Received notification for subscription 2: " + data);
             future2.complete((Map<String, Object>) data);
+            latch.countDown(); // Count down the latch
         });
+
+        // Set a timeout for the test
+        if (!latch.await(30, TimeUnit.SECONDS)) {
+            fail("Test timed out waiting for notifications");
+        }
+
+        CompletableFuture.allOf(future1, future2).join(); // Wait for all to complete
 
         Map<String, Object> result1 = future1.get(30, TimeUnit.SECONDS);
         Map<String, Object> result2 = future2.get(30, TimeUnit.SECONDS);
