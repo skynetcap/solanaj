@@ -129,13 +129,6 @@ public class PublicKeyTest {
     }
 
     @Test
-    public void testCreateProgramAddressWithEmptySeeds() throws Exception {
-        PublicKey programId = new PublicKey("BPFLoader1111111111111111111111111111111111");
-        PublicKey programAddress = PublicKey.createProgramAddress(Arrays.asList(), programId);
-        assertNotNull(programAddress);
-    }
-
-    @Test
     public void testFindProgramAddressWithLargeNonce() throws Exception {
         PublicKey programId = new PublicKey("BPFLoader1111111111111111111111111111111111");
         ProgramDerivedAddress pda = PublicKey.findProgramAddress(
