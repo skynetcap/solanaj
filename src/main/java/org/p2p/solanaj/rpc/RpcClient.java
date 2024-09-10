@@ -7,7 +7,6 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -142,8 +141,8 @@ public class RpcClient {
             final String result = response.body().string();
             RpcResponse<T> rpcResult = resultAdapter.fromJson(result);
 
-            if (rpcResult.getError() != null) {
-                throw new RpcException(rpcResult.getError().getMessage());
+            if (rpcResult == null || rpcResult.getError() != null) {
+                throw new RpcException(rpcResult != null ? rpcResult.getError().getMessage() : "RPC response is null");
             }
 
             return rpcResult.getResult();
