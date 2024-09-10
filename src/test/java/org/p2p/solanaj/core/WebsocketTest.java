@@ -38,7 +38,13 @@ public class WebsocketTest {
         return SubscriptionWebSocketClient.getInstance(serverURI.toString());
     }
 
-    @Test
+    /**
+     * Test account subscription functionality.
+     * This test subscribes to an account and waits for a notification.
+     * 
+     * @throws Exception if any error occurs during the test
+     */
+    @Test(timeout = 180000) // 3-minute timeout
     public void testAccountSubscribe() throws Exception {
         SubscriptionWebSocketClient client = null;
         try {
@@ -48,19 +54,20 @@ public class WebsocketTest {
             }
             
             CountDownLatch latch = new CountDownLatch(1);
-            CompletableFuture<Map<String, Object>> future = new CompletableFuture<>();
+            AtomicReference<Map<String, Object>> resultRef = new AtomicReference<>();
             
             client.accountSubscribe(TEST_ACCOUNT, (NotificationEventListener) data -> {
                 LOGGER.info("Received notification: " + data);
-                future.complete((Map<String, Object>) data);
+                resultRef.set((Map<String, Object>) data);
                 latch.countDown();
             });
 
+            // Wait for notification with a timeout
             if (!latch.await(NOTIFICATION_TIMEOUT, TimeUnit.SECONDS)) {
                 fail("Test timed out waiting for notification from " + TEST_ACCOUNT);
             }
 
-            Map<String, Object> result = future.get(5, TimeUnit.SECONDS);
+            Map<String, Object> result = resultRef.get();
             assertNotNull("Notification should not be null", result);
             
             LOGGER.info("Received result structure: " + result);
