@@ -20,6 +20,9 @@ import org.p2p.solanaj.rpc.types.WeightedEndpoint;
 
 import javax.net.ssl.*;
 
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+
 /**
  * RpcClient is responsible for making RPC calls to a Solana cluster.
  */
@@ -114,6 +117,23 @@ public class RpcClient {
     public RpcClient(String endpoint, OkHttpClient httpClient) {
         this.endpoint = endpoint;
         this.httpClient = httpClient;
+        this.rpcApi = new RpcApi(this);
+        this.moshi = new Moshi.Builder().build(); // Initialize Moshi
+    }
+
+    /**
+     * Constructs an RpcClient with a specified endpoint and SOCKS proxy.
+     *
+     * @param endpoint the RPC endpoint
+     * @param proxyHost the SOCKS proxy host
+     * @param proxyPort the SOCKS proxy port
+     */
+    public RpcClient(String endpoint, String proxyHost, int proxyPort) {
+        this.endpoint = endpoint;
+        this.httpClient = new OkHttpClient.Builder()
+                .proxy(new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(proxyHost, proxyPort))) // Set SOCKS proxy
+                .readTimeout(20, TimeUnit.SECONDS)
+                .build();
         this.rpcApi = new RpcApi(this);
         this.moshi = new Moshi.Builder().build(); // Initialize Moshi
     }
