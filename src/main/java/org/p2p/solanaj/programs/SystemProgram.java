@@ -1,6 +1,7 @@
 package org.p2p.solanaj.programs;
 
-import java.util.ArrayList;
+import java.util.List;
+import java.util.Arrays;
 
 import org.p2p.solanaj.core.PublicKey;
 import org.p2p.solanaj.core.TransactionInstruction;
@@ -8,48 +9,97 @@ import org.p2p.solanaj.core.AccountMeta;
 
 import static org.bitcoinj.core.Utils.*;
 
-public class SystemProgram extends Program {
+/**
+ * Represents the System Program on the Solana blockchain.
+ * This class provides methods to create various system instructions.
+ */
+public class SystemProgram {
+    /** The program ID for the System Program */
     public static final PublicKey PROGRAM_ID = new PublicKey("11111111111111111111111111111111");
 
-    public static final int PROGRAM_INDEX_CREATE_ACCOUNT = 0;
-    public static final int PROGRAM_INDEX_TRANSFER = 2;
+    private static final int PROGRAM_INDEX_CREATE_ACCOUNT = 0;
+    private static final int PROGRAM_INDEX_ASSIGN = 1;
+    private static final int PROGRAM_INDEX_TRANSFER = 2;
 
-    public static TransactionInstruction transfer(PublicKey fromPublicKey, PublicKey toPublickKey, long lamports) {
-        ArrayList<AccountMeta> keys = new ArrayList<AccountMeta>();
-        keys.add(new AccountMeta(fromPublicKey, true, true));
-        keys.add(new AccountMeta(toPublickKey, false, true));
+    private static final int UINT32_SIZE = 4;
+    private static final int INT64_SIZE = 8;
+    private static final int PUBKEY_SIZE = 32;
 
-        // 4 byte instruction index + 8 bytes lamports
-        byte[] data = new byte[4 + 8];
+    private SystemProgram() {
+        // Private constructor to prevent instantiation
+    }
+
+    /**
+     * Creates a transfer instruction.
+     *
+     * @param fromPublicKey The public key of the account to transfer from
+     * @param toPublicKey The public key of the account to transfer to
+     * @param lamports The number of lamports to transfer
+     * @return A TransactionInstruction object representing the transfer instruction
+     * @throws IllegalArgumentException if lamports is negative
+     */
+    public static TransactionInstruction transfer(PublicKey fromPublicKey, PublicKey toPublicKey, long lamports) {
+        if (lamports < 0) {
+            throw new IllegalArgumentException("Lamports must be non-negative");
+        }
+
+        List<AccountMeta> keys = Arrays.asList(
+            new AccountMeta(fromPublicKey, true, true),
+            new AccountMeta(toPublicKey, false, true)
+        );
+
+        byte[] data = new byte[UINT32_SIZE + INT64_SIZE]; // 4 bytes for program index, 8 bytes for lamports
         uint32ToByteArrayLE(PROGRAM_INDEX_TRANSFER, data, 0);
-        int64ToByteArrayLE(lamports, data, 4);
+        int64ToByteArrayLE(lamports, data, UINT32_SIZE);
 
-        return createTransactionInstruction(PROGRAM_ID, keys, data);
+        return new TransactionInstruction(PROGRAM_ID, keys, data);
     }
 
-    public static TransactionInstruction createAccount(PublicKey fromPublicKey, PublicKey newAccountPublikkey,
+    /**
+     * Creates an instruction to create a new account.
+     *
+     * @param fromPublicKey The public key of the account funding the new account
+     * @param newAccountPublicKey The public key of the new account to be created
+     * @param lamports The number of lamports to transfer to the new account
+     * @param space The amount of space in bytes to allocate to the new account
+     * @param programId The program id to assign as the owner of the new account
+     * @return A TransactionInstruction object representing the create account instruction
+     * @throws IllegalArgumentException if lamports or space is negative
+     */
+    public static TransactionInstruction createAccount(PublicKey fromPublicKey, PublicKey newAccountPublicKey,
             long lamports, long space, PublicKey programId) {
-        ArrayList<AccountMeta> keys = new ArrayList<AccountMeta>();
-        keys.add(new AccountMeta(fromPublicKey, true, true));
-        keys.add(new AccountMeta(newAccountPublikkey, true, true));
+        if (lamports < 0 || space < 0) {
+            throw new IllegalArgumentException("Lamports and space must be non-negative");
+        }
 
-        byte[] data = new byte[4 + 8 + 8 + 32];
+        List<AccountMeta> keys = Arrays.asList(
+            new AccountMeta(fromPublicKey, true, true),
+            new AccountMeta(newAccountPublicKey, true, true)
+        );
+
+        byte[] data = new byte[UINT32_SIZE + INT64_SIZE + INT64_SIZE + PUBKEY_SIZE]; // 4 + 8 + 8 + 32 = 52 bytes
         uint32ToByteArrayLE(PROGRAM_INDEX_CREATE_ACCOUNT, data, 0);
-        int64ToByteArrayLE(lamports, data, 4);
-        int64ToByteArrayLE(space, data, 12);
-        System.arraycopy(programId.toByteArray(), 0, data, 20, 32);
+        int64ToByteArrayLE(lamports, data, UINT32_SIZE);
+        int64ToByteArrayLE(space, data, UINT32_SIZE + INT64_SIZE);
+        System.arraycopy(programId.toByteArray(), 0, data, UINT32_SIZE + INT64_SIZE + INT64_SIZE, PUBKEY_SIZE);
 
-        return createTransactionInstruction(PROGRAM_ID, keys, data);
+        return new TransactionInstruction(PROGRAM_ID, keys, data);
     }
 
+    /**
+     * Creates an instruction to assign a new owner to an account.
+     *
+     * @param owner The current owner of the account
+     * @param newOwner The new owner to assign to the account
+     * @return A TransactionInstruction object representing the assign instruction
+     */
     public static TransactionInstruction assign(PublicKey owner, PublicKey newOwner) {
-        ArrayList<AccountMeta> keys = new ArrayList<AccountMeta>();
-        keys.add(new AccountMeta(owner, true, true));
+        List<AccountMeta> keys = List.of(new AccountMeta(owner, true, true));
 
-        byte[] data = new byte[4 + 32];
-        uint32ToByteArrayLE(1, data, 0);
-        System.arraycopy(newOwner.toByteArray(), 0, data, 4, 32);
+        byte[] data = new byte[UINT32_SIZE + PUBKEY_SIZE]; // 4 + 32 = 36 bytes
+        uint32ToByteArrayLE(PROGRAM_INDEX_ASSIGN, data, 0);
+        System.arraycopy(newOwner.toByteArray(), 0, data, UINT32_SIZE, PUBKEY_SIZE);
 
-        return createTransactionInstruction(PROGRAM_ID, keys, data);
+        return new TransactionInstruction(PROGRAM_ID, keys, data);
     }
 }
