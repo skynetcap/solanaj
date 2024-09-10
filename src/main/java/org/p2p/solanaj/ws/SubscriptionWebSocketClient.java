@@ -25,7 +25,22 @@ import org.p2p.solanaj.rpc.types.RpcResponse;
 import org.p2p.solanaj.ws.listeners.NotificationEventListener;
 
 /**
- * A WebSocket client for managing subscriptions to various Solana events.
+ * SubscriptionWebSocketClient is a WebSocket client for managing subscriptions to various Solana events.
+ * 
+ * This class allows users to subscribe to different types of notifications from the Solana blockchain, 
+ * such as account updates, block updates, program updates, and vote updates. Each subscription is 
+ * identified by a unique subscription ID, which is generated when a subscription request is made. 
+ * The client maintains a mapping of these subscription IDs to their corresponding parameters and 
+ * notification listeners, enabling efficient management of active subscriptions.
+ * 
+ * Users can specify various parameters for their subscriptions, including the commitment level 
+ * (e.g., FINALIZED, CONFIRMED) and the encoding format (e.g., jsonParsed, base64) for the data 
+ * received in notifications. The client handles incoming WebSocket messages, processes notifications, 
+ * and invokes the appropriate listener callbacks with the received data.
+ * 
+ * The class also provides methods for unsubscribing from notifications, ensuring that resources 
+ * are properly released when subscriptions are no longer needed. Thread safety is maintained 
+ * through the use of locks to protect shared data structures during subscription management.
  */
 public class SubscriptionWebSocketClient extends WebSocketClient {
 
