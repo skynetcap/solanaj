@@ -12,6 +12,8 @@ import java.util.logging.Logger;
 import java.util.Map;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.*;
 
@@ -137,6 +139,68 @@ public class WebsocketTest {
         } finally {
             if (client != null) {
                 LOGGER.info("Closing WebSocket connection");
+                client.close();
+            }
+        }
+    }
+
+    @Test
+    public void testAccountUnsubscribe() throws Exception {
+        SubscriptionWebSocketClient client = null;
+        try {
+            client = createClient();
+            if (!client.waitForConnection(CONNECTION_TIMEOUT, TimeUnit.SECONDS)) {
+                fail("Failed to establish WebSocket connection");
+            }
+
+            CountDownLatch subscribeLatch = new CountDownLatch(1);
+            CountDownLatch unsubscribeLatch = new CountDownLatch(1);
+            AtomicReference<String> subscriptionId = new AtomicReference<>();
+            AtomicInteger notificationCount = new AtomicInteger(0);
+
+            NotificationEventListener listener = data -> {
+                LOGGER.info("Received notification: " + data);
+                notificationCount.incrementAndGet();
+                if (subscribeLatch.getCount() > 0) {
+                    subscribeLatch.countDown();
+                }
+            };
+
+            LOGGER.info("Subscribing to TEST_ACCOUNT");
+            client.accountSubscribe(TEST_ACCOUNT, listener);
+
+            if (!subscribeLatch.await(NOTIFICATION_TIMEOUT, TimeUnit.SECONDS)) {
+                fail("Timed out waiting for initial notification");
+            }
+
+            // Wait for a short time to potentially receive more notifications
+            Thread.sleep(5000);
+
+            int initialNotifications = notificationCount.get();
+            LOGGER.info("Received " + initialNotifications + " notifications before unsubscribing");
+
+            // Unsubscribe
+            subscriptionId.set(client.getSubscriptionId(TEST_ACCOUNT));
+            assertNotNull("Subscription ID should not be null", subscriptionId.get());
+            LOGGER.info("Unsubscribing from subscription ID: " + subscriptionId.get());
+            client.unsubscribe(subscriptionId.get());
+
+            // Wait for a short time after unsubscribing
+            Thread.sleep(5000);
+
+            int finalNotifications = notificationCount.get();
+            LOGGER.info("Received " + finalNotifications + " notifications after unsubscribing");
+
+            // Check that we didn't receive any new notifications after unsubscribing
+            assertEquals("Should not receive new notifications after unsubscribing", 
+                         initialNotifications, finalNotifications);
+
+            // Try to unsubscribe again (should not throw an exception)
+            client.unsubscribe(subscriptionId.get());
+
+            LOGGER.info("Unsubscribe test completed successfully");
+        } finally {
+            if (client != null) {
                 client.close();
             }
         }

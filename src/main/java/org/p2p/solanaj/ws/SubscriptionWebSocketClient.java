@@ -41,6 +41,8 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
     private int reconnectDelay = INITIAL_RECONNECT_DELAY;
     private final Moshi moshi = new Moshi.Builder().build();
 
+    private final Map<String, SubscriptionParams> activeSubscriptions = new ConcurrentHashMap<>();
+
     /**
      * Inner class to hold subscription parameters.
      */
@@ -168,8 +170,10 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
      * @param listener The listener for notification events
      */
     private void addSubscription(RpcRequest rpcRequest, NotificationEventListener listener) {
-        subscriptions.put(rpcRequest.getId(), new SubscriptionParams(rpcRequest, listener));
-        subscriptionIds.put(rpcRequest.getId(), 0L);
+        String subscriptionId = rpcRequest.getId();
+        activeSubscriptions.put(subscriptionId, new SubscriptionParams(rpcRequest, listener));
+        subscriptions.put(subscriptionId, new SubscriptionParams(rpcRequest, listener));
+        subscriptionIds.put(subscriptionId, 0L);
         updateSubscriptions();
     }
 
@@ -182,7 +186,7 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
     public void onOpen(ServerHandshake handshakedata) {
         LOGGER.info("WebSocket connection opened");
         reconnectDelay = INITIAL_RECONNECT_DELAY;
-        updateSubscriptions();
+        resubscribeAll();
         startHeartbeat();
         connectLatch.countDown();
     }
@@ -222,6 +226,9 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
             if (params != null) {
                 subscriptionListeners.put(rpcResult.getResult(), params.listener);
                 subscriptions.remove(rpcResultId);
+                // Update the activeSubscriptions map with the new subscription ID
+                activeSubscriptions.put(String.valueOf(rpcResult.getResult()), params);
+                activeSubscriptions.remove(rpcResultId);
             }
         }
     }
@@ -353,5 +360,63 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
      */
     public boolean waitForConnection(long timeout, TimeUnit unit) throws InterruptedException {
         return connectLatch.await(timeout, unit);
+    }
+
+    private void resubscribeAll() {
+        LOGGER.info("Resubscribing to all active subscriptions");
+        for (Map.Entry<String, SubscriptionParams> entry : activeSubscriptions.entrySet()) {
+            String subscriptionId = entry.getKey();
+            SubscriptionParams params = entry.getValue();
+            subscriptions.put(subscriptionId, params);
+            subscriptionIds.put(subscriptionId, 0L);
+        }
+        updateSubscriptions();
+    }
+
+    public void unsubscribe(String subscriptionId) {
+        SubscriptionParams params = activeSubscriptions.remove(subscriptionId);
+        if (params != null) {
+            // Send an unsubscribe request to the server
+            List<Object> unsubParams = new ArrayList<>();
+            unsubParams.add(Long.parseLong(subscriptionId));
+            RpcRequest unsubRequest = new RpcRequest(getUnsubscribeMethod(params.request.getMethod()), unsubParams);
+            JsonAdapter<RpcRequest> rpcRequestJsonAdapter = moshi.adapter(RpcRequest.class);
+            send(rpcRequestJsonAdapter.toJson(unsubRequest));
+
+            // Remove the subscription from subscriptionListeners
+            subscriptionListeners.remove(Long.parseLong(subscriptionId));
+            LOGGER.info("Unsubscribed from subscription: " + subscriptionId);
+        } else {
+            LOGGER.warning("Attempted to unsubscribe from non-existent subscription: " + subscriptionId);
+        }
+    }
+
+    private String getUnsubscribeMethod(String subscribeMethod) {
+        switch (subscribeMethod) {
+            case "accountSubscribe":
+                return "accountUnsubscribe";
+            case "logsSubscribe":
+                return "logsUnsubscribe";
+            case "signatureSubscribe":
+                return "signatureUnsubscribe";
+            // Add more cases for other subscription types as needed
+            default:
+                throw new IllegalArgumentException("Unknown subscribe method: " + subscribeMethod);
+        }
+    }
+
+    /**
+     * Gets the subscription ID for a given account.
+     *
+     * @param account The account to get the subscription ID for
+     * @return The subscription ID, or null if not found
+     */
+    public String getSubscriptionId(String account) {
+        for (Map.Entry<String, SubscriptionParams> entry : activeSubscriptions.entrySet()) {
+            if (entry.getValue().request.getParams().get(0).equals(account)) {
+                return entry.getKey();
+            }
+        }
+        return null;
     }
 }
