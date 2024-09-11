@@ -30,6 +30,10 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
             this.request = request;
             this.listener = listener;
         }
+
+        SubscriptionParams(RpcRequest request) {
+            this.request = request;
+        }
     }
 
     private final Map<String, SubscriptionParams> subscriptions = new ConcurrentHashMap<>();
@@ -114,10 +118,27 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
         updateSubscriptions();
     }
 
+    public void transactionSubscribe(String key, NotificationEventListener listener) {
+        List<Object> params = new ArrayList<>();
+        params.add(Map.of("vote", false,
+                "failed", false,
+                "accountRequired", key));
+        params.add(Map.of("encoding", "jsonParsed",
+                "commitment", Commitment.PROCESSED.getValue(),
+                "transaction_details", "full"));
+
+        RpcRequest rpcRequest = new RpcRequest("transactionSubscribe", params);
+
+        subscriptions.put(rpcRequest.getId(), new SubscriptionParams(rpcRequest, listener));
+        subscriptionIds.put(rpcRequest.getId(), 0L);
+
+        updateSubscriptions();
+    }
+
     public void logsSubscribe(String mention, NotificationEventListener listener) {
         List<Object> params = new ArrayList<>();
         params.add(Map.of("mentions", List.of(mention)));
-        params.add(Map.of("commitment", "finalized"));
+        params.add(Map.of("commitment", Commitment.PROCESSED.getValue()));
 
         RpcRequest rpcRequest = new RpcRequest("logsSubscribe", params);
 
@@ -125,6 +146,20 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
         subscriptionIds.put(rpcRequest.getId(), 0L);
 
         updateSubscriptions();
+    }
+
+    public String logsSubscribeWithId(String mention, NotificationEventListener listener) {
+        List<Object> params = new ArrayList<>();
+        params.add(Map.of("mentions", List.of(mention)));
+        params.add(Map.of("commitment", Commitment.PROCESSED.getValue()));
+
+        RpcRequest rpcRequest = new RpcRequest("logsSubscribe", params);
+
+        subscriptions.put(rpcRequest.getId(), new SubscriptionParams(rpcRequest, listener));
+        subscriptionIds.put(rpcRequest.getId(), 0L);
+
+        updateSubscriptions();
+        return rpcRequest.getId();
     }
 
     public void logsSubscribe(List<String> mentions, NotificationEventListener listener) {
@@ -138,6 +173,26 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
         subscriptionIds.put(rpcRequest.getId(), null);
 
         updateSubscriptions();
+    }
+
+    public void logsUnSubscribe(String subscriptionIdKey) {
+        List<Object> params = new ArrayList<>();
+
+        RpcRequest rpcRequest = new RpcRequest("logsUnSubscribe", params);
+        Long subscriptionId = subscriptionIds.get(subscriptionIdKey);
+        params.add(subscriptionId);
+
+        subscriptions.remove(subscriptionIdKey);
+        subscriptionIds.remove(subscriptionIdKey);
+        subscriptionListeners.remove(subscriptionId);
+
+        subscriptions.put(rpcRequest.getId(), new SubscriptionParams(rpcRequest));
+        subscriptionIds.put(rpcRequest.getId(), 0L);
+
+        updateSubscriptions();
+
+        subscriptions.remove(rpcRequest.getId());
+        subscriptionIds.remove(rpcRequest.getId());
     }
 
     @Override
@@ -154,6 +209,7 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
 
         try {
             RpcResponse<Long> rpcResult = resultAdapter.fromJson(message);
+            assert rpcResult != null;
             String rpcResultId = rpcResult.getId();
             if (rpcResultId != null) {
                 if (subscriptionIds.containsKey(rpcResultId)) {
@@ -169,6 +225,7 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
                 JsonAdapter<RpcNotificationResult> notificationResultAdapter = new Moshi.Builder().build()
                         .adapter(RpcNotificationResult.class);
                 RpcNotificationResult result = notificationResultAdapter.fromJson(message);
+                assert result != null;
                 NotificationEventListener listener = subscriptionListeners.get(result.getParams().getSubscription());
 
                 Map value = (Map) result.getParams().getResult().getValue();
