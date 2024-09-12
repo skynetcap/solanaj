@@ -43,10 +43,12 @@ public class RpcApi {
         return client.call("getLatestBlockhash", params, RecentBlockhash.class).getValue().getBlockhash();
     }
 
+    @Deprecated
     public String getRecentBlockhash() throws RpcException {
         return getRecentBlockhash(null);
     }
 
+    @Deprecated
     public String getRecentBlockhash(Commitment commitment) throws RpcException {
         List<Object> params = new ArrayList<>();
 
@@ -415,10 +417,12 @@ public class RpcApi {
         return client.call("getBlockCommitment", params, BlockCommitment.class);
     }
 
+    @Deprecated
     public FeeCalculatorInfo getFeeCalculatorForBlockhash(String blockhash) throws RpcException {
         return getFeeCalculatorForBlockhash(blockhash, null);
     }
 
+    @Deprecated
     public FeeCalculatorInfo getFeeCalculatorForBlockhash(String blockhash, Commitment commitment) throws RpcException {
         List<Object> params = new ArrayList<>();
 
@@ -430,6 +434,7 @@ public class RpcApi {
         return client.call("getFeeCalculatorForBlockhash", params, FeeCalculatorInfo.class);
     }
 
+    @Deprecated
     public FeeRateGovernorInfo getFeeRateGovernor() throws RpcException {
         return client.call("getFeeRateGovernor", new ArrayList<>(), FeeRateGovernorInfo.class);
     }
@@ -535,10 +540,12 @@ public class RpcApi {
         return client.call("getStakeMinimumDelegation", params, ValueLong.class).getValue();
     }
 
+    @Deprecated
     public FeesInfo getFees() throws RpcException {
         return getFees(null);
     }
 
+    @Deprecated
     public FeesInfo getFees(Commitment commitment) throws RpcException {
         List<Object> params = new ArrayList<>();
 
@@ -801,6 +808,7 @@ public class RpcApi {
         return result;
     }
 
+    @Deprecated
     public long getSnapshotSlot() throws RpcException {
         return client.call("getSnapshotSlot", new ArrayList<>(), Long.class);
     }
@@ -982,10 +990,12 @@ public class RpcApi {
         return client.call("getVoteAccounts", params, VoteAccounts.class);
     }
 
+    @Deprecated
     public StakeActivation getStakeActivation(PublicKey publicKey) throws RpcException {
         return getStakeActivation(publicKey, null, null);
     }
 
+    @Deprecated
     public StakeActivation getStakeActivation(PublicKey publicKey, Long epoch, Commitment commitment) throws RpcException {
         List<Object> params = new ArrayList<>();
         params.add(publicKey.toBase58());
