@@ -10,9 +10,9 @@ import static org.junit.Assert.*;
 
 public class AddressLookupTableProgramTest {
 
-    private static final PublicKey AUTHORITY = new PublicKey("AuthorityPublicKeyHere");
-    private static final PublicKey PAYER = new PublicKey("PayerPublicKeyHere");
-    private static final PublicKey LOOKUP_TABLE = new PublicKey("LookupTablePublicKeyHere");
+    private static final PublicKey AUTHORITY = new PublicKey("BPFLoaderUpgradeab1e11111111111111111111111");
+    private static final PublicKey PAYER = new PublicKey("11111111111111111111111111111111");
+    private static final PublicKey LOOKUP_TABLE = new PublicKey("AddressLookupTab1e1111111111111111111111111");
     private static final long RECENT_SLOT = 123456;
 
     /**
@@ -42,7 +42,7 @@ public class AddressLookupTableProgramTest {
      */
     @Test
     public void testExtendLookupTable() {
-        PublicKey addressToAdd = new PublicKey("AddressToAddPublicKeyHere");
+        PublicKey addressToAdd = new PublicKey("SysvarC1ock11111111111111111111111111111111");
         TransactionInstruction instruction = AddressLookupTableProgram.extendLookupTable(LOOKUP_TABLE, AUTHORITY, PAYER, Collections.singletonList(addressToAdd));
         assertNotNull(instruction);
         assertEquals(AddressLookupTableProgram.PROGRAM_ID, instruction.getProgramId());
@@ -65,7 +65,7 @@ public class AddressLookupTableProgramTest {
      */
     @Test
     public void testCloseLookupTable() {
-        PublicKey recipient = new PublicKey("RecipientPublicKeyHere");
+        PublicKey recipient = new PublicKey("SysvarRent111111111111111111111111111111111");
         TransactionInstruction instruction = AddressLookupTableProgram.closeLookupTable(LOOKUP_TABLE, AUTHORITY, recipient);
         assertNotNull(instruction);
         assertEquals(AddressLookupTableProgram.PROGRAM_ID, instruction.getProgramId());

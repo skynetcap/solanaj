@@ -41,9 +41,9 @@ public class TokenManagerTest {
         tokenManager = new TokenManager(mockRpcClient);
 
         owner = new Account();
-        source = new PublicKey("4k3Dyjzvzp8e1Z1g1g1g1g1g1g1g1g1g1g1g1g1g1g1"); // Example source token account
-        destination = new PublicKey("5h3Q4g1g1g1g1g1g1g1g1g1g1g1g1g1g1g1g1g1g1g1"); // Example destination token account
-        tokenMint = new PublicKey("So11111111111111111111111111111111111111112"); // Wrapped SOL (WSOL) mint
+        source = new PublicKey("DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263");
+        destination = new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
+        tokenMint = new PublicKey("So11111111111111111111111111111111111111112");
     }
 
     /**
@@ -117,12 +117,12 @@ public class TokenManagerTest {
     @Test
     public void testTransferArbitraryToken() throws RpcException {
         // Example for transferring BONK tokens
-        PublicKey bonkMint = new PublicKey("DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263"); // Example BONK mint
+        PublicKey bonkMint = new PublicKey("DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263");
         long amount = 1_000_000L; // 1 BONK (assuming 5 decimals)
         byte decimals = 5;
 
-        PublicKey sourceATA = new PublicKey("4k3Dyjzvzp8e1Z1g1g1g1g1g1g1g1g1g1g1g1g1g1"); // Example source ATA
-        PublicKey destinationATA = new PublicKey("5h3Q4g1g1g1g1g1g1g1g1g1g1g1g1g1g1g1g1g1g1"); // Example destination ATA
+        PublicKey sourceATA = new PublicKey("J3dxNj7nDRRqRRXuEMynDG57DkZK4jYRuv3Garmb1i99");
+        PublicKey destinationATA = new PublicKey("AyGCwnwxQMCqaU4ixReHt8h5W4dwmxU7eM3BEQBdWVca");
         String expectedTxId = "MockTransactionId";
 
         when(mockRpcApi.getTokenAccountsByOwner(eq(destination), eq(bonkMint))).thenReturn(destinationATA);
@@ -170,12 +170,12 @@ public class TokenManagerTest {
     @Test
     public void testTransferWSOL() throws RpcException {
         // For transferring Wrapped SOL (WSOL)
-        PublicKey wsolMint = new PublicKey("So11111111111111111111111111111111111111112"); // Wrapped SOL (WSOL) mint
+        PublicKey wsolMint = new PublicKey("So11111111111111111111111111111111111111112");
         long amount = 1_000_000_000L; // 1 WSOL (9 decimals)
         byte decimals = 9;
 
-        PublicKey sourceWSOLATA = new PublicKey("4k3Dyjzvzp8e1Z1g1g1g1g1g1g1g1g1g1g1g1g1g1"); // Example source WSOL ATA
-        PublicKey destinationWSOLATA = new PublicKey("5h3Q4g1g1g1g1g1g1g1g1g1g1g1g1g1g1g1g1g1g1"); // Example destination WSOL ATA
+        PublicKey sourceWSOLATA = new PublicKey("J3dxNj7nDRRqRRXuEMynDG57DkZK4jYRuv3Garmb1i99");
+        PublicKey destinationWSOLATA = new PublicKey("AyGCwnwxQMCqaU4ixReHt8h5W4dwmxU7eM3BEQBdWVca");
         String expectedTxId = "MockTransactionId";
 
         when(mockRpcApi.getTokenAccountsByOwner(eq(destination), eq(wsolMint))).thenReturn(destinationWSOLATA);
