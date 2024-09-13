@@ -144,10 +144,9 @@ public class RpcClient {
      * @param method the RPC method to call
      * @param params the parameters for the RPC method
      * @param clazz  the class type of the expected result
-     * @return the result of the RPC call
-     * @throws RpcException if an error occurs during the RPC call
+     * @return the RpcResponse containing the result or error
      */
-    public <T> T call(String method, List<Object> params, Class<T> clazz) throws RpcException {
+    public <T> RpcResponse<T> call(String method, List<Object> params, Class<T> clazz) {
         RpcRequest rpcRequest = new RpcRequest(method, params);
 
         JsonAdapter<RpcRequest> rpcRequestJsonAdapter = moshi.adapter(RpcRequest.class);
@@ -161,16 +160,16 @@ public class RpcClient {
             final String result = response.body().string();
             RpcResponse<T> rpcResult = resultAdapter.fromJson(result);
 
-            if (rpcResult == null || rpcResult.getError() != null) {
-                throw new RpcException(rpcResult != null ? rpcResult.getError().getMessage() : "RPC response is null");
+            if (rpcResult == null) {
+                return new RpcResponse<T>(null, new RpcException("RPC response is null"));
             }
 
-            return rpcResult.getResult();
+            return rpcResult;
         } catch (SSLHandshakeException e) {
             this.httpClient = new OkHttpClient.Builder().build();
-            throw new RpcException("SSL Handshake failed: " + e.getMessage());
+            return new RpcResponse<T>(null, new RpcException("SSL Handshake failed: " + e.getMessage()));
         } catch (IOException e) {
-            throw new RpcException("IO error during RPC call: " + e.getMessage());
+            return new RpcResponse<T>(null, new RpcException("IO error during RPC call: " + e.getMessage()));
         }
     }
 

@@ -34,6 +34,14 @@ public class MainnetTest extends AccountBasedTest {
     }
 
     @Test
+    public void getLatestBlockhash() {
+        RpcResponse<RecentBlockhash> response = client.getApi().getLatestBlockhash();
+        assertNotNull(response);
+        assertNotNull(response.getResult());
+        assertNotNull(response.getResult().getValue().getBlockhash());
+    }
+
+    @Test
     public void getAccountInfoBase64() throws RpcException {
         // Get account Info
         final AccountInfo accountInfo = client.getApi().getAccountInfo(PublicKey.valueOf("So11111111111111111111111111111111111111112"));
