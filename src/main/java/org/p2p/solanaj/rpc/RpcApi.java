@@ -29,18 +29,18 @@ public class RpcApi {
         this.client = client;
     }
 
-    public String getLatestBlockhash() throws RpcException {
+    public LatestBlockhash getLatestBlockhash() throws RpcException {
         return getLatestBlockhash(null);
     }
 
-    public String getLatestBlockhash(Commitment commitment) throws RpcException {
+    public LatestBlockhash getLatestBlockhash(Commitment commitment) throws RpcException {
         List<Object> params = new ArrayList<>();
 
         if (commitment != null) {
             params.add(Map.of("commitment", commitment.getValue()));
         }
 
-        return client.call("getLatestBlockhash", params, RecentBlockhash.class).getValue().getBlockhash();
+        return client.call("getLatestBlockhash", params, LatestBlockhash.class);
     }
 
     @Deprecated
