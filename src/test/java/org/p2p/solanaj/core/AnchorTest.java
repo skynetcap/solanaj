@@ -1,7 +1,9 @@
 package org.p2p.solanaj.core;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Disabled;
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.p2p.solanaj.programs.MemoProgram;
 import org.p2p.solanaj.programs.anchor.AnchorBasicTutorialProgram;
 import org.p2p.solanaj.rpc.Cluster;
@@ -9,8 +11,6 @@ import org.p2p.solanaj.rpc.RpcClient;
 import org.p2p.solanaj.rpc.RpcException;
 
 import java.util.List;
-
-import static org.junit.Assert.assertNotNull;
 
 public class AnchorTest extends AccountBasedTest {
 
@@ -21,7 +21,7 @@ public class AnchorTest extends AccountBasedTest {
      * Also attaches a memo.
      */
     @Test
-    @Ignore
+    @Disabled
     public void basicInitializeTest() {
         final Account feePayer = testAccount;
 

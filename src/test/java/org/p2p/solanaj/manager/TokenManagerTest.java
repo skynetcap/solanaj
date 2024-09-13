@@ -1,7 +1,10 @@
 package org.p2p.solanaj.manager;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Disabled;
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.mockito.Mockito;
 import org.p2p.solanaj.core.Account;
 import org.p2p.solanaj.core.PublicKey;
@@ -12,7 +15,8 @@ import org.p2p.solanaj.rpc.RpcApi;
 import org.p2p.solanaj.rpc.RpcException;
 import org.p2p.solanaj.token.TokenManager;
 
-import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 /**
@@ -33,7 +37,7 @@ public class TokenManagerTest {
      * Sets up the test environment before each test case.
      * Initializes mock objects and the TokenManager instance.
      */
-    @Before
+    @BeforeEach
     public void setUp() {
         mockRpcClient = Mockito.mock(RpcClient.class);
         mockRpcApi = Mockito.mock(RpcApi.class);

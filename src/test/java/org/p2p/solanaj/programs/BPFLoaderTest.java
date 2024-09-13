@@ -1,8 +1,9 @@
 package org.p2p.solanaj.programs;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.Ignore;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Disabled;
+import static org.junit.jupiter.api.Assertions.*;
 import org.p2p.solanaj.core.Account;
 import org.p2p.solanaj.core.Transaction;
 import org.p2p.solanaj.core.TransactionInstruction;
@@ -11,8 +12,6 @@ import org.p2p.solanaj.rpc.RpcClient;
 import org.p2p.solanaj.rpc.RpcException;
 
 import java.util.List;
-
-import static org.junit.Assert.*;
 
 /**
  * Test class for BPFLoader program instructions.
@@ -25,7 +24,7 @@ public class BPFLoaderTest {
     private Account programAccount;
     private Account programDataAccount;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         client = new RpcClient(Cluster.DEVNET);
         payer = new Account();
@@ -117,7 +116,7 @@ public class BPFLoaderTest {
      * Note: This test is ignored by default as it requires a connection to the Solana network.
      */
     @Test
-    @Ignore
+    @Disabled
     public void initializeBufferIntegrationTest() throws RpcException {
         Account account = new Account(); // Replace with your actual account setup
         Transaction transaction = new Transaction();

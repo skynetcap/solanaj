@@ -1,21 +1,22 @@
 package org.p2p.solanaj.core;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 import org.p2p.solanaj.core.PublicKey.ProgramDerivedAddress;
-
-import static org.junit.Assert.*;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 
 public class PublicKeyTest {
 
-    @Test(expected = IllegalArgumentException.class)
-    public void ivalidKeys() {
-        new PublicKey(new byte[] { 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0 });
-        new PublicKey("300000000000000000000000000000000000000000000000000000000000000000000");
-        new PublicKey("300000000000000000000000000000000000000000000000000000000000000");
+    @Test
+    public void testInvalidKeys() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            new PublicKey(new byte[] { 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0 });
+            new PublicKey("300000000000000000000000000000000000000000000000000000000000000000000");
+            new PublicKey("300000000000000000000000000000000000000000000000000000000000000");
+        });
     }
 
     @Test
@@ -123,9 +124,9 @@ public class PublicKeyTest {
         assertNotEquals(key1.hashCode(), key3.hashCode());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testInvalidBase58Key() {
-        new PublicKey("InvalidBase58Key");
+        assertThrows(IllegalArgumentException.class, () -> new PublicKey("InvalidBase58Key"));
     }
 
     @Test
