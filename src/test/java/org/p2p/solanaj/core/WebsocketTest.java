@@ -30,7 +30,7 @@ public class WebsocketTest {
     private static final Logger LOGGER = Logger.getLogger(WebsocketTest.class.getName());
     private static final long TEST_TIMEOUT_MS = 180000; // 3 minutes
 
-    private static final String TEST_ACCOUNT = "4DoNfFBfF7UokCC2FQzriy7yHK6DY6NVdYpuekQ5pRgg";
+    private static final String TEST_ACCOUNT = "SysvarRecentB1ockHashes11111111111111111111";
     private static final String SYSVAR_CLOCK = "SysvarC1ock11111111111111111111111111111111";
     private static final long CONNECTION_TIMEOUT = 10;
     private static final long NOTIFICATION_TIMEOUT = 120;
