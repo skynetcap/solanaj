@@ -3,8 +3,10 @@ package org.p2p.solanaj.programs;
 import org.p2p.solanaj.core.PublicKey;
 import org.p2p.solanaj.core.TransactionInstruction;
 
-import org.junit.Test;
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Disabled;
+import static org.junit.jupiter.api.Assertions.*;
 
 import org.bitcoinj.core.Base58;
 
@@ -31,13 +33,15 @@ public class SystemProgramTest {
         assertArrayEquals(expectedData, instruction.getData());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testTransferInstructionWithNegativeLamports() {
-        PublicKey fromPublicKey = new PublicKey("QqCCvshxtqMAL2CVALqiJB7uEeE5mjSPsseQdDzsRUo");
-        PublicKey toPublicKey = new PublicKey("GrDMoeqMLFjeXQ24H56S1RLgT4R76jsuWCd6SvXyGPQ5");
-        long negativeLamports = -1;
+        assertThrows(IllegalArgumentException.class, () -> {
+            PublicKey fromPublicKey = new PublicKey("QqCCvshxtqMAL2CVALqiJB7uEeE5mjSPsseQdDzsRUo");
+            PublicKey toPublicKey = new PublicKey("GrDMoeqMLFjeXQ24H56S1RLgT4R76jsuWCd6SvXyGPQ5");
+            long negativeLamports = -1;
 
-        SystemProgram.transfer(fromPublicKey, toPublicKey, negativeLamports);
+            SystemProgram.transfer(fromPublicKey, toPublicKey, negativeLamports);
+        });
     }
 
     @Test
@@ -63,15 +67,17 @@ public class SystemProgramTest {
         assertEquals(expectedDataBase58, Base58.encode(instruction.getData()));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testCreateAccountInstructionWithNegativeLamports() {
-        PublicKey fromPublicKey = new PublicKey("QqCCvshxtqMAL2CVALqiJB7uEeE5mjSPsseQdDzsRUo");
-        PublicKey newAccountPublicKey = new PublicKey("GrDMoeqMLFjeXQ24H56S1RLgT4R76jsuWCd6SvXyGPQ5");
-        long negativeLamports = -1;
-        long space = 165;
-        PublicKey programId = SystemProgram.PROGRAM_ID;
-
-        SystemProgram.createAccount(fromPublicKey, newAccountPublicKey, negativeLamports, space, programId);
+        assertThrows(IllegalArgumentException.class, () -> {
+            PublicKey fromPublicKey = new PublicKey("QqCCvshxtqMAL2CVALqiJB7uEeE5mjSPsseQdDzsRUo");
+            PublicKey newAccountPublicKey = new PublicKey("GrDMoeqMLFjeXQ24H56S1RLgT4R76jsuWCd6SvXyGPQ5");
+            long negativeLamports = -1;
+            long space = 165;
+            PublicKey programId = SystemProgram.PROGRAM_ID;
+    
+            SystemProgram.createAccount(fromPublicKey, newAccountPublicKey, negativeLamports, space, programId);    
+        });
     }
 
     @Test

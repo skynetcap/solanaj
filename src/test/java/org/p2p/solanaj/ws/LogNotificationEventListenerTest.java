@@ -1,14 +1,15 @@
 package org.p2p.solanaj.ws;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.After;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.p2p.solanaj.core.PublicKey;
 import org.p2p.solanaj.rpc.RpcClient;
 import org.p2p.solanaj.ws.listeners.LogNotificationEventListener;
-
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Disabled;
+import static org.junit.jupiter.api.Assertions.*;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -19,8 +20,6 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import java.util.ArrayList;
 
-import static org.junit.Assert.*;
-
 public class LogNotificationEventListenerTest {
 
     @Mock
@@ -30,7 +29,7 @@ public class LogNotificationEventListenerTest {
     private LogNotificationEventListener listener;
     private TestLogHandler logHandler;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
         testPublicKey = new PublicKey("PhoeNiXZ8ByJGLkxNfZRnkUfjvmuYqLR89jjFHGqdXY");
@@ -42,7 +41,7 @@ public class LogNotificationEventListenerTest {
         logger.setLevel(Level.ALL);
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         Logger logger = Logger.getLogger(LogNotificationEventListener.class.getName());
         logger.removeHandler(logHandler);
@@ -110,8 +109,8 @@ public class LogNotificationEventListenerTest {
      */
     @Test
     public void testGetters() {
-        assertEquals("RpcClient should match", mockRpcClient, listener.getClient());
-        assertEquals("PublicKey should match", testPublicKey, listener.getListeningPubkey());
+        assertEquals(mockRpcClient, listener.getClient(), "RpcClient should match");
+        assertEquals(testPublicKey, listener.getListeningPubkey(), "PublicKey should match");
     }
 
     private static class TestLogHandler extends Handler {

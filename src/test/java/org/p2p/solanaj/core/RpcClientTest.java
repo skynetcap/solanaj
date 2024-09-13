@@ -1,7 +1,7 @@
 package org.p2p.solanaj.core;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 import org.p2p.solanaj.rpc.RpcClient;
 import org.p2p.solanaj.rpc.WeightedCluster;
 import org.p2p.solanaj.rpc.types.WeightedEndpoint;
@@ -44,10 +44,10 @@ public class RpcClientTest {
         float endpoint1Percentage = (float)endpoint1Occurence / (float)WEIGHTED_TEST_OCCURRENCE;
         float endpoint2Percentage = (float)endpoint2Occurence / (float)WEIGHTED_TEST_OCCURRENCE;
         float endpoint3Percentage = (float)endpoint3Occurence / (float)WEIGHTED_TEST_OCCURRENCE;
-        Assert.assertEquals(0.1f, endpoint0Percentage, 0.03);
-        Assert.assertEquals(0.2f, endpoint1Percentage, 0.03);
-        Assert.assertEquals(0.3f, endpoint2Percentage, 0.03);
-        Assert.assertEquals(0.4f, endpoint3Percentage, 0.03);
+        assertEquals(0.1f, endpoint0Percentage, 0.03);
+        assertEquals(0.2f, endpoint1Percentage, 0.03);
+        assertEquals(0.3f, endpoint2Percentage, 0.03);
+        assertEquals(0.4f, endpoint3Percentage, 0.03);
     }
 
 }

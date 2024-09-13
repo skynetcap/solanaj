@@ -1,10 +1,11 @@
 package org.p2p.solanaj.core;
 
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Disabled;
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.p2p.solanaj.programs.MemoProgram;
-import org.p2p.solanaj.programs.SystemProgram;
 import org.p2p.solanaj.rpc.Cluster;
 import org.p2p.solanaj.rpc.RpcClient;
 import org.p2p.solanaj.rpc.RpcException;
@@ -14,9 +15,6 @@ import org.p2p.solanaj.rpc.types.config.Commitment;
 import org.p2p.solanaj.token.TokenManager;
 
 import java.util.*;
-import java.util.stream.Collectors;
-
-import static org.junit.Assert.*;
 
 public class MainnetTest extends AccountBasedTest {
 
@@ -27,7 +25,7 @@ public class MainnetTest extends AccountBasedTest {
     private static final long LAMPORTS_PER_SOL = 1000000000L;
 
 
-    @Before
+    @BeforeEach
     public void beforeMethod() throws InterruptedException {
         // Prevent RPCPool rate limit
         Thread.sleep(200L);
@@ -96,7 +94,7 @@ public class MainnetTest extends AccountBasedTest {
      * Calls sendTransaction with a call to the Memo program included.
      */
     @Test
-    @Ignore
+    @Disabled
     public void transactionMemoTest() {
         final int lamports = 1111;
         final PublicKey destination = solDestination;
@@ -274,7 +272,7 @@ public class MainnetTest extends AccountBasedTest {
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void getInflationRewardTest() throws RpcException {
         List<InflationReward> inflationRewards = client.getApi().getInflationReward(
                 Arrays.asList(
@@ -346,7 +344,7 @@ public class MainnetTest extends AccountBasedTest {
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void getSupplyTest() throws RpcException {
         Supply supply = client.getApi().getSupply();
         LOGGER.info(supply.toString());
@@ -399,7 +397,7 @@ public class MainnetTest extends AccountBasedTest {
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void getTokenLargestAccountsTest() throws RpcException {
         List<TokenAccount> tokenAccounts = client.getApi().getTokenLargestAccounts(PublicKey.valueOf(
                 "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R"));
@@ -426,7 +424,7 @@ public class MainnetTest extends AccountBasedTest {
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void getTokenAccountsByDelegateTest() throws RpcException {
         Map<String, Object> requiredParams = Map.of("mint", USDC_TOKEN_MINT);
         TokenAccountInfo tokenAccount = client.getApi().getTokenAccountsByDelegate(PublicKey.valueOf(
@@ -445,7 +443,7 @@ public class MainnetTest extends AccountBasedTest {
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void getFeeCalculatorForBlockhashTest() throws RpcException, InterruptedException {
         String recentBlockHash = client.getApi().getRecentBlockhash();
         Thread.sleep(20000L);
@@ -487,7 +485,7 @@ public class MainnetTest extends AccountBasedTest {
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void getMaxRetransmitSlotTest() throws RpcException {
         long maxRetransmitSlot = client.getApi().getMaxRetransmitSlot();
         LOGGER.info("maxRetransmitSlot = " + maxRetransmitSlot);
@@ -515,7 +513,7 @@ public class MainnetTest extends AccountBasedTest {
         assertNotNull(recentBlockhash);
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void getStakeActivationTest() throws RpcException {
         StakeActivation stakeActivation = client.getApi().getStakeActivation(
@@ -531,7 +529,7 @@ public class MainnetTest extends AccountBasedTest {
         assertEquals(0, stakeActivation.getInactive());
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void simulateTransactionTest() throws RpcException {
         String transaction = "ASdDdWBaKXVRA+6flVFiZokic9gK0+r1JWgwGg/GJAkLSreYrGF4rbTCXNJvyut6K6hupJtm72GztLbWNmRF1Q4BAAEDBhrZ0FOHFUhTft4+JhhJo9+3/QL6vHWyI8jkatuFPQzrerzQ2HXrwm2hsYGjM5s+8qMWlbt6vbxngnO8rc3lqgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAy+KIwZmU8DLmYglP3bPzrlpDaKkGu6VIJJwTOYQmRfUBAgIAAQwCAAAAuAsAAAAAAAA=";
@@ -541,7 +539,7 @@ public class MainnetTest extends AccountBasedTest {
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void sendTokenTest() {
         final PublicKey source = usdcSource; // Private key's USDC token account
         final PublicKey destination = usdcDestination; // Destination's USDC account
@@ -563,7 +561,7 @@ public class MainnetTest extends AccountBasedTest {
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void transferCheckedTest() {
         final PublicKey source = usdcSource; // Private key's USDC token account
         final PublicKey destination = solDestination;
@@ -594,7 +592,7 @@ public class MainnetTest extends AccountBasedTest {
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void initializeAccountTest() {
         final Account owner = testAccount;
         final Account newAccount = new Account();
@@ -610,14 +608,14 @@ public class MainnetTest extends AccountBasedTest {
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void getConfirmedBlockTest() throws RpcException {
         ConfirmedBlock block = this.client.getApi().getConfirmedBlock(124398367);
         assertEquals(124398367, block.getParentSlot());
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void getSignaturesForAddressTest() throws RpcException {
         List<SignatureInformation> confirmedSignatures = client.getApi().getSignaturesForAddress(
                 solDestination,
@@ -630,7 +628,7 @@ public class MainnetTest extends AccountBasedTest {
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void getBlockTest() throws RpcException {
         Block block = this.client.getApi().getBlock(124398367);
         assertEquals(112516757, block.getBlockHeight());
@@ -643,7 +641,7 @@ public class MainnetTest extends AccountBasedTest {
 
     // Ignored since some validators can only get recent blocks
     @Test
-    @Ignore
+    @Disabled
     public void getConfirmedBlocksTest() throws RpcException {
         List<Double> blocks = this.client.getApi().getConfirmedBlocks(5);
         List<Double> singleBlock = this.client.getApi().getConfirmedBlocks(5, 5);
@@ -658,7 +656,7 @@ public class MainnetTest extends AccountBasedTest {
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void getSignatureStatusesTest() throws RpcException {
         SignatureStatuses signatureStatuses = client.getApi().getSignatureStatuses(
                 List.of(
@@ -680,7 +678,7 @@ public class MainnetTest extends AccountBasedTest {
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void getHealthTest() throws RpcException {
         boolean isHealthy = client.getApi().getHealth();
 
@@ -688,7 +686,7 @@ public class MainnetTest extends AccountBasedTest {
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void getLargestAccountsTest() throws RpcException {
         List<LargeAccount> largeAccounts = client.getApi().getLargestAccounts();
 
@@ -704,7 +702,7 @@ public class MainnetTest extends AccountBasedTest {
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void getLeaderScheduleTest_identity() throws RpcException {
         List<LeaderSchedule> leaderSchedules = client.getApi().getLeaderSchedule(null,
                 "12oRmi8YDbqpkn326MdjwFeZ1bh3t7zVw8Nra2QK2SnR", null);

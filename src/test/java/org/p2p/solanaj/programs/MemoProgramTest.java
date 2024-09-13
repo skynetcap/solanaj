@@ -1,12 +1,13 @@
 package org.p2p.solanaj.programs;
 
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Disabled;
+import static org.junit.jupiter.api.Assertions.*;
 import org.p2p.solanaj.core.PublicKey;
 import org.p2p.solanaj.core.TransactionInstruction;
 
 import java.nio.charset.StandardCharsets;
-
-import static org.junit.Assert.*;
 
 public class MemoProgramTest {
 
@@ -26,21 +27,21 @@ public class MemoProgramTest {
         assertArrayEquals(memo.getBytes(StandardCharsets.UTF_8), instruction.getData());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testWriteUtf8_NullAccount() {
-        MemoProgram.writeUtf8(null, "Test memo");
+        assertThrows(IllegalArgumentException.class, () -> MemoProgram.writeUtf8(null, "Test memo"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testWriteUtf8_NullMemo() {
         PublicKey account = new PublicKey("11111111111111111111111111111111");
-        MemoProgram.writeUtf8(account, null);
+        assertThrows(IllegalArgumentException.class, () -> MemoProgram.writeUtf8(account, null));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testWriteUtf8_EmptyMemo() {
         PublicKey account = new PublicKey("11111111111111111111111111111111");
-        MemoProgram.writeUtf8(account, "");
+        assertThrows(IllegalArgumentException.class, () -> MemoProgram.writeUtf8(account, ""));
     }
 
     @Test

@@ -1,7 +1,8 @@
 package org.p2p.solanaj.core;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Disabled;
+import static org.junit.jupiter.api.Assertions.*;
 import org.p2p.solanaj.rpc.Cluster;
 import org.p2p.solanaj.ws.SubscriptionWebSocketClient;
 import org.p2p.solanaj.ws.listeners.NotificationEventListener;
@@ -20,12 +21,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
 
-import static org.junit.Assert.*;
-
 /**
  * Test class for WebSocket functionality in the Solana Java client.
  */
-@Ignore
+@Disabled
 public class WebsocketTest {
 
     private static final Logger LOGGER = Logger.getLogger(WebsocketTest.class.getName());
@@ -178,8 +177,8 @@ public class WebsocketTest {
             Map<String, Object> result1 = future1.get(5, TimeUnit.SECONDS);
             Map<String, Object> result2 = future2.get(5, TimeUnit.SECONDS);
 
-            assertNotNull("Notification 1 should not be null", result1);
-            assertNotNull("Notification 2 should not be null", result2);
+            assertNotNull(result1, "Notification 1 should not be null");
+            assertNotNull(result2, "Notification 2 should not be null");
             
             LOGGER.info("Received data for subscription 1 (TEST_ACCOUNT): " + result1);
             LOGGER.info("Received data for subscription 2 (SYSVAR_CLOCK): " + result2);
@@ -246,8 +245,8 @@ public class WebsocketTest {
             LOGGER.info("Received " + finalNotifications + " notifications after unsubscribing");
 
             // Check that we didn't receive any new notifications after unsubscribing
-            assertEquals("Should not receive new notifications after unsubscribing", 
-                         initialNotifications, finalNotifications);
+            assertEquals(initialNotifications, finalNotifications, 
+                         "Should not receive new notifications after unsubscribing");
 
             // Try to unsubscribe again (should not throw an exception)
             client.unsubscribe(subscriptionId.get());
@@ -262,9 +261,9 @@ public class WebsocketTest {
 
     private void validateAccountData(Map<String, Object> data) {
         // Implement proper validation logic here
-        assertNotNull("Account data should not be null", data);
-        assertTrue("Account data should contain 'lamports'", data.containsKey("lamports"));
-        assertTrue("Account data should contain 'data'", data.containsKey("data"));
+        assertNotNull(data, "Account data should not be null");
+        assertTrue(data.containsKey("lamports"), "Account data should contain 'lamports'");
+        assertTrue(data.containsKey("data"), "Account data should contain 'data'");
         // Add more specific validations as needed
     }
 }
