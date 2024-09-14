@@ -82,4 +82,28 @@ public class TransactionBuilder {
         return transaction;
     }
 
+    /**
+     * Sets the version for the transaction.
+     *
+     * @param version the version to set
+     * @return this builder for method chaining
+     */
+    public TransactionBuilder setVersion(byte version) {
+        transaction.setVersion(version);
+        return this;
+    }
+
+    /**
+     * Adds an address table lookup to the transaction.
+     *
+     * @param tablePubkey the public key of the address table
+     * @param writableIndexes the list of writable indexes
+     * @param readonlyIndexes the list of readonly indexes
+     * @return this builder for method chaining
+     */
+    public TransactionBuilder addAddressTableLookup(PublicKey tablePubkey, List<Byte> writableIndexes, List<Byte> readonlyIndexes) {
+        transaction.addAddressTableLookup(tablePubkey, writableIndexes, readonlyIndexes);
+        return this;
+    }
+
 }

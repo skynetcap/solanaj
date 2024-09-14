@@ -21,13 +21,15 @@ public class Transaction {
     private final Message message;
     private final List<String> signatures;
     private byte[] serializedMessage;
+    private byte version = (byte) 0xFF; // Default to legacy version
+    private List<AddressTableLookup> addressTableLookups = new ArrayList<>();
 
     /**
      * Constructs a new Transaction instance.
      */
     public Transaction() {
         this.message = new Message();
-        this.signatures = new ArrayList<>(); // Use diamond operator
+        this.signatures = new ArrayList<>();
     }
 
     /**
@@ -38,7 +40,7 @@ public class Transaction {
      * @throws NullPointerException if the instruction is null
      */
     public Transaction addInstruction(TransactionInstruction instruction) {
-        Objects.requireNonNull(instruction, "Instruction cannot be null"); // Add input validation
+        Objects.requireNonNull(instruction, "Instruction cannot be null");
         message.addInstruction(instruction);
         return this;
     }
@@ -50,7 +52,7 @@ public class Transaction {
      * @throws NullPointerException if the recentBlockhash is null
      */
     public void setRecentBlockHash(String recentBlockhash) {
-        Objects.requireNonNull(recentBlockhash, "Recent blockhash cannot be null"); // Add input validation
+        Objects.requireNonNull(recentBlockhash, "Recent blockhash cannot be null");
         message.setRecentBlockHash(recentBlockhash);
     }
 
@@ -61,7 +63,7 @@ public class Transaction {
      * @throws NullPointerException if the signer is null
      */
     public void sign(Account signer) {
-        sign(Arrays.asList(Objects.requireNonNull(signer, "Signer cannot be null"))); // Add input validation
+        sign(Arrays.asList(Objects.requireNonNull(signer, "Signer cannot be null")));
     }
 
     /**
@@ -86,7 +88,7 @@ public class Transaction {
                 byte[] signature = signatureProvider.detached(serializedMessage);
                 signatures.add(Base58.encode(signature));
             } catch (Exception e) {
-                throw new RuntimeException("Error signing transaction", e); // Improve exception handling
+                throw new RuntimeException("Error signing transaction", e);
             }
         }
     }
@@ -97,13 +99,26 @@ public class Transaction {
      * @return The serialized transaction as a byte array
      */
     public byte[] serialize() {
+        byte[] serializedMessage = message.serialize();
         int signaturesSize = signatures.size();
         byte[] signaturesLength = ShortvecEncoding.encodeLength(signaturesSize);
 
-        // Calculate total size before allocating ByteBuffer
         int totalSize = signaturesLength.length + signaturesSize * SIGNATURE_LENGTH + serializedMessage.length;
+        if (version != (byte) 0xFF) {
+            totalSize += 1; // Add 1 byte for version
+            if (version == 0) {
+                totalSize += ShortvecEncoding.encodeLength(addressTableLookups.size()).length;
+                for (AddressTableLookup lookup : addressTableLookups) {
+                    totalSize += lookup.getSerializedSize();
+                }
+            }
+        }
+
         ByteBuffer out = ByteBuffer.allocate(totalSize);
 
+        if (version != (byte) 0xFF) {
+            out.put(version);
+        }
         out.put(signaturesLength);
 
         for (String signature : signatures) {
@@ -113,6 +128,26 @@ public class Transaction {
 
         out.put(serializedMessage);
 
+        if (version == 0) {
+            byte[] addressTableLookupsLength = ShortvecEncoding.encodeLength(addressTableLookups.size());
+            out.put(addressTableLookupsLength);
+            for (AddressTableLookup lookup : addressTableLookups) {
+                out.put(lookup.serialize());
+            }
+        }
+
         return out.array();
+    }
+
+    public void setVersion(byte version) {
+        this.version = version;
+    }
+
+    public byte getVersion() {
+        return version;
+    }
+
+    public void addAddressTableLookup(PublicKey tablePubkey, List<Byte> writableIndexes, List<Byte> readonlyIndexes) {
+        addressTableLookups.add(new AddressTableLookup(tablePubkey, writableIndexes, readonlyIndexes));
     }
 }
