@@ -251,7 +251,15 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
     public void onClose(int code, String reason, boolean remote) {
         System.out.println(
                 "Connection closed by " + (remote ? "remote peer" : "us") + " Code: " + code + " Reason: " + reason);
-
+        try {
+            boolean connected = reconnectBlocking();
+            while (!connected) {
+                Thread.sleep(1000);
+                connected = reconnectBlocking();
+            }
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
