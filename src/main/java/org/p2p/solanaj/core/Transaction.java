@@ -2,10 +2,11 @@ package org.p2p.solanaj.core;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.bitcoinj.core.Base58;
 import org.p2p.solanaj.utils.ShortvecEncoding;
 import org.p2p.solanaj.utils.TweetNaclFast;
@@ -21,8 +22,10 @@ public class Transaction {
     private final Message message;
     private final List<String> signatures;
     private byte[] serializedMessage;
+    @Getter
+    @Setter
     private byte version = (byte) 0xFF; // Default to legacy version
-    private List<AddressTableLookup> addressTableLookups = new ArrayList<>();
+    private final List<AddressTableLookup> addressTableLookups = new ArrayList<>();
 
     /**
      * Constructs a new Transaction instance.
@@ -63,7 +66,7 @@ public class Transaction {
      * @throws NullPointerException if the signer is null
      */
     public void sign(Account signer) {
-        sign(Arrays.asList(Objects.requireNonNull(signer, "Signer cannot be null")));
+        sign(List.of(Objects.requireNonNull(signer, "Signer cannot be null")));
     }
 
     /**
@@ -137,14 +140,6 @@ public class Transaction {
         }
 
         return out.array();
-    }
-
-    public void setVersion(byte version) {
-        this.version = version;
-    }
-
-    public byte getVersion() {
-        return version;
     }
 
     public void addAddressTableLookup(PublicKey tablePubkey, List<Byte> writableIndexes, List<Byte> readonlyIndexes) {

@@ -1,6 +1,10 @@
 package org.p2p.solanaj.rpc.types;
 
+import org.p2p.solanaj.core.AddressTableLookup;
+import org.p2p.solanaj.core.PublicKey;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.Collections;
 
 import com.squareup.moshi.Json;
 import lombok.Getter;
@@ -42,8 +46,14 @@ public class ConfirmedTransaction {
     @ToString
     public static class Message {
 
+        @Json(name = "version")
+        private byte version;
+
+        @Json(name = "addressTableLookups")
+        private List<AddressTableLookup> addressTableLookups;
+
         @Json(name = "accountKeys")
-        private List<String> accountKeys;
+        private List<String> accountKeyStrings;
 
         @Json(name = "header")
         private Header header;
@@ -53,6 +63,24 @@ public class ConfirmedTransaction {
 
         @Json(name = "recentBlockhash")
         private String recentBlockhash;
+
+        /**
+         * Gets the list of account keys involved in the transaction as PublicKey objects.
+         * @return The list of account keys as PublicKey objects.
+         */
+        public List<PublicKey> getAccountKeys() {
+            return accountKeyStrings.stream()
+                .map(PublicKey::new)
+                .collect(Collectors.toList());
+        }
+
+        /**
+         * Gets the list of address table lookups.
+         * @return The list of address table lookups.
+         */
+        public List<AddressTableLookup> getAddressTableLookups() {
+            return addressTableLookups != null ? addressTableLookups : Collections.emptyList();
+        }
     }
 
     @Getter
@@ -125,4 +153,8 @@ public class ConfirmedTransaction {
 
     @Json(name = "transaction")
     private Transaction transaction;
+
+    public Transaction getTransaction() {
+        return transaction;
+    }
 }

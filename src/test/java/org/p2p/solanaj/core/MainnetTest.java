@@ -762,19 +762,19 @@ public class MainnetTest extends AccountBasedTest {
 
         ConfirmedTransaction transactionInfo = client.getApi().getTransaction(transactionSignature);
 
-        String fromKey = transactionInfo.getTransaction().getMessage().getAccountKeys().get(0);
-        String toKey = transactionInfo.getTransaction().getMessage().getAccountKeys().get(1);
+        PublicKey fromKey = transactionInfo.getTransaction().getMessage().getAccountKeys().get(0);
+        PublicKey toKey = transactionInfo.getTransaction().getMessage().getAccountKeys().get(1);
 
-        assertEquals("HHntUXQbUBdx8HZQQaT7W1ZSgKRitMtForz4YJXc6qF6", fromKey);
-        assertEquals("6QcgNYEqHeUohoJWR5ppuRg9Ugh6scMzJY4j4tFnrZMu", toKey);
+        assertEquals("HHntUXQbUBdx8HZQQaT7W1ZSgKRitMtForz4YJXc6qF6", fromKey.toBase58());
+        assertEquals("6QcgNYEqHeUohoJWR5ppuRg9Ugh6scMzJY4j4tFnrZMu", toKey.toBase58());
 
         ConfirmedTransaction transactionInfoCommitted = client.getApi().getTransaction(transactionSignature, Commitment.CONFIRMED);
 
-        String fromKeyCommitted = transactionInfoCommitted.getTransaction().getMessage().getAccountKeys().get(0);
-        String toKeyCommitted = transactionInfoCommitted.getTransaction().getMessage().getAccountKeys().get(1);
+        PublicKey fromKeyCommitted = transactionInfoCommitted.getTransaction().getMessage().getAccountKeys().get(0);
+        PublicKey toKeyCommitted = transactionInfoCommitted.getTransaction().getMessage().getAccountKeys().get(1);
 
-        assertEquals("HHntUXQbUBdx8HZQQaT7W1ZSgKRitMtForz4YJXc6qF6", fromKeyCommitted);
-        assertEquals("6QcgNYEqHeUohoJWR5ppuRg9Ugh6scMzJY4j4tFnrZMu", toKeyCommitted);
+        assertEquals("HHntUXQbUBdx8HZQQaT7W1ZSgKRitMtForz4YJXc6qF6", fromKeyCommitted.toBase58());
+        assertEquals("6QcgNYEqHeUohoJWR5ppuRg9Ugh6scMzJY4j4tFnrZMu", toKeyCommitted.toBase58());
     }
 
     @Test
