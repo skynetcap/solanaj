@@ -3,10 +3,12 @@ package org.p2p.solanaj.programs;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.p2p.solanaj.core.AccountMeta;
 import org.p2p.solanaj.core.PublicKey;
 import org.p2p.solanaj.core.TransactionInstruction;
 
 import java.util.Collections;
+import java.util.List;
 
 public class AddressLookupTableProgramTest {
 
@@ -42,11 +44,24 @@ public class AddressLookupTableProgramTest {
      */
     @Test
     public void testExtendLookupTable() {
-        PublicKey addressToAdd = new PublicKey("SysvarC1ock11111111111111111111111111111111");
-        TransactionInstruction instruction = AddressLookupTableProgram.extendLookupTable(LOOKUP_TABLE, AUTHORITY, PAYER, Collections.singletonList(addressToAdd));
+        List<PublicKey> addresses = List.of(
+            new PublicKey("ExtendAddress11111111111111111111111111111"),
+            new PublicKey("ExtendAddress21111111111111111111111111111")
+        );
+        TransactionInstruction instruction = AddressLookupTableProgram.extendLookupTable(LOOKUP_TABLE, PAYER, AUTHORITY, addresses);
         assertNotNull(instruction);
         assertEquals(AddressLookupTableProgram.PROGRAM_ID, instruction.getProgramId());
-        assertEquals(4, instruction.getKeys().size()); // Check number of keys
+        assertEquals(3, instruction.getKeys().size());
+        
+        List<AccountMeta> keys = instruction.getKeys();
+        assertTrue(keys.get(0).isWritable());
+        assertFalse(keys.get(0).isSigner());
+        assertTrue(keys.get(1).isWritable());
+        assertTrue(keys.get(1).isSigner());
+        assertFalse(keys.get(2).isWritable());
+        assertTrue(keys.get(2).isSigner());
+
+        assertTrue(instruction.getData().length > 1); // Should contain instruction byte + serialized addresses
     }
 
     /**

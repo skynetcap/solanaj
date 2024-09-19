@@ -73,17 +73,17 @@ public class AddressLookupTableProgram extends Program {
      * Creates an instruction to extend an address lookup table.
      *
      * @param lookupTable The address of the lookup table to extend
-     * @param authority The authority (signer) of the lookup table
      * @param payer The account paying for the table extension
+     * @param authority The authority (signer) of the lookup table
      * @param addresses The list of addresses to add to the table
      * @return A TransactionInstruction to extend an address lookup table
      */
-    public static TransactionInstruction extendLookupTable(PublicKey lookupTable, PublicKey authority, PublicKey payer, List<PublicKey> addresses) {
+    public static TransactionInstruction extendLookupTable(PublicKey lookupTable, PublicKey payer, PublicKey authority, List<PublicKey> addresses) {
         List<AccountMeta> keys = new ArrayList<>();
         keys.add(new AccountMeta(lookupTable, false, true));
-        keys.add(new AccountMeta(authority, true, false));
         keys.add(new AccountMeta(payer, true, true));
-        keys.add(new AccountMeta(SystemProgram.PROGRAM_ID, false, false));
+        keys.add(new AccountMeta(authority, true, false));
+        // Remove the SystemProgram.PROGRAM_ID key
 
         ByteBuffer data = ByteBuffer.allocate(1 + 4 + addresses.size() * 32);
         data.order(ByteOrder.LITTLE_ENDIAN);
