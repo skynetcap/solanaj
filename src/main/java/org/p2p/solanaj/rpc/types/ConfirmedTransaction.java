@@ -115,6 +115,12 @@ public class ConfirmedTransaction {
 
         @Json(name = "signatures")
         private List<String> signatures;
+
+        
+        @Json(name = "blockTime")
+        private String blocktime;
+
+
     }
 
     @Json(name = "meta")
