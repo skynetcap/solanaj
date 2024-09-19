@@ -1,12 +1,13 @@
 package org.p2p.solanaj.core;
 
+import org.bitcoinj.core.Base58;
+import org.p2p.solanaj.utils.ShortvecEncoding;
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
-
-import org.bitcoinj.core.Base58;
-
-import org.p2p.solanaj.utils.ShortvecEncoding;
+import java.util.stream.Collectors;
 
 public class Message {
     private class MessageHeader {
@@ -148,8 +149,17 @@ public class Message {
 
     private List<AccountMeta> getAccountKeys() {
         List<AccountMeta> keysList = accountKeys.getList();
-        int feePayerIndex = findAccountIndex(keysList, feePayer.getPublicKey());
 
+        // Check whether custom sorting is needed. The `getAccountKeys()` method returns a reversed list of accounts, with signable and mutable accounts at the end, but the fee is placed first. When a transaction involves multiple accounts that need signing, an incorrect order can cause bugs. Change to custom sorting based on the contract order.
+        boolean needSort = keysList.stream().anyMatch(accountMeta -> accountMeta.getSort() < Integer.MAX_VALUE);
+        if (needSort) {
+            // Sort in ascending order based on the `sort` field.
+            return keysList.stream()
+                    .sorted(Comparator.comparingInt(AccountMeta::getSort))
+                    .collect(Collectors.toList());
+        }
+
+        int feePayerIndex = findAccountIndex(keysList, feePayer.getPublicKey());
         List<AccountMeta> newList = new ArrayList<AccountMeta>();
         AccountMeta feePayerMeta = keysList.get(feePayerIndex);
         newList.add(new AccountMeta(feePayerMeta.getPublicKey(), true, true));
