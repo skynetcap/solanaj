@@ -1,26 +1,19 @@
 package org.p2p.solanaj.rpc;
 
-import java.util.*;
-import java.util.stream.Collectors;
 import org.p2p.solanaj.core.Account;
 import org.p2p.solanaj.core.PublicKey;
 import org.p2p.solanaj.core.Transaction;
 import org.p2p.solanaj.rpc.types.*;
-import org.p2p.solanaj.rpc.types.config.BlockConfig;
-import org.p2p.solanaj.rpc.types.config.LargestAccountConfig;
-import org.p2p.solanaj.rpc.types.config.LeaderScheduleConfig;
-import org.p2p.solanaj.rpc.types.config.ProgramAccountConfig;
-import org.p2p.solanaj.rpc.types.config.RpcEpochConfig;
 import org.p2p.solanaj.rpc.types.RpcResultTypes.ValueLong;
-import org.p2p.solanaj.rpc.types.config.RpcSendTransactionConfig;
+import org.p2p.solanaj.rpc.types.TokenResultObjects.TokenAccount;
+import org.p2p.solanaj.rpc.types.TokenResultObjects.TokenAmountInfo;
+import org.p2p.solanaj.rpc.types.config.*;
 import org.p2p.solanaj.rpc.types.config.RpcSendTransactionConfig.Encoding;
-import org.p2p.solanaj.rpc.types.config.SignatureStatusConfig;
-import org.p2p.solanaj.rpc.types.config.SimulateTransactionConfig;
-import org.p2p.solanaj.rpc.types.TokenResultObjects.*;
-import org.p2p.solanaj.rpc.types.config.Commitment;
-import org.p2p.solanaj.rpc.types.config.VoteAccountConfig;
 import org.p2p.solanaj.ws.SubscriptionWebSocketClient;
 import org.p2p.solanaj.ws.listeners.NotificationEventListener;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class RpcApi {
     private RpcClient client;
@@ -82,7 +75,7 @@ public class RpcApi {
                                   RpcSendTransactionConfig rpcSendTransactionConfig)
             throws RpcException {
         if (recentBlockHash == null) {
-            recentBlockHash = getRecentBlockhash();
+            recentBlockHash = getLatestBlockhash().getValue().getBlockhash();
         }
         transaction.setRecentBlockHash(recentBlockHash);
         transaction.sign(signers);
