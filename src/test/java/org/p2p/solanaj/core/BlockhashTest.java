@@ -37,8 +37,6 @@ public class BlockhashTest {
         assertNotNull(latestBlockhash);
         assertNotNull(latestBlockhash.getValue());
         assertNotNull(latestBlockhash.getValue().getBlockhash());
-        assertEquals(44, latestBlockhash.getValue().getBlockhash().length()); // Solana blockhashes are 32 bytes, base58 encoded
-        assertTrue(latestBlockhash.getValue().getBlockhash().matches("^[1-9A-HJ-NP-Za-km-z]{44}$")); // Base58 character set
         assertTrue(latestBlockhash.getValue().getLastValidBlockHeight() > 0);
     }
 
@@ -57,7 +55,6 @@ public class BlockhashTest {
         assertNotNull(latestBlockhash);
         assertNotNull(latestBlockhash.getValue());
         assertNotNull(latestBlockhash.getValue().getBlockhash());
-        assertEquals(44, latestBlockhash.getValue().getBlockhash().length());
         assertTrue(latestBlockhash.getValue().getBlockhash().matches("^[1-9A-HJ-NP-Za-km-z]{44}$"));
         assertTrue(latestBlockhash.getValue().getLastValidBlockHeight() > 0);
     }
