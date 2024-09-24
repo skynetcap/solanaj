@@ -365,7 +365,7 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
      * @param rpcRequest The RPC request for the subscription
      * @param listener The listener for notification events
      */
-    private void addSubscription(RpcRequest rpcRequest, NotificationEventListener listener) {
+    public void addSubscription(RpcRequest rpcRequest, NotificationEventListener listener) {
         String subscriptionId = rpcRequest.getId();
         subscriptionLock.lock();
         try {
