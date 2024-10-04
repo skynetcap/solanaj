@@ -26,14 +26,17 @@ public class AddressLookupTableProgram extends Program {
     /**
      * Creates an instruction to create a new address lookup table.
      *
-     * @param authority The authority (signer) that can modify the table
-     * @param payer The account paying for the table creation
-     * @param recentSlot A recent slot to derive the table's address
+     * @param authority   The authority (signer) that can modify the table
+     * @param payer       The account paying for the table creation
+     * @param recentSlot  A recent slot to derive the table's address
      * @return A TransactionInstruction to create a new address lookup table
      */
     public static TransactionInstruction createLookupTable(PublicKey authority, PublicKey payer, long recentSlot) {
         PublicKey derivedAddress = PublicKey.findProgramAddress(
-            List.of(authority.toByteArray(), ByteBuffer.allocate(8).order(ByteOrder.LITTLE_ENDIAN).putLong(recentSlot).array()),
+            List.of(
+                authority.toByteArray(),
+                ByteBuffer.allocate(8).order(ByteOrder.LITTLE_ENDIAN).putLong(recentSlot).array()
+            ),
             PROGRAM_ID
         ).getAddress();
 
@@ -55,7 +58,7 @@ public class AddressLookupTableProgram extends Program {
      * Creates an instruction to freeze an address lookup table.
      *
      * @param lookupTable The address of the lookup table to freeze
-     * @param authority The authority (signer) of the lookup table
+     * @param authority   The authority (signer) of the lookup table
      * @return A TransactionInstruction to freeze an address lookup table
      */
     public static TransactionInstruction freezeLookupTable(PublicKey lookupTable, PublicKey authority) {
@@ -73,17 +76,16 @@ public class AddressLookupTableProgram extends Program {
      * Creates an instruction to extend an address lookup table.
      *
      * @param lookupTable The address of the lookup table to extend
-     * @param authority The authority (signer) of the lookup table
-     * @param payer The account paying for the table extension
-     * @param addresses The list of addresses to add to the table
+     * @param payer       The account paying for the table extension
+     * @param authority   The authority (signer) of the lookup table
+     * @param addresses   The list of addresses to add to the table
      * @return A TransactionInstruction to extend an address lookup table
      */
-    public static TransactionInstruction extendLookupTable(PublicKey lookupTable, PublicKey authority, PublicKey payer, List<PublicKey> addresses) {
+    public static TransactionInstruction extendLookupTable(PublicKey lookupTable, PublicKey payer, PublicKey authority, List<PublicKey> addresses) {
         List<AccountMeta> keys = new ArrayList<>();
         keys.add(new AccountMeta(lookupTable, false, true));
-        keys.add(new AccountMeta(authority, true, false));
         keys.add(new AccountMeta(payer, true, true));
-        keys.add(new AccountMeta(SystemProgram.PROGRAM_ID, false, false));
+        keys.add(new AccountMeta(authority, true, false));
 
         ByteBuffer data = ByteBuffer.allocate(1 + 4 + addresses.size() * 32);
         data.order(ByteOrder.LITTLE_ENDIAN);
@@ -100,7 +102,7 @@ public class AddressLookupTableProgram extends Program {
      * Creates an instruction to deactivate an address lookup table.
      *
      * @param lookupTable The address of the lookup table to deactivate
-     * @param authority The authority (signer) of the lookup table
+     * @param authority   The authority (signer) of the lookup table
      * @return A TransactionInstruction to deactivate an address lookup table
      */
     public static TransactionInstruction deactivateLookupTable(PublicKey lookupTable, PublicKey authority) {
@@ -118,8 +120,8 @@ public class AddressLookupTableProgram extends Program {
      * Creates an instruction to close an address lookup table.
      *
      * @param lookupTable The address of the lookup table to close
-     * @param authority The authority (signer) of the lookup table
-     * @param recipient The account to receive the closed table's lamports
+     * @param authority   The authority (signer) of the lookup table
+     * @param recipient   The account to receive the closed table's lamports
      * @return A TransactionInstruction to close an address lookup table
      */
     public static TransactionInstruction closeLookupTable(PublicKey lookupTable, PublicKey authority, PublicKey recipient) {

@@ -42,10 +42,12 @@ public class Message {
     private AccountKeysList accountKeys;
     private List<TransactionInstruction> instructions;
     private Account feePayer;
+    private List<AddressTableLookup> addressTableLookups;
 
     public Message() {
         this.accountKeys = new AccountKeysList();
         this.instructions = new ArrayList<TransactionInstruction>();
+        this.addressTableLookups = new ArrayList<>();
     }
 
     public Message addInstruction(TransactionInstruction instruction) {
@@ -140,6 +142,15 @@ public class Message {
             out.put(compiledInstruction.data);
         }
 
+        // Serialize address table lookups if present
+        if (!addressTableLookups.isEmpty()) {
+            byte[] addressTableLookupsLength = ShortvecEncoding.encodeLength(addressTableLookups.size());
+            out.put(addressTableLookupsLength);
+            for (AddressTableLookup lookup : addressTableLookups) {
+                out.put(lookup.serialize());
+            }
+        }
+
         return out.array();
     }
 
@@ -177,5 +188,13 @@ public class Message {
         }
 
         throw new RuntimeException("unable to find account index");
+    }
+
+    public void addAddressTableLookup(AddressTableLookup lookup) {
+        addressTableLookups.add(lookup);
+    }
+
+    public List<AddressTableLookup> getAddressTableLookups() {
+        return addressTableLookups;
     }
 }
