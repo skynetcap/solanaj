@@ -5,6 +5,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.concurrent.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -364,7 +365,7 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
      * @param rpcRequest The RPC request for the subscription
      * @param listener The listener for notification events
      */
-    private void addSubscription(RpcRequest rpcRequest, NotificationEventListener listener) {
+    public void addSubscription(RpcRequest rpcRequest, NotificationEventListener listener) {
         String subscriptionId = rpcRequest.getId();
         subscriptionLock.lock();
         try {
@@ -386,7 +387,6 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
     public void onOpen(ServerHandshake handshakedata) {
         LOGGER.info("WebSocket connection opened");
         reconnectDelay = INITIAL_RECONNECT_DELAY;
-        resubscribeAll();
         startHeartbeat();
         connectLatch.countDown();
     }
@@ -402,7 +402,9 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
             JsonAdapter<RpcResponse<Long>> resultAdapter = moshi.adapter(
                     Types.newParameterizedType(RpcResponse.class, Long.class));
             RpcResponse<Long> rpcResult = resultAdapter.fromJson(message);
-
+            if(rpcResult!=null && rpcResult.getError()!=null){
+                throw new IllegalStateException(rpcResult.getError().toString());
+            }
             if (rpcResult != null && rpcResult.getId() != null) {
                 handleSubscriptionResponse(rpcResult);
             } else {
@@ -519,7 +521,10 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
     public void reconnect() {
         LOGGER.info("Attempting to reconnect...");
         try {
-            reconnectBlocking();
+            final boolean reconnectBlocking = reconnectBlocking();
+            if(reconnectBlocking){
+                resubscribeAll();
+            }
         } catch (InterruptedException e) {
             LOGGER.warning("Reconnection interrupted: " + e.getMessage());
             Thread.currentThread().interrupt();
@@ -592,13 +597,30 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
 
     private void resubscribeAll() {
         LOGGER.info("Resubscribing to all active subscriptions");
+        cleanSubscriptions();
+        final Map<String, SubscriptionParams> activeSubscriptionsResubscribe = new HashMap<>();
         for (Map.Entry<String, SubscriptionParams> entry : activeSubscriptions.entrySet()) {
-            String subscriptionId = entry.getKey();
-            SubscriptionParams params = entry.getValue();
+            SubscriptionParams paramsOld = entry.getValue();
+            final RpcRequest rpcRequest = paramsOld.request;
+            final NotificationEventListener notificationEventListener = paramsOld.listener;
+            final RpcRequest request = new RpcRequest(rpcRequest.getMethod(), rpcRequest.getParams());
+            final String subscriptionId = request.getId();
+            final SubscriptionParams params = new SubscriptionParams(
+                    request,
+                    notificationEventListener);
             subscriptions.put(subscriptionId, params);
             subscriptionIds.put(subscriptionId, 0L);
+            activeSubscriptionsResubscribe.put(subscriptionId, params);
         }
+        activeSubscriptions.clear();
+        activeSubscriptions.putAll(activeSubscriptionsResubscribe);
         updateSubscriptions();
+    }
+
+    private void cleanSubscriptions(){
+        subscriptions.clear();
+        subscriptionIds.clear();
+        subscriptionListeners.clear();
     }
 
     public void unsubscribe(String subscriptionId) {
