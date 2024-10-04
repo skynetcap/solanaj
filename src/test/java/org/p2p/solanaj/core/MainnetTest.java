@@ -323,6 +323,8 @@ public class MainnetTest extends AccountBasedTest {
     }
 
     @Test
+    @Disabled
+    @Deprecated
     public void getSnapshotSlotTest() throws RpcException {
         long snapshotSlot = client.getApi().getSnapshotSlot();
         LOGGER.info(String.format("Snapshot slot = %d", snapshotSlot));
@@ -455,6 +457,8 @@ public class MainnetTest extends AccountBasedTest {
     }
 
     @Test
+    @Disabled
+    @Deprecated
     public void getFeesRateGovernorTest() throws RpcException {
         FeeRateGovernorInfo feeRateGovernorInfo = client.getApi().getFeeRateGovernor();
         LOGGER.info(feeRateGovernorInfo.getValue().getFeeRateGovernor().toString());
@@ -468,6 +472,8 @@ public class MainnetTest extends AccountBasedTest {
     }
 
     @Test
+    @Disabled
+    @Deprecated
     public void getFeesInfoTest() throws RpcException {
         FeesInfo feesInfo = client.getApi().getFees();
         LOGGER.info(feesInfo.toString());
@@ -507,6 +513,8 @@ public class MainnetTest extends AccountBasedTest {
     }
 
     @Test
+    @Disabled
+    @Deprecated
     public void getRecentBlockhashTest() throws RpcException {
         String recentBlockhash = client.getApi().getRecentBlockhash();
         LOGGER.info(String.format("Recent blockhash = %s", recentBlockhash));
@@ -779,7 +787,7 @@ public class MainnetTest extends AccountBasedTest {
 
     @Test
     public void isBlockhashValidTest() throws RpcException, InterruptedException {
-        String recentBlockHash = client.getApi().getRecentBlockhash();
+        String recentBlockHash = client.getApi().getLatestBlockhash().getValue().getBlockhash();
         Thread.sleep(500L);
         assertTrue(client.getApi().isBlockhashValid(recentBlockHash));
     }

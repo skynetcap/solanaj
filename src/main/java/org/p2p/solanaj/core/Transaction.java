@@ -13,7 +13,10 @@ import org.p2p.solanaj.utils.TweetNaclFast;
 
 /**
  * Represents a Solana transaction.
+ * <p>
  * This class allows for building, signing, and serializing transactions.
+ * It supports both legacy and versioned transactions with Address Lookup Tables (ALTs).
+ * </p>
  */
 public class Transaction {
 
@@ -22,9 +25,11 @@ public class Transaction {
     private final Message message;
     private final List<String> signatures;
     private byte[] serializedMessage;
+
     @Getter
     @Setter
     private byte version = (byte) 0xFF; // Default to legacy version
+
     private final List<AddressTableLookup> addressTableLookups = new ArrayList<>();
 
     /**
@@ -142,6 +147,13 @@ public class Transaction {
         return out.array();
     }
 
+    /**
+     * Adds an address table lookup to the transaction.
+     *
+     * @param tablePubkey      The public key of the address table
+     * @param writableIndexes  The list of writable indexes
+     * @param readonlyIndexes  The list of readonly indexes
+     */
     public void addAddressTableLookup(PublicKey tablePubkey, List<Byte> writableIndexes, List<Byte> readonlyIndexes) {
         addressTableLookups.add(new AddressTableLookup(tablePubkey, writableIndexes, readonlyIndexes));
     }
