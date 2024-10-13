@@ -1,30 +1,45 @@
 package org.p2p.solanaj.utils;
 
-import static org.bitcoinj.core.Utils.*;
-
+/**
+ * Utility class for short vector encoding as per Solana's requirements.
+ */
 public class ShortvecEncoding {
 
-    public static byte[] encodeLength(int len) {
-        byte[] out = new byte[10];
-        int remLen = len;
-        int cursor = 0;
-
-        for (;;) {
-            int elem = remLen & 0x7f;
-            remLen >>= 7;
-            if (remLen == 0) {
-                uint16ToByteArrayLE(elem, out, cursor);
-                break;
-            } else {
-                elem |= 0x80;
-                uint16ToByteArrayLE(elem, out, cursor);
-                cursor += 1;
-            }
+    /**
+     * Encodes a length using Solana's short vector encoding.
+     *
+     * @param length The length to encode
+     * @return The encoded byte array
+     */
+    public static byte[] encodeLength(int length) {
+        byte[] buffer = new byte[5];
+        int i = 0;
+        while (length > 127) {
+            buffer[i++] = (byte) ((length & 0x7F) | 0x80);
+            length >>>= 7;
         }
+        buffer[i++] = (byte) (length & 0x7F);
+        byte[] result = new byte[i];
+        System.arraycopy(buffer, 0, result, 0, i);
+        return result;
+    }
 
-        byte[] bytes = new byte[cursor + 1];
-        System.arraycopy(out, 0, bytes, 0, cursor + 1);
-
-        return bytes;
+    /**
+     * Decodes a short vector encoded length.
+     *
+     * @param bytes The byte array containing the encoded length
+     * @return The decoded length
+     */
+    public static int decodeLength(byte[] bytes) {
+        int length = 0;
+        int shift = 0;
+        for (byte b : bytes) {
+            length |= (b & 0x7F) << shift;
+            if ((b & 0x80) == 0) {
+                break;
+            }
+            shift += 7;
+        }
+        return length;
     }
 }

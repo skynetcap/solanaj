@@ -3,6 +3,7 @@ package org.p2p.solanaj.rpc;
 import org.p2p.solanaj.core.Account;
 import org.p2p.solanaj.core.PublicKey;
 import org.p2p.solanaj.core.Transaction;
+import org.p2p.solanaj.core.VersionedTransaction;
 import org.p2p.solanaj.rpc.types.*;
 import org.p2p.solanaj.rpc.types.RpcResultTypes.ValueLong;
 import org.p2p.solanaj.rpc.types.TokenResultObjects.TokenAccount;
@@ -1251,6 +1252,59 @@ public class RpcApi {
 
         List<Double> result = client.call("getBlocksWithLimit", params, List.class);
         return result.stream().map(Double::longValue).collect(Collectors.toList());
+    }
+
+    /**
+     * Sends a VersionedTransaction to the network.
+     *
+     * @param transaction The VersionedTransaction to send
+     * @param signers     The list of signers for the transaction
+     * @return The transaction signature as a base58 encoded string
+     * @throws RpcException if there's an error during the RPC call
+     */
+    public String sendTransaction(VersionedTransaction transaction, Account... signers) throws RpcException {
+        transaction.sign(Arrays.asList(signers));
+
+        byte[] serializedTransaction = transaction.serialize();
+        String encodedTransaction = Base64.getEncoder().encodeToString(serializedTransaction);
+
+        List<Object> params = Arrays.asList(encodedTransaction, new RpcSendTransactionConfig());
+
+        return client.call("sendTransaction", params, String.class);
+    }
+
+    /**
+     * Sends a versioned transaction to the Solana network.
+     *
+     * @param vt The VersionedTransaction to send
+     * @return The transaction signature as a String
+     * @throws RpcException if the transaction fails to send
+     */
+    public String sendVersionedTransaction(VersionedTransaction vt) throws RpcException {
+        Objects.requireNonNull(vt, "VersionedTransaction cannot be null");
+        byte[] serializedTransaction = vt.serialize();
+
+        String base64Transaction = Base64.getEncoder().encodeToString(serializedTransaction);
+        List<Object> params = Arrays.asList(base64Transaction, new RpcSendTransactionConfig());
+
+        return client.call("sendTransaction", params, String.class);
+    }
+
+    /**
+     * Simulates a versioned transaction.
+     *
+     * @param vt The VersionedTransaction to simulate
+     * @return The simulated transaction result
+     * @throws RpcException if the simulation fails
+     */
+    public SimulatedTransaction simulateVersionedTransaction(VersionedTransaction vt) throws RpcException {
+        Objects.requireNonNull(vt, "VersionedTransaction cannot be null");
+        byte[] serializedTransaction = vt.serialize();
+
+        String base64Transaction = Base64.getEncoder().encodeToString(serializedTransaction);
+        List<Object> params = Arrays.asList(base64Transaction, new SimulateTransactionConfig(Encoding.base64));
+
+        return client.call("simulateTransaction", params, SimulatedTransaction.class);
     }
 
 }
