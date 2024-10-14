@@ -123,7 +123,7 @@ public class VersionedMessage {
      *
      * @return Serialized V0 message as a byte array
      */
-    private byte[] serializeV0Message() {
+    public byte[] serializeV0Message() {
         byte[] headerBytes = header.serialize();
         byte[] accountKeysBytes = serializeAccountKeys();
         byte[] recentBlockhashBytes = recentBlockhash.getBytes();

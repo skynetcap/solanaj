@@ -74,7 +74,7 @@ public class VersionedTransaction {
      * @return The serialized transaction as a byte array
      */
     public byte[] serialize() {
-        byte[] messageBytes = message.serialize();
+        byte[] messageBytes = message.serializeV0Message();
         int totalLength = 1 + signatures.size() * 64 + messageBytes.length;
         
         ByteBuffer buffer = ByteBuffer.allocate(totalLength);
