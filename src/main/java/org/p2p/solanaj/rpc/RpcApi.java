@@ -266,6 +266,7 @@ public class RpcApi {
         });
 
         ProgramAccountConfig programAccountConfig = new ProgramAccountConfig(filters);
+        programAccountConfig.setEncoding(Encoding.base64);
         params.add(programAccountConfig);
 
         List<AbstractMap> rawResult = client.call("getProgramAccounts", params, List.class);
