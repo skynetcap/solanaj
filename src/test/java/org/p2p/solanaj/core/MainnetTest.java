@@ -323,6 +323,8 @@ public class MainnetTest extends AccountBasedTest {
     }
 
     @Test
+    @Disabled
+    @Deprecated
     public void getSnapshotSlotTest() throws RpcException {
         long snapshotSlot = client.getApi().getSnapshotSlot();
         LOGGER.info(String.format("Snapshot slot = %d", snapshotSlot));
@@ -455,6 +457,8 @@ public class MainnetTest extends AccountBasedTest {
     }
 
     @Test
+    @Disabled
+    @Deprecated
     public void getFeesRateGovernorTest() throws RpcException {
         FeeRateGovernorInfo feeRateGovernorInfo = client.getApi().getFeeRateGovernor();
         LOGGER.info(feeRateGovernorInfo.getValue().getFeeRateGovernor().toString());
@@ -468,6 +472,8 @@ public class MainnetTest extends AccountBasedTest {
     }
 
     @Test
+    @Disabled
+    @Deprecated
     public void getFeesInfoTest() throws RpcException {
         FeesInfo feesInfo = client.getApi().getFees();
         LOGGER.info(feesInfo.toString());
@@ -507,6 +513,8 @@ public class MainnetTest extends AccountBasedTest {
     }
 
     @Test
+    @Disabled
+    @Deprecated
     public void getRecentBlockhashTest() throws RpcException {
         String recentBlockhash = client.getApi().getRecentBlockhash();
         LOGGER.info(String.format("Recent blockhash = %s", recentBlockhash));
@@ -762,24 +770,24 @@ public class MainnetTest extends AccountBasedTest {
 
         ConfirmedTransaction transactionInfo = client.getApi().getTransaction(transactionSignature);
 
-        String fromKey = transactionInfo.getTransaction().getMessage().getAccountKeys().get(0);
-        String toKey = transactionInfo.getTransaction().getMessage().getAccountKeys().get(1);
+        PublicKey fromKey = transactionInfo.getTransaction().getMessage().getAccountKeys().get(0);
+        PublicKey toKey = transactionInfo.getTransaction().getMessage().getAccountKeys().get(1);
 
-        assertEquals("HHntUXQbUBdx8HZQQaT7W1ZSgKRitMtForz4YJXc6qF6", fromKey);
-        assertEquals("6QcgNYEqHeUohoJWR5ppuRg9Ugh6scMzJY4j4tFnrZMu", toKey);
+        assertEquals("HHntUXQbUBdx8HZQQaT7W1ZSgKRitMtForz4YJXc6qF6", fromKey.toBase58());
+        assertEquals("6QcgNYEqHeUohoJWR5ppuRg9Ugh6scMzJY4j4tFnrZMu", toKey.toBase58());
 
         ConfirmedTransaction transactionInfoCommitted = client.getApi().getTransaction(transactionSignature, Commitment.CONFIRMED);
 
-        String fromKeyCommitted = transactionInfoCommitted.getTransaction().getMessage().getAccountKeys().get(0);
-        String toKeyCommitted = transactionInfoCommitted.getTransaction().getMessage().getAccountKeys().get(1);
+        PublicKey fromKeyCommitted = transactionInfoCommitted.getTransaction().getMessage().getAccountKeys().get(0);
+        PublicKey toKeyCommitted = transactionInfoCommitted.getTransaction().getMessage().getAccountKeys().get(1);
 
-        assertEquals("HHntUXQbUBdx8HZQQaT7W1ZSgKRitMtForz4YJXc6qF6", fromKeyCommitted);
-        assertEquals("6QcgNYEqHeUohoJWR5ppuRg9Ugh6scMzJY4j4tFnrZMu", toKeyCommitted);
+        assertEquals("HHntUXQbUBdx8HZQQaT7W1ZSgKRitMtForz4YJXc6qF6", fromKeyCommitted.toBase58());
+        assertEquals("6QcgNYEqHeUohoJWR5ppuRg9Ugh6scMzJY4j4tFnrZMu", toKeyCommitted.toBase58());
     }
 
     @Test
     public void isBlockhashValidTest() throws RpcException, InterruptedException {
-        String recentBlockHash = client.getApi().getRecentBlockhash();
+        String recentBlockHash = client.getApi().getLatestBlockhash().getValue().getBlockhash();
         Thread.sleep(500L);
         assertTrue(client.getApi().isBlockhashValid(recentBlockHash));
     }
