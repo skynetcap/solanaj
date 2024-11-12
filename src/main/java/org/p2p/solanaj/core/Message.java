@@ -14,7 +14,6 @@ import lombok.Getter;
 
 import org.p2p.solanaj.utils.GuardedArrayUtils;
 
-
 public class Message {
     @Getter
     public static class MessageHeader {

@@ -4,7 +4,7 @@
     <groupId>com.mmorrell</groupId>
     <artifactId>solanaj</artifactId>
     <packaging>jar</packaging>
-    <version>1.17.6</version>
+    <version>1.19.3-SNAPSHOT</version>
     <name>${project.groupId}:${project.artifactId}</name>
     <description>Java client for Solana RPC</description>
     <url>https://github.com/skynetcap/solanaj</url>
@@ -18,7 +18,7 @@
         <connection>scm:git:git://github.com/skynetcap/solanaj.git</connection>
         <developerConnection>scm:git:ssh://github.com/skynetcap/solanaj.git</developerConnection>
         <url>https://github.com/skynetcap/solanaj/tree/main</url>
-    </scm>
+    </scm>  
     <developers>
         <developer>
             <name>Michael Morrell</name>
@@ -66,7 +66,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>33.2.1-android</version>
+            <version>33.3.1-jre</version>
         </dependency>
         <dependency>
             <groupId>com.google.protobuf</groupId>
@@ -80,7 +80,7 @@
         </dependency>
         <dependency>
             <groupId>com.squareup.moshi</groupId>
-                <artifactId>moshi</artifactId>
+            <artifactId>moshi</artifactId>
             <version>1.15.1</version>
         </dependency>
         <dependency>
@@ -112,12 +112,18 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
-            <version>2.17.2</version>
+            <version>2.18.0</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.17.2</version>
+            <version>2.18.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>3.12.4</version>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
@@ -222,8 +228,8 @@
                                     <goal>sign</goal>
                                 </goals>
                                 <configuration>
-                                    <homedir>/Users/chintan_mbp/.gnupg/</homedir>
-                                    <keyname>4B9021119F83557FF09AEBAAA4751749EC8210A3</keyname>
+                                    <homedir>c:/Users/Michael/.gnupg/</homedir>
+                                    <keyname>0x27FAE7D2</keyname>
                                 </configuration>
                             </execution>
                         </executions>
