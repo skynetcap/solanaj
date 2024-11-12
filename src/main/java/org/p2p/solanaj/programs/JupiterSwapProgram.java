@@ -102,8 +102,8 @@ public final class JupiterSwapProgram {
     }
 
     public static String swapToken(RpcClient rpcClient, Account account, URI quoteUri) {
-        JsonNode quote = getJupiterQuote(quoteUri);
-        return swapToken(rpcClient, account, quote);
+        JsonNode quoteJsonNode = getJupiterQuote(quoteUri);
+        return swapToken(rpcClient, account, quoteJsonNode);
     }
 
     public record SwapRequest(Object quoteResponse, String userPublicKey) {}
