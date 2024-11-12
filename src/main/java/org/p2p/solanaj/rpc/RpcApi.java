@@ -1,31 +1,20 @@
 package org.p2p.solanaj.rpc;
 
-import java.util.*;
-import java.util.stream.Collectors;
 import org.p2p.solanaj.core.Account;
 import org.p2p.solanaj.core.LegacyTransaction;
 import org.p2p.solanaj.core.PublicKey;
 import org.p2p.solanaj.core.Transaction;
 import org.p2p.solanaj.rpc.types.*;
-import org.p2p.solanaj.rpc.types.config.BlockConfig;
-import org.p2p.solanaj.rpc.types.ConfirmedSignFAddr2;
-import org.p2p.solanaj.rpc.types.DataSize;
-import org.p2p.solanaj.rpc.types.Filter;
-import org.p2p.solanaj.rpc.types.Memcmp;
-import org.p2p.solanaj.rpc.types.config.LargestAccountConfig;
-import org.p2p.solanaj.rpc.types.config.LeaderScheduleConfig;
-import org.p2p.solanaj.rpc.types.config.ProgramAccountConfig;
-import org.p2p.solanaj.rpc.types.config.RpcEpochConfig;
 import org.p2p.solanaj.rpc.types.RpcResultTypes.ValueLong;
-import org.p2p.solanaj.rpc.types.config.RpcSendTransactionConfig;
+import org.p2p.solanaj.rpc.types.TokenResultObjects.TokenAccount;
+import org.p2p.solanaj.rpc.types.TokenResultObjects.TokenAmountInfo;
+import org.p2p.solanaj.rpc.types.config.*;
 import org.p2p.solanaj.rpc.types.config.RpcSendTransactionConfig.Encoding;
-import org.p2p.solanaj.rpc.types.config.SignatureStatusConfig;
-import org.p2p.solanaj.rpc.types.config.SimulateTransactionConfig;
-import org.p2p.solanaj.rpc.types.TokenResultObjects.*;
-import org.p2p.solanaj.rpc.types.config.Commitment;
-import org.p2p.solanaj.rpc.types.config.VoteAccountConfig;
 import org.p2p.solanaj.ws.SubscriptionWebSocketClient;
 import org.p2p.solanaj.ws.listeners.NotificationEventListener;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class RpcApi {
     private final RpcClient client;
@@ -34,28 +23,30 @@ public class RpcApi {
         this.client = client;
     }
 
-    public String getLatestBlockhash() throws RpcException {
+    public LatestBlockhash getLatestBlockhash() throws RpcException {
         return getLatestBlockhash(null);
     }
 
-    public String getLatestBlockhash(Commitment commitment) throws RpcException {
+    public LatestBlockhash getLatestBlockhash(Commitment commitment) throws RpcException {
         List<Object> params = new ArrayList<>();
 
-        if (null != commitment) {
+        if (commitment != null) {
             params.add(Map.of("commitment", commitment.getValue()));
         }
 
-        return client.call("getLatestBlockhash", params, RecentBlockhash.class).getValue().getBlockhash();
+        return client.call("getLatestBlockhash", params, LatestBlockhash.class);
     }
 
+    @Deprecated
     public String getRecentBlockhash() throws RpcException {
         return getRecentBlockhash(null);
     }
 
+    @Deprecated
     public String getRecentBlockhash(Commitment commitment) throws RpcException {
         List<Object> params = new ArrayList<>();
 
-        if (null != commitment) {
+        if (commitment != null) {
             params.add(Map.of("commitment", commitment.getValue()));
         }
 
@@ -148,7 +139,7 @@ public class RpcApi {
                                         RpcSendTransactionConfig rpcSendTransactionConfig)
             throws RpcException {
         if (recentBlockHash == null) {
-            recentBlockHash = getRecentBlockhash();
+            recentBlockHash = getLatestBlockhash().getValue().getBlockhash();
         }
         transaction.setRecentBlockHash(recentBlockHash);
         transaction.sign(signers);
@@ -195,7 +186,7 @@ public class RpcApi {
         List<Object> params = new ArrayList<>();
 
         params.add(account.toString());
-        if (null != commitment) {
+        if (commitment != null) {
             params.add(Map.of("commitment", commitment.getValue()));
         }
 
@@ -244,28 +235,6 @@ public class RpcApi {
 
         params.add(account.toString());
         params.add(new ConfirmedSignFAddr2(limit, commitment));
-
-        List<AbstractMap> rawResult = client.call("getSignaturesForAddress", params, List.class);
-
-        List<SignatureInformation> result = new ArrayList<>();
-        for (AbstractMap item : rawResult) {
-            result.add(new SignatureInformation(item));
-        }
-
-        return result;
-    }
-
-    public List<SignatureInformation> getSignaturesForAddress(PublicKey account, String beforeSignature, int limit,
-                                                              Commitment commitment)
-            throws RpcException {
-        if (beforeSignature == null) {
-            return getSignaturesForAddress(account, limit, commitment);
-        }
-
-        List<Object> params = new ArrayList<>();
-
-        params.add(account.toString());
-        params.add(new ConfirmedSignFAddr2(beforeSignature, limit, commitment));
 
         List<AbstractMap> rawResult = client.call("getSignaturesForAddress", params, List.class);
 
@@ -357,6 +326,7 @@ public class RpcApi {
         memcmpList.forEach(memcmp -> filters.add(new Filter(memcmp)));
 
         ProgramAccountConfig programAccountConfig = new ProgramAccountConfig(filters);
+        programAccountConfig.setEncoding(Encoding.base64);
         params.add(programAccountConfig);
 
         List<AbstractMap> rawResult = client.call("getProgramAccounts", params, List.class);
@@ -417,7 +387,7 @@ public class RpcApi {
         List<Object> params = new ArrayList<>();
 
         params.add(dataLength);
-        if (null != commitment) {
+        if (commitment != null) {
             params.add(Map.of("commitment", commitment.getValue()));
         }
 
@@ -445,7 +415,7 @@ public class RpcApi {
     public long getBlockHeight(Commitment commitment) throws RpcException {
         List<Object> params = new ArrayList<>();
 
-        if (null != commitment) {
+        if (commitment != null) {
             params.add(Map.of("commitment", commitment.getValue()));
         }
         return client.call("getBlockHeight", params, Long.class);
@@ -486,7 +456,7 @@ public class RpcApi {
 
         params.add(address.toString());
         params.add(lamports);
-        if (null != commitment) {
+        if (commitment != null) {
             params.add(Map.of("commitment", commitment.getValue()));
         }
 
@@ -501,48 +471,139 @@ public class RpcApi {
         return client.call("getBlockCommitment", params, BlockCommitment.class);
     }
 
+    @Deprecated
     public FeeCalculatorInfo getFeeCalculatorForBlockhash(String blockhash) throws RpcException {
         return getFeeCalculatorForBlockhash(blockhash, null);
     }
 
+    @Deprecated
     public FeeCalculatorInfo getFeeCalculatorForBlockhash(String blockhash, Commitment commitment) throws RpcException {
         List<Object> params = new ArrayList<>();
 
         params.add(blockhash);
-        if (null != commitment) {
+        if (commitment != null) {
             params.add(Map.of("commitment", commitment.getValue()));
         }
 
         return client.call("getFeeCalculatorForBlockhash", params, FeeCalculatorInfo.class);
     }
 
+    @Deprecated
     public FeeRateGovernorInfo getFeeRateGovernor() throws RpcException {
         return client.call("getFeeRateGovernor", new ArrayList<>(), FeeRateGovernorInfo.class);
     }
 
+    /**
+     * Gets the fee the network will charge for a particular message
+     *
+     * @param message Base-64 encoded Message
+     * @return Fee for the message
+     * @throws RpcException if the RPC call fails
+     */
     public Long getFeeForMessage(String message) throws RpcException {
         return getFeeForMessage(message, null);
     }
 
+    /**
+     * Gets the fee the network will charge for a particular message
+     *
+     * @param message Base-64 encoded Message
+     * @param commitment Optional commitment level
+     * @return Fee for the message
+     * @throws RpcException if the RPC call fails
+     */
     public Long getFeeForMessage(String message, Commitment commitment) throws RpcException {
         List<Object> params = new ArrayList<>();
         params.add(message);
 
-        if (null != commitment) {
-            params.add(Map.of("commitment", commitment.getValue()));
+        Map<String, Object> configMap = new HashMap<>();
+        if (commitment != null) {
+            configMap.put("commitment", commitment.getValue());
         }
+        params.add(configMap);
 
-        return client.call("getFeeForMessage", params, ValueLong.class).getValue();
+        Long feeValue = client.call("getFeeForMessage", params, ValueLong.class).getValue();
+
+        if (feeValue == null) {
+            return 0L;
+        } else {
+            return feeValue;
+        }
     }
 
+    /**
+     * Gets a list of prioritization fees from recent blocks
+     *
+     * @return List of RecentPrioritizationFees
+     * @throws RpcException if the RPC call fails
+     */
+    public List<RecentPrioritizationFees> getRecentPrioritizationFees() throws RpcException {
+        return getRecentPrioritizationFees(null);
+    }
+
+    /**
+     * Gets a list of prioritization fees from recent blocks
+     *
+     * @param addresses Optional list of PublicKey addresses to filter by
+     * @return List of RecentPrioritizationFees
+     * @throws RpcException if the RPC call fails
+     */
+    public List<RecentPrioritizationFees> getRecentPrioritizationFees(List<PublicKey> addresses) throws RpcException {
+        List<Object> params = new ArrayList<>();
+
+        if (addresses != null) {
+            params.add(addresses.stream().map(PublicKey::toBase58).toList());
+        }
+
+        List<Map<String, Object>> rawResult = client.call("getRecentPrioritizationFees", params, List.class);
+        
+        List<RecentPrioritizationFees> result = new ArrayList<>();
+        for (Map<String, Object> item : rawResult) {
+            result.add(new RecentPrioritizationFees(item));
+        }
+        
+        return result;
+    }
+
+    /**
+     * Gets the current stake minimum delegation
+     *
+     * @return Stake minimum delegation in lamports
+     * @throws RpcException if the RPC call fails
+     */
+    public Long getStakeMinimumDelegation() throws RpcException {
+        return getStakeMinimumDelegation(null);
+    }
+
+    /**
+     * Gets the current stake minimum delegation
+     *
+     * @param commitment Optional commitment level
+     * @return Stake minimum delegation in lamports
+     * @throws RpcException if the RPC call fails
+     */
+    public Long getStakeMinimumDelegation(Commitment commitment) throws RpcException {
+        List<Object> params = new ArrayList<>();
+        
+        if (commitment != null) {
+            Map<String, Object> configMap = new HashMap<>();
+            configMap.put("commitment", commitment.getValue());
+            params.add(configMap);
+        }
+
+        return client.call("getStakeMinimumDelegation", params, ValueLong.class).getValue();
+    }
+
+    @Deprecated
     public FeesInfo getFees() throws RpcException {
         return getFees(null);
     }
 
+    @Deprecated
     public FeesInfo getFees(Commitment commitment) throws RpcException {
         List<Object> params = new ArrayList<>();
 
-        if (null != commitment) {
+        if (commitment != null) {
             params.add(Map.of("commitment", commitment.getValue()));
         }
 
@@ -556,7 +617,7 @@ public class RpcApi {
     public long getTransactionCount(Commitment commitment) throws RpcException {
         List<Object> params = new ArrayList<>();
 
-        if (null != commitment) {
+        if (commitment != null) {
             params.add(Map.of("commitment", commitment.getValue()));
         }
 
@@ -632,7 +693,7 @@ public class RpcApi {
 
         params.add(slot);
 
-        if (null != optionalParams) {
+        if (optionalParams != null) {
             BlockConfig blockConfig = new BlockConfig();
             if (optionalParams.containsKey("commitment")) {
                 Commitment commitment = (Commitment) optionalParams.get("commitment");
@@ -671,7 +732,7 @@ public class RpcApi {
     public EpochInfo getEpochInfo(Commitment commitment) throws RpcException {
         List<Object> params = new ArrayList<>();
 
-        if (null != commitment) {
+        if (commitment != null) {
             params.add(Map.of("commitment", commitment.getValue()));
         }
 
@@ -719,7 +780,7 @@ public class RpcApi {
     public InflationGovernor getInflationGovernor(Commitment commitment) throws RpcException {
         List<Object> params = new ArrayList<>();
 
-        if (null != commitment) {
+        if (commitment != null) {
             params.add(Map.of("commitment", commitment.getValue()));
         }
 
@@ -737,10 +798,10 @@ public class RpcApi {
         params.add(addresses.stream().map(PublicKey::toString).collect(Collectors.toList()));
 
         RpcEpochConfig rpcEpochConfig = new RpcEpochConfig();
-        if (null != epoch) {
+        if (epoch != null) {
             rpcEpochConfig.setEpoch(epoch);
         }
-        if (null != commitment) {
+        if (commitment != null) {
             rpcEpochConfig.setCommitment(commitment.getValue());
         }
         params.add(rpcEpochConfig);
@@ -764,7 +825,7 @@ public class RpcApi {
     public long getSlot(Commitment commitment) throws RpcException {
         List<Object> params = new ArrayList<>();
 
-        if (null != commitment) {
+        if (commitment != null) {
             params.add(Map.of("commitment", commitment.getValue()));
         }
 
@@ -778,7 +839,7 @@ public class RpcApi {
     public PublicKey getSlotLeader(Commitment commitment) throws RpcException {
         List<Object> params = new ArrayList<>();
 
-        if (null != commitment) {
+        if (commitment != null) {
             params.add(Map.of("commitment", commitment.getValue()));
         }
 
@@ -801,6 +862,7 @@ public class RpcApi {
         return result;
     }
 
+    @Deprecated
     public long getSnapshotSlot() throws RpcException {
         return client.call("getSnapshotSlot", new ArrayList<>(), Long.class);
     }
@@ -831,7 +893,7 @@ public class RpcApi {
     public Supply getSupply(Commitment commitment) throws RpcException {
         List<Object> params = new ArrayList<>();
 
-        if (null != commitment) {
+        if (commitment != null) {
             params.add(Map.of("commitment", commitment.getValue()));
         }
 
@@ -873,7 +935,7 @@ public class RpcApi {
         List<Object> params = new ArrayList<>();
         params.add(tokenAccount.toString());
 
-        if (null != commitment) {
+        if (commitment != null) {
             params.add(Map.of("commitment", commitment.getValue()));
         }
 
@@ -982,10 +1044,12 @@ public class RpcApi {
         return client.call("getVoteAccounts", params, VoteAccounts.class);
     }
 
+    @Deprecated
     public StakeActivation getStakeActivation(PublicKey publicKey) throws RpcException {
         return getStakeActivation(publicKey, null, null);
     }
 
+    @Deprecated
     public StakeActivation getStakeActivation(PublicKey publicKey, Long epoch, Commitment commitment) throws RpcException {
         List<Object> params = new ArrayList<>();
         params.add(publicKey.toBase58());
@@ -1180,6 +1244,74 @@ public class RpcApi {
         Boolean result = (Boolean) call.get("value");
 
         return result;
+    }
+
+    /**
+     * Returns a list of confirmed blocks between two slots
+     *
+     * @param startSlot Start slot (inclusive)
+     * @param endSlot End slot (inclusive)
+     * @return List of block numbers between start_slot and end_slot
+     * @throws RpcException if the RPC call fails
+     */
+    public List<Long> getBlocks(long startSlot, long endSlot) throws RpcException {
+        return getBlocks(startSlot, endSlot, null);
+    }
+
+    /**
+     * Returns a list of confirmed blocks between two slots
+     *
+     * @param startSlot Start slot (inclusive)
+     * @param endSlot End slot (inclusive)
+     * @param commitment Bank state to query
+     * @return List of block numbers between start_slot and end_slot
+     * @throws RpcException if the RPC call fails
+     */
+    public List<Long> getBlocks(long startSlot, long endSlot, Commitment commitment) throws RpcException {
+        List<Object> params = new ArrayList<>();
+        params.add(startSlot);
+        params.add(endSlot);
+
+        if (commitment != null) {
+            params.add(Map.of("commitment", commitment.getValue()));
+        }
+
+        List<Double> result = client.call("getBlocks", params, List.class);
+        return result.stream().map(Double::longValue).collect(Collectors.toList());
+    }
+
+    /**
+     * Returns a list of confirmed blocks starting at the given slot
+     *
+     * @param startSlot Start slot
+     * @param limit Maximum number of blocks to return
+     * @return List of block numbers from start_slot to limit
+     * @throws RpcException if the RPC call fails
+     */
+    public List<Long> getBlocksWithLimit(long startSlot, long limit) throws RpcException {
+        return getBlocksWithLimit(startSlot, limit, null);
+    }
+
+    /**
+     * Returns a list of confirmed blocks starting at the given slot
+     *
+     * @param startSlot Start slot
+     * @param limit Maximum number of blocks to return
+     * @param commitment Bank state to query
+     * @return List of block numbers from start_slot to limit
+     * @throws RpcException if the RPC call fails
+     */
+    public List<Long> getBlocksWithLimit(long startSlot, long limit, Commitment commitment) throws RpcException {
+        List<Object> params = new ArrayList<>();
+        params.add(startSlot);
+        params.add(limit);
+
+        if (commitment != null) {
+            params.add(Map.of("commitment", commitment.getValue()));
+        }
+
+        List<Double> result = client.call("getBlocksWithLimit", params, List.class);
+        return result.stream().map(Double::longValue).collect(Collectors.toList());
     }
 
 }

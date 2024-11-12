@@ -1,7 +1,7 @@
 package org.p2p.solanaj.core;
 
 import org.bitcoinj.core.Base58;
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.BeforeAll;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -19,7 +19,7 @@ public class AccountBasedTest {
     public static PublicKey usdcDestination;
     public static final Logger LOGGER = Logger.getLogger(AccountBasedTest.class.getName());
 
-    @BeforeClass
+    @BeforeAll
     public static void setup() {
         // Build account from secretkey.dat
         byte[] data = new byte[0];

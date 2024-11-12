@@ -1,15 +1,19 @@
 package org.p2p.solanaj.core;
 
+import org.bitcoinj.core.Base58;
+import org.p2p.solanaj.utils.ShortvecEncoding;
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Comparator;
+import java.util.stream.Collectors;
 
 import lombok.Getter;
-import org.bitcoinj.core.Base58;
 
 import org.p2p.solanaj.utils.GuardedArrayUtils;
-import org.p2p.solanaj.utils.Shortvec;
+
 
 public class Message {
     @Getter
@@ -124,13 +128,13 @@ public class Message {
 
         CompiledInstruction compiledInstruction = new CompiledInstruction();
         compiledInstruction.programIdIndex = (byte) findAccountIndex(keysList, instruction.getProgramId());
-        compiledInstruction.keyIndicesCount = Shortvec.encodeLength(keysSize);
+        compiledInstruction.keyIndicesCount = ShortvecEncoding.encodeLength(keysSize);
         byte[] keyIndices = new byte[keysSize];
         for (int i = 0; i < instruction.getKeys().size(); i++) {
             keyIndices[i] = (byte) findAccountIndex(keysList, instruction.getKeys().get(i).getPublicKey());
         }
         compiledInstruction.keyIndices = keyIndices;
-        compiledInstruction.dataLength = Shortvec.encodeLength(instruction.getData().length);
+        compiledInstruction.dataLength = ShortvecEncoding.encodeLength(instruction.getData().length);
         compiledInstruction.data = instruction.getData();
         compiledInstructions.add(compiledInstruction);
         return this;
@@ -153,15 +157,15 @@ public class Message {
         List<AccountMeta> keysList = getAccountKeys();
         int accountKeysSize = keysList.size();
 
-        byte[] accountAddressesLength = Shortvec.encodeLength(accountKeysSize);
+        byte[] accountAddressesLength = ShortvecEncoding.encodeLength(accountKeysSize);
 
-        byte[] instructionsCountLength = Shortvec.encodeLength(compiledInstructions.size());
+        byte[] instructionsCountLength = ShortvecEncoding.encodeLength(compiledInstructions.size());
         int compiledInstructionsLength = 0;
         for (CompiledInstruction compiledInstruction : this.compiledInstructions) {
             compiledInstructionsLength += compiledInstruction.getLength();
         }
 
-        byte[] addressTableLookupsCountLength = Shortvec.encodeLength(addressTableLookups.size());
+        byte[] addressTableLookupsCountLength = ShortvecEncoding.encodeLength(addressTableLookups.size());
         int addressTableLookupsLength = 0;
         for (MessageAddressTableLookup addressTableLookup : this.addressTableLookups) {
             addressTableLookupsLength += addressTableLookup.getLength();
@@ -213,7 +217,7 @@ public class Message {
         MessageHeader messageHeader = new MessageHeader(messageHeaderBytes);
 
         // Total static account keys
-        int accountKeysSize = Shortvec.decodeLength(serializedMessageList);
+        int accountKeysSize = ShortvecEncoding.decodeLength(serializedMessageList);
         List<AccountMeta> accountKeys = new ArrayList<>(accountKeysSize);
         for (int i = 0; i < accountKeysSize; i++) {
             byte[] accountMetaPublicKeyByteArray = GuardedArrayUtils.guardedSplice(serializedMessageList, 0,
@@ -229,16 +233,16 @@ public class Message {
                 PublicKey.PUBLIC_KEY_LENGTH));
 
         // Deserialize instructions
-        int instructionsLength = Shortvec.decodeLength(serializedMessageList);
+        int instructionsLength = ShortvecEncoding.decodeLength(serializedMessageList);
         List<CompiledInstruction> compiledInstructions = new ArrayList<>(instructionsLength);
         for (int i = 0; i < instructionsLength; i++) {
             CompiledInstruction compiledInstruction = new CompiledInstruction();
             compiledInstruction.programIdIndex = GuardedArrayUtils.guardedShift(serializedMessageList);
-            int keysSize = Shortvec.decodeLength(serializedMessageList); // keysSize
-            compiledInstruction.keyIndicesCount = Shortvec.encodeLength(keysSize);
+            int keysSize = ShortvecEncoding.decodeLength(serializedMessageList); // keysSize
+            compiledInstruction.keyIndicesCount = ShortvecEncoding.encodeLength(keysSize);
             compiledInstruction.keyIndices = GuardedArrayUtils.guardedSplice(serializedMessageList, 0, keysSize);
-            var dataLength = Shortvec.decodeLength(serializedMessageList);
-            compiledInstruction.dataLength = Shortvec.encodeLength(dataLength);
+            var dataLength = ShortvecEncoding.decodeLength(serializedMessageList);
+            compiledInstruction.dataLength = ShortvecEncoding.encodeLength(dataLength);
             compiledInstruction.data = GuardedArrayUtils.guardedSplice(serializedMessageList, 0, dataLength);
 
             compiledInstructions.add(compiledInstruction);
@@ -246,17 +250,17 @@ public class Message {
         }
 
         // Deserialize addressTableLookups
-        int addressTableLookupsLength = Shortvec.decodeLength(serializedMessageList);
+        int addressTableLookupsLength = ShortvecEncoding.decodeLength(serializedMessageList);
         List<MessageAddressTableLookup> addressTableLookups = new ArrayList<>(addressTableLookupsLength);
         for (int i = 0; i < addressTableLookupsLength; i++) {
             MessageAddressTableLookup addressTableLookup = new MessageAddressTableLookup();
             byte[] accountKeyByteArray = GuardedArrayUtils.guardedSplice(serializedMessageList, 0, PublicKey.PUBLIC_KEY_LENGTH);
             addressTableLookup.accountKey = new PublicKey(accountKeyByteArray);
-            int writableIndexesLength = Shortvec.decodeLength(serializedMessageList); // keysSize
-            addressTableLookup.writableIndexesCountLength = Shortvec.encodeLength(writableIndexesLength);
+            int writableIndexesLength = ShortvecEncoding.decodeLength(serializedMessageList); // keysSize
+            addressTableLookup.writableIndexesCountLength = ShortvecEncoding.encodeLength(writableIndexesLength);
             addressTableLookup.writableIndexes = GuardedArrayUtils.guardedSplice(serializedMessageList, 0, writableIndexesLength);
-            int readonlyIndexesLength = Shortvec.decodeLength(serializedMessageList);
-            addressTableLookup.readonlyIndexesCountLength = Shortvec.encodeLength(readonlyIndexesLength);
+            int readonlyIndexesLength = ShortvecEncoding.decodeLength(serializedMessageList);
+            addressTableLookup.readonlyIndexesCountLength = ShortvecEncoding.encodeLength(readonlyIndexesLength);
             addressTableLookup.readonlyIndexes = GuardedArrayUtils.guardedSplice(serializedMessageList, 0, readonlyIndexesLength);
 
             addressTableLookups.add(addressTableLookup);
@@ -271,9 +275,18 @@ public class Message {
 
     public List<AccountMeta> getAccountKeys() {
         List<AccountMeta> keysList = accountKeys.getList();
-        int feePayerIndex = findAccountIndex(keysList, feePayer.getPublicKey());
 
-        List<AccountMeta> newList = new ArrayList<>();
+        // Check whether custom sorting is needed. The `getAccountKeys()` method returns a reversed list of accounts, with signable and mutable accounts at the end, but the fee is placed first. When a transaction involves multiple accounts that need signing, an incorrect order can cause bugs. Change to custom sorting based on the contract order.
+        boolean needSort = keysList.stream().anyMatch(accountMeta -> accountMeta.getSort() < Integer.MAX_VALUE);
+        if (needSort) {
+            // Sort in ascending order based on the `sort` field.
+            return keysList.stream()
+                    .sorted(Comparator.comparingInt(AccountMeta::getSort))
+                    .collect(Collectors.toList());
+        }
+
+        int feePayerIndex = findAccountIndex(keysList, feePayer.getPublicKey());
+        List<AccountMeta> newList = new ArrayList<AccountMeta>();
         AccountMeta feePayerMeta = keysList.get(feePayerIndex);
         newList.add(new AccountMeta(feePayerMeta.getPublicKey(), true, true));
         keysList.remove(feePayerIndex);

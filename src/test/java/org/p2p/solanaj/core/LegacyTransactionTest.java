@@ -3,8 +3,8 @@ package org.p2p.solanaj.core;
 import org.p2p.solanaj.programs.MemoProgram;
 import org.p2p.solanaj.programs.SystemProgram;
 
-import org.junit.Test;
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Base64;
 import java.util.List;

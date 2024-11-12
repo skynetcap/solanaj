@@ -21,25 +21,24 @@ public class MemoProgram extends Program {
      * @param account signer pubkey
      * @param memo utf-8 string to be written into Solana transaction
      * @return {@link TransactionInstruction} object with memo instruction
+     * @throws IllegalArgumentException if the account is null or the memo is null or empty
      */
     public static TransactionInstruction writeUtf8(PublicKey account, String memo) {
-        // Add signer to AccountMeta keys
-        final List<AccountMeta> keys = Collections.singletonList(
-                new AccountMeta(
-                        account,
-                        true,
-                        false
-                )
-
-        );
-
+        if (account == null) {
+            throw new IllegalArgumentException("Account cannot be null");
+        }
+        if (memo == null || memo.isEmpty()) {
+            throw new IllegalArgumentException("Memo cannot be null or empty");
+        }
+        
         // Convert memo string to UTF-8 byte array
         final byte[] memoBytes = memo.getBytes(StandardCharsets.UTF_8);
 
-        return createTransactionInstruction(
-                PROGRAM_ID,
-                keys,
-                memoBytes
+        // Add signer to AccountMeta keys
+        final List<AccountMeta> keys = Collections.singletonList(
+                new AccountMeta(account, true, false)
         );
+
+        return createTransactionInstruction(PROGRAM_ID, keys, memoBytes);
     }
 }

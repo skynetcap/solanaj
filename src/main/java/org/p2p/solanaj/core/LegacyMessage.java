@@ -1,12 +1,13 @@
 package org.p2p.solanaj.core;
 
+import org.bitcoinj.core.Base58;
+import org.p2p.solanaj.utils.ShortvecEncoding;
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
-
-import org.bitcoinj.core.Base58;
-
-import org.p2p.solanaj.utils.Shortvec;
+import java.util.stream.Collectors;
 
 public class LegacyMessage {
     private static class MessageHeader {
@@ -36,6 +37,7 @@ public class LegacyMessage {
 
     private static final int RECENT_BLOCK_HASH_LENGTH = 32;
 
+    private MessageHeader messageHeader;
     private String recentBlockhash;
     private final AccountKeysList accountKeys;
     private final List<TransactionInstruction> instructions;
@@ -68,12 +70,12 @@ public class LegacyMessage {
             throw new IllegalArgumentException("No instructions provided");
         }
 
-        MessageHeader messageHeader = new MessageHeader();
+        messageHeader = new MessageHeader();
 
         List<AccountMeta> keysList = getAccountKeys();
         int accountKeysSize = keysList.size();
 
-        byte[] accountAddressesLength = Shortvec.encodeLength(accountKeysSize);
+        byte[] accountAddressesLength = ShortvecEncoding.encodeLength(accountKeysSize);
 
         int compiledInstructionsLength = 0;
         List<CompiledInstruction> compiledInstructions = new ArrayList<>();
@@ -88,9 +90,9 @@ public class LegacyMessage {
 
             CompiledInstruction compiledInstruction = new CompiledInstruction();
             compiledInstruction.programIdIndex = (byte) findAccountIndex(keysList, instruction.getProgramId());
-            compiledInstruction.keyIndicesCount = Shortvec.encodeLength(keysSize);
+            compiledInstruction.keyIndicesCount = ShortvecEncoding.encodeLength(keysSize);
             compiledInstruction.keyIndices = keyIndices;
-            compiledInstruction.dataLength = Shortvec.encodeLength(instruction.getData().length);
+            compiledInstruction.dataLength = ShortvecEncoding.encodeLength(instruction.getData().length);
             compiledInstruction.data = instruction.getData();
 
             compiledInstructions.add(compiledInstruction);
@@ -98,7 +100,7 @@ public class LegacyMessage {
             compiledInstructionsLength += compiledInstruction.getLength();
         }
 
-        byte[] instructionsLength = Shortvec.encodeLength(compiledInstructions.size());
+        byte[] instructionsLength = ShortvecEncoding.encodeLength(compiledInstructions.size());
 
         int bufferSize = MessageHeader.HEADER_LENGTH + RECENT_BLOCK_HASH_LENGTH + accountAddressesLength.length
                 + (accountKeysSize * PublicKey.PUBLIC_KEY_LENGTH) + instructionsLength.length
@@ -147,9 +149,18 @@ public class LegacyMessage {
 
     private List<AccountMeta> getAccountKeys() {
         List<AccountMeta> keysList = accountKeys.getList();
-        int feePayerIndex = findAccountIndex(keysList, feePayer.getPublicKey());
 
-        List<AccountMeta> newList = new ArrayList<>();
+        // Check whether custom sorting is needed. The `getAccountKeys()` method returns a reversed list of accounts, with signable and mutable accounts at the end, but the fee is placed first. When a transaction involves multiple accounts that need signing, an incorrect order can cause bugs. Change to custom sorting based on the contract order.
+        boolean needSort = keysList.stream().anyMatch(accountMeta -> accountMeta.getSort() < Integer.MAX_VALUE);
+        if (needSort) {
+            // Sort in ascending order based on the `sort` field.
+            return keysList.stream()
+                    .sorted(Comparator.comparingInt(AccountMeta::getSort))
+                    .collect(Collectors.toList());
+        }
+
+        int feePayerIndex = findAccountIndex(keysList, feePayer.getPublicKey());
+        List<AccountMeta> newList = new ArrayList<AccountMeta>();
         AccountMeta feePayerMeta = keysList.get(feePayerIndex);
         newList.add(new AccountMeta(feePayerMeta.getPublicKey(), true, true));
         keysList.remove(feePayerIndex);

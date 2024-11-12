@@ -1,21 +1,22 @@
 package org.p2p.solanaj.core;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 import org.p2p.solanaj.core.PublicKey.ProgramDerivedAddress;
-
-import static org.junit.Assert.*;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 
 public class PublicKeyTest {
 
-    @Test(expected = IllegalArgumentException.class)
-    public void ivalidKeys() {
-        new PublicKey(new byte[] { 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0 });
-        new PublicKey("300000000000000000000000000000000000000000000000000000000000000000000");
-        new PublicKey("300000000000000000000000000000000000000000000000000000000000000");
+    @Test
+    public void testInvalidKeys() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            new PublicKey(new byte[] { 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0 });
+            new PublicKey("300000000000000000000000000000000000000000000000000000000000000000000");
+            new PublicKey("300000000000000000000000000000000000000000000000000000000000000");
+        });
     }
 
     @Test
@@ -105,6 +106,37 @@ public class PublicKeyTest {
                         programId2);
         assertTrue(programAddress2.getAddress().equals(new PublicKey("GXLbx3CbJuTTtJDZeS1PGzwJJ5jGYVEqcXum7472kpUp")));
         assertEquals(programAddress2.getNonce(), 254);
+    }
+
+    @Test
+    public void testToString() {
+        PublicKey key = new PublicKey("CiDwVBFgWV9E5MvXWoLgnEgn2hK7rJikbvfWavzAQz3");
+        assertEquals("CiDwVBFgWV9E5MvXWoLgnEgn2hK7rJikbvfWavzAQz3", key.toString());
+    }
+
+    @Test
+    public void testHashCode() {
+        PublicKey key1 = new PublicKey("11111111111111111111111111111111");
+        PublicKey key2 = new PublicKey("11111111111111111111111111111111");
+        PublicKey key3 = new PublicKey("22222222222222222222222222222222");
+
+        assertEquals(key1.hashCode(), key2.hashCode());
+        assertNotEquals(key1.hashCode(), key3.hashCode());
+    }
+
+    @Test
+    public void testInvalidBase58Key() {
+        assertThrows(IllegalArgumentException.class, () -> new PublicKey("InvalidBase58Key"));
+    }
+
+    @Test
+    public void testFindProgramAddressWithLargeNonce() throws Exception {
+        PublicKey programId = new PublicKey("BPFLoader1111111111111111111111111111111111");
+        ProgramDerivedAddress pda = PublicKey.findProgramAddress(
+            Arrays.asList("LargeNonceTest".getBytes()),
+            programId
+        );
+        assertTrue(pda.getNonce() >= 0 && pda.getNonce() <= 255);
     }
 
 }

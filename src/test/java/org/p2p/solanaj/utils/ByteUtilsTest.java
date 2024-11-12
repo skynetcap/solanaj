@@ -1,7 +1,7 @@
 package org.p2p.solanaj.utils;
 
-import org.junit.Test;
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -29,13 +29,16 @@ public class ByteUtilsTest {
         assertEquals(bigIntValue, bn.toString());
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void uint64ToByteStreamLE() {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        try {
-            ByteUtils.uint64ToByteStreamLE(new BigInteger("137001898677442802701"), bos);
-        } catch (IOException e) {
-        }
+        assertThrows(RuntimeException.class, () -> {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            try {
+                ByteUtils.uint64ToByteStreamLE(new BigInteger("137001898677442802701"), bos);
+            } catch (IOException e) {
+                
+            }
+        });
     }
 
 }

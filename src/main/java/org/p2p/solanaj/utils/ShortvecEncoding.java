@@ -4,7 +4,7 @@ import java.util.List;
 
 import static org.bitcoinj.core.Utils.*;
 
-public class Shortvec {
+public class ShortvecEncoding {
 
     public static byte[] encodeLength(int len) {
         byte[] out = new byte[10];
