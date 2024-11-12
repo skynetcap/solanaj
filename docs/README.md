@@ -125,11 +125,7 @@ final Market solUsdcMarket = new MarketBuilder()
 final OrderBook bids = solUsdcMarket.getBidOrderBook();
 ```
 
-<<<<<<< HEAD
 ##### Send a legacyTransaction with call to the "Memo" program
-=======
-### Send a Transaction with Memo Program
->>>>>>> main
 
 ```java
 // Create account from private key
@@ -141,11 +137,7 @@ legacyTransaction.addInstruction(
         MemoProgram.writeUtf8(feePayer.getPublicKey(),"Hello from SolanaJ :)")
 );
 
-<<<<<<< HEAD
 String response = client.getApi().sendTransaction(legacyTransaction, feePayer);
-=======
-String response = client.getApi().sendTransaction(transaction, feePayer);
->>>>>>> main
 ```
 
 ## 🤝 Contributing

@@ -106,7 +106,6 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
     }
 
     /**
-<<<<<<< HEAD
      * Creates a SubscriptionWebSocketClient instance with a modified URI based on the provided endpoint.
      *
      * @param endpoint The endpoint URL
@@ -126,8 +125,6 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
     }
 
     /**
-=======
->>>>>>> main
      * Constructs a SubscriptionWebSocketClient with the given server URI.
      *
      * @param serverURI The URI of the WebSocket server
