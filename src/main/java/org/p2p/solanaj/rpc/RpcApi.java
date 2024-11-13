@@ -246,6 +246,24 @@ public class RpcApi {
         return result;
     }
 
+    public List<SignatureInformation> getSignaturesForAddress(PublicKey account, int limit, Commitment commitment,
+                                                              String before)
+            throws RpcException {
+        List<Object> params = new ArrayList<>();
+
+        params.add(account.toString());
+        params.add(new ConfirmedSignFAddr2(before, limit, commitment));
+
+        List<AbstractMap> rawResult = client.call("getSignaturesForAddress", params, List.class);
+
+        List<SignatureInformation> result = new ArrayList<>();
+        for (AbstractMap item : rawResult) {
+            result.add(new SignatureInformation(item));
+        }
+
+        return result;
+    }
+
     public List<ProgramAccount> getProgramAccounts(PublicKey account, long offset, String bytes) throws RpcException {
         List<Object> filters = new ArrayList<>();
         filters.add(new Filter(new Memcmp(offset, bytes)));

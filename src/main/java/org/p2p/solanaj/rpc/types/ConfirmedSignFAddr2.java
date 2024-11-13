@@ -27,4 +27,14 @@ public class ConfirmedSignFAddr2 {
         this.limit = limit;
         this.commitment = commitment.getValue();
     }
+
+    @Override
+    public String toString() {
+        return "ConfirmedSignFAddr2{" +
+                "limit=" + limit +
+                ", before='" + before + '\'' +
+                ", until='" + until + '\'' +
+                ", commitment='" + commitment + '\'' +
+                '}';
+    }
 }
