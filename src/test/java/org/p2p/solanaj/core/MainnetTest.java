@@ -90,6 +90,60 @@ public class MainnetTest extends AccountBasedTest {
         }
     }
 
+    @Test
+    public void testPdaStakeAccountDerive() throws RpcException {
+        PublicKey miner = new PublicKey("mineXqpDeBeMR8bPQCyy9UneJZbjFywraS3koWZ8SSH");
+        PublicKey programId = new PublicKey("J6XAzG8S5KmoBM8GcCFfF8NmtzD7U3QPnbhNiYwsu9we");
+        PublicKey boostProgramId = new PublicKey("boostmPwypNUQu8qZ8RoWt5DXyYSVYxnBXqbbrGjecc");
+        PublicKey staker = new PublicKey("skynetDj29GH6o6bAqoixCpDuYtWqi1rm8ZNx1hB3vq");
+        PublicKey oreSolMeteoraLpTokenMint = new PublicKey("DrSS5RM7zUd9qjUEdDaf31vnDUSbCrMto6mjqTrHFifN");
+
+        // Managed Proof Address
+        var managedProofAddress = PublicKey.findProgramAddress(
+            List.of(
+                "managed-proof-account".getBytes(),
+                miner.toByteArray()
+            ),
+            programId
+        );
+
+        var delegatedBoostAddress = PublicKey.findProgramAddress(
+            List.of(
+                "v2-delegated-boost".getBytes(),
+                staker.toByteArray(),
+                oreSolMeteoraLpTokenMint.toByteArray(),
+                managedProofAddress.getAddress().toByteArray()
+            ),
+            programId
+        );
+
+        var boostPda = PublicKey.findProgramAddress(
+            List.of(
+                "boost".getBytes(),
+                oreSolMeteoraLpTokenMint.toByteArray()
+            ),
+            boostProgramId
+        );
+
+        var stakePda = PublicKey.findProgramAddress(
+            List.of(
+                "stake".getBytes(),
+                managedProofAddress.getAddress().toByteArray(),
+                boostPda.getAddress().toByteArray()
+            ),
+            boostProgramId
+        );
+
+        LOGGER.info("managedProofAddress: " + managedProofAddress.getAddress());
+        LOGGER.info("delegatedBoostAddress: " + delegatedBoostAddress.getAddress());
+        LOGGER.info("boostPda: " + boostPda.getAddress());
+        LOGGER.info("stakePda: " + stakePda.getAddress());
+
+        // Deserialize delegatedBoostAddress
+        byte[] delegatedBoostAddressData = client.getApi().getAccountInfo(delegatedBoostAddress.getAddress()).getDecodedData();
+        LOGGER.info("delegatedBoostAddressData: " + Arrays.toString(delegatedBoostAddressData));
+    }
+
     /**
      * Calls sendTransaction with a call to the Memo program included.
      */
