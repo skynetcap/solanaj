@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.util.AbstractMap;
+import java.util.List;
 
 public class TokenResultObjects {
 
@@ -68,6 +69,25 @@ public class TokenResultObjects {
 
         @Json(name = "tokenAmount")
         private TokenAmountInfo tokenAmount;
+
+        @Json(name = "decimals")
+        private int decimals;
+
+        @Json(name = "freezeAuthority")
+        private String freezeAuthority;
+
+        @Json(name = "mintAuthority")
+        private String mintAuthority;
+
+        @Json(name = "supply")
+        private String supply;  
+
+        @Json(name = "isInitialized")
+        private boolean isInitialized;
+
+        // Optional extensions for token2022
+        @Json(name = "extensions")
+        private List<Extension> extensions;
     }
 
     @Getter
@@ -113,5 +133,47 @@ public class TokenResultObjects {
 
         @Json(name = "rentEpoch")
         private double rentEpoch;
+    }
+
+    @Getter
+    @ToString
+    public static class Extension {
+
+        @Json(name = "extension")
+        private String extensionType;
+
+        @Json(name = "state")
+        private ExtensionState state;
+    }
+
+    @Getter
+    @ToString
+    public static class ExtensionState {
+        
+        // For "metadataPointer" extension
+        @Json(name = "authority")
+        private String authority;
+
+        @Json(name = "metadataAddress")
+        private String metadataAddress;
+
+        // For "tokenMetadata" extension
+        @Json(name = "additionalMetadata")
+        private List<Object> additionalMetadata;
+
+        @Json(name = "mint")
+        private String mint;
+
+        @Json(name = "name")
+        private String name;
+
+        @Json(name = "symbol")
+        private String symbol;
+
+        @Json(name = "updateAuthority")
+        private String updateAuthority;
+
+        @Json(name = "uri")
+        private String uri;
     }
 }

@@ -144,6 +144,75 @@ public class MainnetTest extends AccountBasedTest {
         LOGGER.info("delegatedBoostAddressData: " + Arrays.toString(delegatedBoostAddressData));
     }
 
+    @Test
+    public void getToken2022AccountInfoLegacyDto() throws RpcException {
+        SplTokenAccountInfo token2022AccountInfo = client.getApi().getSplTokenAccountInfo(PublicKey.valueOf("HeLp6NuQkmYB4pYWo2zYs22mESHXPQYzXbB8n4V98jwC"));
+        LOGGER.info(token2022AccountInfo.toString());
+
+        int decimals = token2022AccountInfo.getValue().getData().getParsed().getInfo().getDecimals();
+        LOGGER.info("decimals: " + decimals);
+
+        assertEquals(9, decimals);
+
+        Optional<Extension> tokenExtension = token2022AccountInfo.getValue().getData().getParsed().getInfo().getExtensions().stream()
+            .filter(e -> e.getExtensionType().equals("tokenMetadata"))
+            .findAny();
+
+        assertTrue(tokenExtension.isPresent());
+
+        Extension extension = tokenExtension.get();
+
+        LOGGER.info("name: " + extension.getState().getName());
+        assertEquals("ai16z", extension.getState().getName());
+    }
+
+    @Test
+    public void getToken2022AccountInfo() throws RpcException {
+        SplTokenAccountInfo token2022AccountInfo = client.getApi().getSplTokenAccountInfo(PublicKey.valueOf("HeLp6NuQkmYB4pYWo2zYs22mESHXPQYzXbB8n4V98jwC"));
+        LOGGER.info(token2022AccountInfo.toString());
+
+        int decimals = token2022AccountInfo.getValue().getData().getParsed().getInfo().getDecimals();
+        LOGGER.info("decimals: " + decimals);
+        assertEquals(9, decimals);
+
+        Optional<Extension> tokenExtension = token2022AccountInfo.getValue().getData().getParsed().getInfo().getExtensions().stream()
+            .filter(e -> e.getExtensionType().equals("tokenMetadata"))
+            .findAny();
+        assertTrue(tokenExtension.isPresent());
+
+        Extension extension = tokenExtension.get();
+        LOGGER.info("name: " + extension.getState().getName());
+        assertEquals("ai16z", extension.getState().getName());
+
+        Extension tokenMetadataExtension = token2022AccountInfo.getExtension("tokenMetadata").get();
+        LOGGER.info("tokenMetadataExtension: " + tokenMetadataExtension.toString());
+
+        Optional<ExtensionState> extensionState = token2022AccountInfo.getToken2022Metadata();
+        assertTrue(extensionState.isPresent());
+
+        ExtensionState extensionStateFinal = extensionState.get();
+        LOGGER.info("name: " + extensionStateFinal.getName());
+        assertEquals("ai16z", extensionStateFinal.getName());
+    }
+
+    @Test
+    public void getToken2022Metadata() throws RpcException {
+        SplTokenAccountInfo token2022AccountInfo = client.getApi().getSplTokenAccountInfo(PublicKey.valueOf("HeLp6NuQkmYB4pYWo2zYs22mESHXPQYzXbB8n4V98jwC"));
+        LOGGER.info(token2022AccountInfo.toString());
+
+        Optional<String> name = token2022AccountInfo.getTokenName();
+        assertTrue(name.isPresent());
+        assertEquals("ai16z", name.get());
+
+        Optional<String> symbol = token2022AccountInfo.getTokenSymbol();
+        assertTrue(symbol.isPresent());
+        assertEquals("ai16z", symbol.get());    
+
+        Optional<String> uri = token2022AccountInfo.getTokenUri();
+        assertTrue(uri.isPresent());
+        assertEquals("https://ipfs.io/ipfs/bafkreigaf4mmibkmjmz4mn4opsvzbcp74k2edldui2hxtecoflaltog7x4", uri.get());
+    }
+
     /**
      * Calls sendTransaction with a call to the Memo program included.
      */
