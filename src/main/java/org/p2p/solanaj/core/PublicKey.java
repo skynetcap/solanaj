@@ -91,6 +91,23 @@ public class PublicKey {
         }
     }
 
+    public static PublicKey createWithSeed(PublicKey fromPublicKey, String seed, PublicKey programId) {
+        try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
+            if (seed.length() > 32) {
+                throw new IllegalArgumentException("Max seed length exceeded: " + seed.length());
+            }
+
+            buffer.write(fromPublicKey.toByteArray());
+            buffer.write(seed.getBytes());
+            buffer.write(programId.toByteArray());
+
+            byte[] hash = Sha256Hash.hash(buffer.toByteArray());
+            return new PublicKey(hash);
+        } catch (IOException e) {
+            throw new RuntimeException("Error creating program address", e);
+        }
+    }
+
     public static class ProgramDerivedAddress {
         private PublicKey address;
         private int nonce;
@@ -123,6 +140,8 @@ public class PublicKey {
         }
         throw new IllegalStateException("Unable to find a viable program address nonce");
     }
+
+
 
     public static PublicKey valueOf(String publicKey) {
         return new PublicKey(publicKey);
