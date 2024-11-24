@@ -71,10 +71,13 @@ public class TokenResultObjects {
         private TokenAmountInfo tokenAmount;
 
         @Json(name = "decimals")
-        private int decimals;
+        private Integer decimals;
 
         @Json(name = "freezeAuthority")
         private String freezeAuthority;
+
+        @Json(name = "isInitialized")
+        private Boolean isInitialized;
 
         @Json(name = "mintAuthority")
         private String mintAuthority;

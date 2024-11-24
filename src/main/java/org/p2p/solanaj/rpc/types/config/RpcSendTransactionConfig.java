@@ -10,11 +10,11 @@ import lombok.NoArgsConstructor;
 @Builder
 public class RpcSendTransactionConfig {
 
-    public static enum Encoding {
+    public enum Encoding {
         base64("base64"),
         base58("base58");
 
-        private String enc;
+        private final String enc;
 
         Encoding(String enc) {
             this.enc = enc;

@@ -1,5 +1,8 @@
 package org.p2p.solanaj.rpc.types.config;
 
+import lombok.Getter;
+
+@Getter
 public enum Commitment {
 
     FINALIZED("finalized"),
@@ -17,7 +20,4 @@ public enum Commitment {
         this.value = value;
     }
 
-    public String getValue() {
-        return value;
-    }
 }

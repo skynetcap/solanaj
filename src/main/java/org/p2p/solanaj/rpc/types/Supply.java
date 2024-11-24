@@ -3,7 +3,6 @@ package org.p2p.solanaj.rpc.types;
 import com.squareup.moshi.Json;
 import lombok.Getter;
 import lombok.ToString;
-import org.p2p.solanaj.core.PublicKey;
 
 import java.util.List;
 

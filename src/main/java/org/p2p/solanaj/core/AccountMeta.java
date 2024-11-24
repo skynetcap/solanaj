@@ -24,4 +24,12 @@ public class AccountMeta {
         this.isWritable = isWritable;
     }
 
+    @Override
+    public String toString() {
+        return "AccountMeta{" +
+                "publicKey=" + publicKey +
+                ", isSigner=" + isSigner +
+                ", isWritable=" + isWritable +
+                '}';
+    }
 }

@@ -1,6 +1,7 @@
 package org.p2p.solanaj.rpc;
 
 import org.p2p.solanaj.core.Account;
+import org.p2p.solanaj.core.LegacyTransaction;
 import org.p2p.solanaj.core.PublicKey;
 import org.p2p.solanaj.core.Transaction;
 import org.p2p.solanaj.rpc.types.*;
@@ -16,7 +17,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class RpcApi {
-    private RpcClient client;
+    private final RpcClient client;
 
     public RpcApi(RpcClient client) {
         this.client = client;
@@ -52,6 +53,69 @@ public class RpcApi {
         return client.call("getRecentBlockhash", params, RecentBlockhash.class).getValue().getBlockhash();
     }
 
+
+    public String sendLegacyTransaction(LegacyTransaction legacyTransaction, Account signer, String recentBlockHash) throws
+            RpcException {
+        return sendLegacyTransaction(legacyTransaction, Collections.singletonList(signer), recentBlockHash);
+    }
+
+    public String sendLegacyTransaction(LegacyTransaction legacyTransaction, Account signer) throws RpcException {
+        return sendLegacyTransaction(legacyTransaction, Collections.singletonList(signer), null);
+    }
+
+    /**
+     * Sends a transaction to the RPC server.
+     *
+     * @param legacyTransaction             The transaction to send.
+     * @param signers                 The list of accounts signing the transaction.
+     * @param recentBlockHash         The recent block hash. If null, it will be obtained from the RPC server.
+     * @param rpcSendTransactionConfig The configuration object for sending transactions via RPC.
+     * @return The transaction ID as a string.
+     * @throws RpcException If an error occurs during the RPC call.
+     */
+    public String sendLegacyTransaction(LegacyTransaction legacyTransaction, List<Account> signers, String recentBlockHash,
+                                        RpcSendTransactionConfig rpcSendTransactionConfig)
+            throws RpcException {
+        if (recentBlockHash == null) {
+            recentBlockHash = getRecentBlockhash();
+        }
+        legacyTransaction.setRecentBlockHash(recentBlockHash);
+        legacyTransaction.sign(signers);
+        byte[] serializedTransaction = legacyTransaction.serialize();
+
+        String base64Trx = Base64.getEncoder().encodeToString(serializedTransaction);
+
+        List<Object> params = new ArrayList<>();
+
+        params.add(base64Trx);
+        params.add(rpcSendTransactionConfig);
+
+        return client.call("sendLegacyTransaction", params, String.class);
+    }
+
+    /**
+     * Sends a transaction to the network for processing.
+     * A default RpcSendTransactionConfig is used.
+     *
+     * @param legacyTransaction    the transaction to send
+     * @param signers        the list of accounts that will sign the transaction
+     * @param recentBlockHash    the recent block hash to include in the transaction
+     * @return the result of the transaction
+     * @throws RpcException    if an error occurs during the RPC call
+     */
+    public String sendLegacyTransaction(LegacyTransaction legacyTransaction, List<Account> signers, String recentBlockHash)
+            throws RpcException {
+        return sendLegacyTransaction(legacyTransaction, signers, recentBlockHash, new RpcSendTransactionConfig());
+    }
+
+    public void sendAndConfirmLegacyTransaction(LegacyTransaction legacyTransaction, List<Account> signers,
+                                          NotificationEventListener listener) throws RpcException {
+        String signature = sendLegacyTransaction(legacyTransaction, signers, null);
+
+        SubscriptionWebSocketClient subClient = SubscriptionWebSocketClient.getInstance(client.getEndpoint());
+        subClient.signatureSubscribe(signature, listener);
+    }
+
     public String sendTransaction(Transaction transaction, Account signer, String recentBlockHash) throws
             RpcException {
         return sendTransaction(transaction, Collections.singletonList(signer), recentBlockHash);
@@ -72,7 +136,7 @@ public class RpcApi {
      * @throws RpcException If an error occurs during the RPC call.
      */
     public String sendTransaction(Transaction transaction, List<Account> signers, String recentBlockHash,
-                                  RpcSendTransactionConfig rpcSendTransactionConfig)
+                                        RpcSendTransactionConfig rpcSendTransactionConfig)
             throws RpcException {
         if (recentBlockHash == null) {
             recentBlockHash = getLatestBlockhash().getValue().getBlockhash();
@@ -88,7 +152,7 @@ public class RpcApi {
         params.add(base64Trx);
         params.add(rpcSendTransactionConfig);
 
-        return client.call("sendTransaction", params, String.class);
+        return client.call("sendLegacyTransaction", params, String.class);
     }
 
     /**
@@ -107,7 +171,7 @@ public class RpcApi {
     }
 
     public void sendAndConfirmTransaction(Transaction transaction, List<Account> signers,
-            NotificationEventListener listener) throws RpcException {
+                                          NotificationEventListener listener) throws RpcException {
         String signature = sendTransaction(transaction, signers, null);
 
         SubscriptionWebSocketClient subClient = SubscriptionWebSocketClient.getInstance(client.getEndpoint());
@@ -234,9 +298,7 @@ public class RpcApi {
         params.add(account.toString());
 
         List<Object> filters = new ArrayList<>();
-        memcmpList.forEach(memcmp -> {
-            filters.add(new Filter(memcmp));
-        });
+        memcmpList.forEach(memcmp -> filters.add(new Filter(memcmp)));
 
         filters.add(new DataSize(dataSize));
 
@@ -261,9 +323,7 @@ public class RpcApi {
         params.add(account.toString());
 
         List<Object> filters = new ArrayList<>();
-        memcmpList.forEach(memcmp -> {
-            filters.add(new Filter(memcmp));
-        });
+        memcmpList.forEach(memcmp -> filters.add(new Filter(memcmp)));
 
         ProgramAccountConfig programAccountConfig = new ProgramAccountConfig(filters);
         programAccountConfig.setEncoding(Encoding.base64);

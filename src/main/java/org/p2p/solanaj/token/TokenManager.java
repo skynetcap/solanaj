@@ -1,8 +1,8 @@
 package org.p2p.solanaj.token;
 
 import org.p2p.solanaj.core.Account;
+import org.p2p.solanaj.core.LegacyTransaction;
 import org.p2p.solanaj.core.PublicKey;
-import org.p2p.solanaj.core.Transaction;
 import org.p2p.solanaj.programs.MemoProgram;
 import org.p2p.solanaj.programs.TokenProgram;
 import org.p2p.solanaj.rpc.RpcClient;
@@ -20,10 +20,10 @@ public class TokenManager {
     }
 
     public String transfer(final Account owner, final PublicKey source, final PublicKey destination, final PublicKey tokenMint, long amount) {
-        final Transaction transaction = new Transaction();
+        final LegacyTransaction legacyTransaction = new LegacyTransaction();
 
         // SPL token instruction
-        transaction.addInstruction(
+        legacyTransaction.addInstruction(
                 TokenProgram.transfer(
                         source,
                         destination,
@@ -33,17 +33,17 @@ public class TokenManager {
         );
 
         // Memo
-        transaction.addInstruction(
+        legacyTransaction.addInstruction(
                 MemoProgram.writeUtf8(
                         owner.getPublicKey(),
                         "Hello from SolanaJ"
                 )
         );
 
-        // Call sendTransaction
+        // Call sendLegacyTransaction
         String result = null;
         try {
-            result = client.getApi().sendTransaction(transaction, owner);
+            result = client.getApi().sendLegacyTransaction(legacyTransaction, owner);
         } catch (RpcException e) {
             e.printStackTrace();
         }
@@ -61,9 +61,9 @@ public class TokenManager {
             e.printStackTrace();
         }
 
-        final Transaction transaction = new Transaction();
+        final LegacyTransaction legacyTransaction = new LegacyTransaction();
         // SPL token instruction
-        transaction.addInstruction(
+        legacyTransaction.addInstruction(
                 TokenProgram.transferChecked(
                         source,
                         tokenAccount,
@@ -75,17 +75,17 @@ public class TokenManager {
         );
 
         // Memo
-        transaction.addInstruction(
+        legacyTransaction.addInstruction(
                 MemoProgram.writeUtf8(
                         owner.getPublicKey(),
                         "Hello from SolanaJ"
                 )
         );
 
-        // Call sendTransaction
+        // Call sendLegacyTransaction
         String result = null;
         try {
-            result = client.getApi().sendTransaction(transaction, owner);
+            result = client.getApi().sendLegacyTransaction(legacyTransaction, owner);
         } catch (RpcException e) {
             e.printStackTrace();
         }
@@ -94,10 +94,10 @@ public class TokenManager {
     }
 
     public String initializeAccount(Account newAccount, PublicKey usdcTokenMint, Account owner) {
-        final Transaction transaction = new Transaction();
+        final LegacyTransaction legacyTransaction = new LegacyTransaction();
 
         // SPL token instruction
-        transaction.addInstruction(
+        legacyTransaction.addInstruction(
                 TokenProgram.initializeAccount(
                         newAccount.getPublicKey(),
                         usdcTokenMint,
@@ -105,10 +105,10 @@ public class TokenManager {
                 )
         );
 
-        // Call sendTransaction
+        // Call sendLegacyTransaction
         String result = null;
         try {
-            result = client.getApi().sendTransaction(transaction, owner);
+            result = client.getApi().sendLegacyTransaction(legacyTransaction, owner);
         } catch (RpcException e) {
             e.printStackTrace();
         }

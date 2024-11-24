@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import lombok.Getter;
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.Sha256Hash;
 import org.p2p.solanaj.utils.ByteUtils;
@@ -91,21 +92,14 @@ public class PublicKey {
         }
     }
 
+    @Getter
     public static class ProgramDerivedAddress {
-        private PublicKey address;
-        private int nonce;
+        private final PublicKey address;
+        private final int nonce;
 
         public ProgramDerivedAddress(PublicKey address, int nonce) {
             this.address = address;
             this.nonce = nonce;
-        }
-
-        public PublicKey getAddress() {
-            return address;
-        }
-
-        public int getNonce() {
-            return nonce;
         }
 
     }
