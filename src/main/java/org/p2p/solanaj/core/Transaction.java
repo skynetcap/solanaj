@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 
 import org.bitcoinj.core.Base58;
 import org.p2p.solanaj.utils.ShortvecEncoding;
@@ -76,8 +77,7 @@ public class Transaction {
         }
 
         Account feePayer = signers.get(0);
-        message.setFeePayer(feePayer);
-
+        message.setFeePayerPublicKey(feePayer.getPublicKey());
         serializedMessage = message.serialize();
 
         for (Account signer : signers) {
@@ -88,6 +88,29 @@ public class Transaction {
             } catch (Exception e) {
                 throw new RuntimeException("Error signing transaction", e); // Improve exception handling
             }
+        }
+    }
+
+    /**
+     * Signs the transaction with external signer.
+     *
+     * @param feePayerPublicKey - The public key of the signer's account.
+     * @param externalSigner - Function for external sign.
+     * @throws IllegalArgumentException if no signers are provided
+     */
+    public void signByExternalSigner(PublicKey feePayerPublicKey, Function<byte[], byte[]> externalSigner) {
+        if (externalSigner == null) {
+            throw new IllegalArgumentException("No external signer provided");
+        }
+
+        message.setFeePayerPublicKey(feePayerPublicKey);
+        serializedMessage = message.serialize();
+
+        try {
+            byte[] signature = externalSigner.apply(message.serialize());
+            signatures.add(Base58.encode(signature));
+        } catch (Exception e) {
+            throw new RuntimeException("Error signing transaction", e); // Improve exception handling
         }
     }
 

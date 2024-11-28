@@ -41,7 +41,7 @@ public class Message {
     private String recentBlockhash;
     private AccountKeysList accountKeys;
     private List<TransactionInstruction> instructions;
-    private Account feePayer;
+    private PublicKey feePayerPublicKey;
 
     public Message() {
         this.accountKeys = new AccountKeysList();
@@ -143,8 +143,8 @@ public class Message {
         return out.array();
     }
 
-    protected void setFeePayer(Account feePayer) {
-        this.feePayer = feePayer;
+    protected void setFeePayerPublicKey(PublicKey feePayerPublicKey) {
+        this.feePayerPublicKey = feePayerPublicKey;
     }
 
     private List<AccountMeta> getAccountKeys() {
@@ -159,7 +159,7 @@ public class Message {
                     .collect(Collectors.toList());
         }
 
-        int feePayerIndex = findAccountIndex(keysList, feePayer.getPublicKey());
+        int feePayerIndex = findAccountIndex(keysList, feePayerPublicKey);
         List<AccountMeta> newList = new ArrayList<AccountMeta>();
         AccountMeta feePayerMeta = keysList.get(feePayerIndex);
         newList.add(new AccountMeta(feePayerMeta.getPublicKey(), true, true));
