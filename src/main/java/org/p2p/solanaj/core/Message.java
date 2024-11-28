@@ -143,7 +143,7 @@ public class Message {
         return out.array();
     }
 
-    protected void setFeePayer(Account feePayer) {
+    public void setFeePayer(Account feePayer) {
         this.feePayer = feePayer;
     }
 

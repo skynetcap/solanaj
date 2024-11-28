@@ -31,6 +31,33 @@ public class Transaction {
     }
 
     /**
+     * Get transactions message
+     *
+     * @return Transactions message
+     */
+    public Message getMessage() {
+        return this.message;
+    }
+
+    /**
+     * Set serialized message to the transaction
+     *
+     * @param serializedMessage The serialized message to add
+     */
+    public void setSerializedMessage(byte[] serializedMessage) {
+        this.serializedMessage = serializedMessage;
+    }
+
+    /**
+     * Adds a signature to the transaction
+     *
+     * @param signature The signature to add
+     */
+    public void addSignature(byte[] signature) {
+        signatures.add(Base58.encode(signature));
+    }
+
+    /**
      * Adds an instruction to the transaction.
      *
      * @param instruction The instruction to add
