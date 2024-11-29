@@ -19,7 +19,7 @@ public class MessageTest {
         Message message = new Message();
         message.addInstruction(SystemProgram.transfer(fromPublicKey, toPublickKey, lamports));
         message.setRecentBlockHash("Eit7RCyhUixAe2hGBS8oqnw59QK3kgMMjfLME5bm9wRn");
-        message.setFeePayer(signer);
+        message.setFeePayerPublicKey(signer.getPublicKey());
 
         assertArrayEquals(new int[] { 1, 0, 1, 3, 6, 26, 217, 208, 83, 135, 21, 72, 83, 126, 222, 62, 38, 24, 73, 163,
                 223, 183, 253, 2, 250, 188, 117, 178, 35, 200, 228, 106, 219, 133, 61, 12, 235, 122, 188, 208, 216, 117,

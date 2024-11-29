@@ -18,7 +18,7 @@
         <connection>scm:git:git://github.com/skynetcap/solanaj.git</connection>
         <developerConnection>scm:git:ssh://github.com/skynetcap/solanaj.git</developerConnection>
         <url>https://github.com/skynetcap/solanaj/tree/main</url>
-    </scm>  
+    </scm>
     <developers>
         <developer>
             <name>Michael Morrell</name>

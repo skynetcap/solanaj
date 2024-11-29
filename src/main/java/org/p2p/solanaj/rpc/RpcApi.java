@@ -13,6 +13,7 @@ import org.p2p.solanaj.ws.SubscriptionWebSocketClient;
 import org.p2p.solanaj.ws.listeners.NotificationEventListener;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class RpcApi {
@@ -79,6 +80,37 @@ public class RpcApi {
         }
         transaction.setRecentBlockHash(recentBlockHash);
         transaction.sign(signers);
+        byte[] serializedTransaction = transaction.serialize();
+
+        String base64Trx = Base64.getEncoder().encodeToString(serializedTransaction);
+
+        List<Object> params = new ArrayList<>();
+
+        params.add(base64Trx);
+        params.add(rpcSendTransactionConfig);
+
+        return client.call("sendTransaction", params, String.class);
+    }
+
+    /**
+     * Sends a transaction to the RPC server with external signer
+     *
+     * @param transaction - The transaction to send.
+     * @param feePayerPublicKey - The public key of the signer's account.
+     * @param externalSigner - Function for external sign.
+     * @param recentBlockHash - The recent block hash. If null, it will be obtained from the RPC server.
+     * @param rpcSendTransactionConfig - The configuration object for sending transactions via RPC.
+     * @return The transaction ID as a string.
+     * @throws RpcException If an error occurs during the RPC call.
+     */
+    public String sendTransaction(Transaction transaction, PublicKey feePayerPublicKey,
+                                  Function<byte[], byte[]> externalSigner, String recentBlockHash,
+                                  RpcSendTransactionConfig rpcSendTransactionConfig) throws RpcException {
+        if (recentBlockHash == null) {
+            recentBlockHash = getLatestBlockhash().getValue().getBlockhash();
+        }
+        transaction.setRecentBlockHash(recentBlockHash);
+        transaction.signByExternalSigner(feePayerPublicKey, externalSigner);
         byte[] serializedTransaction = transaction.serialize();
 
         String base64Trx = Base64.getEncoder().encodeToString(serializedTransaction);
