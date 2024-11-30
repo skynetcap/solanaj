@@ -730,7 +730,9 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
      */
     public String getSubscriptionId(String account) {
         for (Map.Entry<String, SubscriptionParams> entry : activeSubscriptions.entrySet()) {
-            if (entry.getValue().request.getParams().get(0).equals(account)) {
+            Object params = entry.getValue().request.getParams();
+            List<?> paramsList = (List<?>) params;
+            if (paramsList.get(0).equals(account)) {
                 return entry.getKey();
             }
         }

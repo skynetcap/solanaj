@@ -18,7 +18,7 @@ public class RpcRequest {
     private final String method;
 
     @Json(name = "params")
-    private final List<Object> params;
+    private final Object params;
 
     @Json(name = "id")
     private final String id = UUID.randomUUID().toString();
@@ -27,7 +27,7 @@ public class RpcRequest {
         this(method, null);
     }
 
-    public RpcRequest(String method, List<Object> params) {
+    public RpcRequest(String method, Object params) {
         this.method = method;
         this.params = params;
     }

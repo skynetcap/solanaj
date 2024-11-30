@@ -357,6 +357,11 @@ public class RpcApi {
         return result;
     }
 
+    public TokenAccountResponse getTokenAccounts(TokenAccountConfig tokenAccountConfig)
+            throws RpcException {
+        return client.call("getTokenAccounts", tokenAccountConfig, TokenAccountResponse.class);
+    }
+
     public AccountInfo getAccountInfo(PublicKey account) throws RpcException {
         return getAccountInfo(account, new HashMap<>());
     }
