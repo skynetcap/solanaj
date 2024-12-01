@@ -2,43 +2,37 @@ package org.p2p.solanaj.rpc.types.config;
 
 import lombok.Setter;
 
-public class TokenAccountConfig {
+@Setter
+public class TokenAccountsConfig {
 
-    @Setter
     private String mint;
 
-    @Setter
     private String owner = null;
 
-    @Setter
     private Integer page = null;
 
-    @Setter
     private Integer limit = null;
 
-    @Setter
     private String cursor = null;
 
-    @Setter
     private String before = null;
 
-    @Setter
     private String after = null;
 
-    public TokenAccountConfig() {}
+    public TokenAccountsConfig() {}
 
-    public TokenAccountConfig(String mint, Integer limit, String cursor) {
+    public TokenAccountsConfig(String mint, Integer limit, String cursor) {
         this.mint = mint;
         this.limit = limit;
         this.cursor = cursor;
     }
 
-    public TokenAccountConfig(String mint, Integer limit) {
+    public TokenAccountsConfig(String mint, Integer limit) {
         this.mint = mint;
-        this.cursor = cursor;
+        this.limit = limit;
     }
 
-    public TokenAccountConfig(String mint) {
+    public TokenAccountsConfig(String mint) {
         this.mint = mint;
     }
 }

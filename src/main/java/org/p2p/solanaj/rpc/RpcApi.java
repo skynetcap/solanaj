@@ -357,9 +357,13 @@ public class RpcApi {
         return result;
     }
 
-    public TokenAccountResponse getTokenAccounts(TokenAccountConfig tokenAccountConfig)
+    public TokenAccountsResponse getTokenAccounts(TokenAccountsConfig tokenAccountsConfig)
             throws RpcException {
-        return client.call("getTokenAccounts", tokenAccountConfig, TokenAccountResponse.class);
+        return client.call("getTokenAccounts", tokenAccountsConfig, TokenAccountsResponse.class);
+    }
+
+    public SearchAssetsResponse searchAssets(SearchAssetsConfig searchAssetsConfig) throws RpcException {
+        return client.call("searchAssets", searchAssetsConfig, SearchAssetsResponse.class);
     }
 
     public AccountInfo getAccountInfo(PublicKey account) throws RpcException {

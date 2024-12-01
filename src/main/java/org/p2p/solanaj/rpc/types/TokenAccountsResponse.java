@@ -9,7 +9,7 @@ import lombok.ToString;
 
 @Getter
 @ToString
-public class TokenAccountResponse {
+public class TokenAccountsResponse {
 
     @Json(name = "total")
     private int total;
