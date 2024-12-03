@@ -12,6 +12,8 @@ public class SearchAssetsConfig {
 
     private Integer page = null;
 
+    private String cursor = null;
+
     private String authorityAddress = null;
 
     private Integer limit = null;
@@ -66,6 +68,12 @@ public class SearchAssetsConfig {
         this.ownerAddress = ownerAddress;
         this.limit = limit;
         this.page = page;
+    }
+
+    public SearchAssetsConfig(String ownerAddress, int limit, String cursor) {
+        this.ownerAddress = ownerAddress;
+        this.limit = limit;
+        this.cursor = cursor;
     }
 
     public SearchAssetsConfig(String ownerAddress, int limit) {

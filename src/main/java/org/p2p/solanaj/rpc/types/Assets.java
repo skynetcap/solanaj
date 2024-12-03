@@ -15,6 +15,7 @@ public class Assets {
     private Integer page;
     @Json(name = "items")
     private List<Asset> items;
+    private String cursor;
     private NativeBalance nativeBalance;
 
     @Getter
