@@ -87,10 +87,10 @@ public class SearchAssetsConfig {
 
     @Getter
     @Setter
-    static class SortByObject {
+    public static class SortByObject {
         @Getter
         @AllArgsConstructor
-        enum SortBy {
+        public enum SortBy {
             CREATED("created"),
             RECENT_ACTION("recent_action"),
             UPDATED("updated"),
@@ -99,7 +99,7 @@ public class SearchAssetsConfig {
         }
         @Getter
         @AllArgsConstructor
-        enum SortDirection {
+        public enum SortDirection {
             ASC("asc"),
             DESC("desc");
             private final String value;
@@ -110,7 +110,7 @@ public class SearchAssetsConfig {
 
     @Getter
     @Setter
-    static class Options {
+    public static class Options {
         private Boolean showUnverifiedCollections = null;
         private Boolean showCollectionMetadata = null;
         private Boolean showGrandTotal = null;
@@ -137,7 +137,7 @@ public class SearchAssetsConfig {
 
     @Getter
     @AllArgsConstructor
-    enum TokenType {
+    public enum TokenType {
         FUNGIBLE("fungible"),
         NON_FUNGIBLE("nonFungible"),
         REGULAR_NFT("regularNFT"),

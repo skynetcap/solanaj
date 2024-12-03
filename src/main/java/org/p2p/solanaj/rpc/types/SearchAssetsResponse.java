@@ -43,7 +43,7 @@ public class SearchAssetsResponse {
 
     @Getter
     @ToString
-    static class MintExtensions {
+    public static class MintExtensions {
         @Json(name = "confidential_transfer_mint")
         private ConfidentialTransferMint confidentialTransferMint;
         @Json(name = "confidential_transfer_fee_config")
@@ -70,7 +70,7 @@ public class SearchAssetsResponse {
 
     @Getter
     @ToString
-    static class ConfidentialTransferMint {
+    public static class ConfidentialTransferMint {
         @Json(name = "authority")
         private String authority;
         @Json(name = "auto_approve_new_accounts")
@@ -81,7 +81,7 @@ public class SearchAssetsResponse {
 
     @Getter
     @ToString
-    static class ConfidentialTransferFeeConfig {
+    public static class ConfidentialTransferFeeConfig {
         @Json(name = "authority")
         private String authority;
         @Json(name = "withdraw_withheld_authority_elgamal_pubkey")
@@ -94,7 +94,7 @@ public class SearchAssetsResponse {
 
     @Getter
     @ToString
-    static class TransferFeeConfig {
+    public static class TransferFeeConfig {
         @Json(name = "transfer_fee_config_authority")
         private String transferFeeConfigAuthority;
         @Json(name = "withdraw_withheld_authority")
@@ -109,7 +109,7 @@ public class SearchAssetsResponse {
 
     @Getter
     @ToString
-    static class OlderTransferFee {
+    public static class OlderTransferFee {
         private String epoch;
         @Json(name = "maximum_fee")
         private String maximumFee;
@@ -119,13 +119,13 @@ public class SearchAssetsResponse {
 
     @Getter
     @ToString
-    static class NewerTransferFee {
+    public static class NewerTransferFee {
         private String epoch;
     }
 
     @Getter
     @ToString
-    static class MetadataPointer {
+    public static class MetadataPointer {
         private String authority;
         @Json(name = "metadata_address")
         private String metadataAddress;
@@ -133,20 +133,20 @@ public class SearchAssetsResponse {
 
     @Getter
     @ToString
-    static class MintCloseAuthority {
+    public static class MintCloseAuthority {
         @Json(name = "close_authority")
         private String closeAuthority;
     }
 
     @Getter
     @ToString
-    static class PermanentDelegate {
+    public static class PermanentDelegate {
         private String delegate;
     }
 
     @Getter
     @ToString
-    static class TransferHook {
+    public static class TransferHook {
         private String authority;
         @Json(name = "program_id")
         private String programId;
@@ -154,7 +154,7 @@ public class SearchAssetsResponse {
 
     @Getter
     @ToString
-    static class InterestBearingConfig {
+    public static class InterestBearingConfig {
         @Json(name = "rate_authority")
         private String rateAuthority;
         @Json(name = "initialization_timestamp")
@@ -169,13 +169,13 @@ public class SearchAssetsResponse {
 
     @Getter
     @ToString
-    static class DefaultAccountState {
+    public static class DefaultAccountState {
         private String state;
     }
 
     @Getter
     @ToString
-    static class ConfidentialTransferAccount {
+    public static class ConfidentialTransferAccount {
         private Boolean approved;
         @Json(name = "elgamal_pubkey")
         private String elgamalPubkey;
@@ -203,7 +203,7 @@ public class SearchAssetsResponse {
 
     @Getter
     @ToString
-    static class Metadata {
+    public static class Metadata {
         @Json(name = "update_authority")
         private String updateAuthority;
         private String mint;
@@ -216,14 +216,14 @@ public class SearchAssetsResponse {
 
     @Getter
     @ToString
-    static class KeyValue {
+    public static class KeyValue {
         private String key;
         private String value;
     }
 
     @Getter
     @ToString
-    static class Supply {
+    public static class Supply {
         @Json(name = "print_max_supply")
         private Long printMaxSupply;
         @Json(name = "print_current_supply")
@@ -236,7 +236,7 @@ public class SearchAssetsResponse {
 
     @Getter
     @ToString
-    static class TokenInfo {
+    public static class TokenInfo {
         private String symbol;
         private Long balance;
         private Long supply;
@@ -251,7 +251,7 @@ public class SearchAssetsResponse {
 
     @Getter
     @ToString
-    static class PriceInfo {
+    public static class PriceInfo {
         @Json(name = "price_per_token")
         private Double pricePerToken;
         @Json(name = "total_price")
@@ -261,7 +261,7 @@ public class SearchAssetsResponse {
 
     @Getter
     @ToString
-    static class Inscription {
+    public static class Inscription {
         private Integer order;
         private Integer size;
         private String contentType;
@@ -273,7 +273,7 @@ public class SearchAssetsResponse {
 
     @Getter
     @ToString
-    static class NativeBalance {
+    public static class NativeBalance {
         private Long lamports;
         @Json(name = "price_per_sol")
         private Double pricePerSol;
