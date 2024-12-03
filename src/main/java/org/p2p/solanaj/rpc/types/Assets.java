@@ -20,7 +20,7 @@ public class Assets {
 
     @Getter
     @ToString
-    static class Asset {
+    public static class Asset {
         private SearchAssetsConfig.Interface iterface;
         private String id;
         private Object content;
