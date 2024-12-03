@@ -60,7 +60,7 @@ public class SearchAssetsConfig {
 
     private Options options = null;
 
-    private TokenType tokenType = TokenType.FUNGIBLE;
+    private String tokenType = TokenType.FUNGIBLE.getName();
 
     public SearchAssetsConfig() {}
 
@@ -143,6 +143,7 @@ public class SearchAssetsConfig {
         REGULAR_NFT("regularNFT"),
         COMPRESSED_NFT("compressedNFT"),
         ALL("all");
-        private final String value;
+        @Json
+        private final String name;
     }
 }
