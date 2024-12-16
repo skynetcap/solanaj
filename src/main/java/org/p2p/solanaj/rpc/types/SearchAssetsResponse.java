@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.ToString;
 import org.p2p.solanaj.rpc.types.config.SearchAssetsConfig;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Getter
@@ -238,8 +239,8 @@ public class SearchAssetsResponse {
     @ToString
     public static class TokenInfo {
         private String symbol;
-        private Long balance;
-        private Long supply;
+        private String balance;
+        private String supply;
         private Integer decimals;
         @Json(name = "token_program")
         private String tokenProgram;
