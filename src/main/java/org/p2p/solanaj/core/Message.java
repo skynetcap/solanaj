@@ -147,26 +147,11 @@ public class Message {
         this.feePayer = feePayer;
     }
 
-    private List<AccountMeta> getAccountKeys() {
-        List<AccountMeta> keysList = accountKeys.getList();
-
-        // Check whether custom sorting is needed. The `getAccountKeys()` method returns a reversed list of accounts, with signable and mutable accounts at the end, but the fee is placed first. When a transaction involves multiple accounts that need signing, an incorrect order can cause bugs. Change to custom sorting based on the contract order.
-        boolean needSort = keysList.stream().anyMatch(accountMeta -> accountMeta.getSort() < Integer.MAX_VALUE);
-        if (needSort) {
-            // Sort in ascending order based on the `sort` field.
-            return keysList.stream()
-                    .sorted(Comparator.comparingInt(AccountMeta::getSort))
-                    .collect(Collectors.toList());
-        }
-
-        int feePayerIndex = findAccountIndex(keysList, feePayer.getPublicKey());
-        List<AccountMeta> newList = new ArrayList<AccountMeta>();
-        AccountMeta feePayerMeta = keysList.get(feePayerIndex);
-        newList.add(new AccountMeta(feePayerMeta.getPublicKey(), true, true));
-        keysList.remove(feePayerIndex);
-        newList.addAll(keysList);
-
-        return newList;
+    public List<AccountMeta> getAccountKeys() {
+        AccountKeysList accounts = new AccountKeysList();
+        accounts.add(new AccountMeta(feePayer.getPublicKey(), true, true));
+        accounts.addAll(accountKeys);
+        return accounts.getList();
     }
 
     private int findAccountIndex(List<AccountMeta> accountMetaList, PublicKey key) {
