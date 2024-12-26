@@ -41,7 +41,7 @@ public class Message {
     private String recentBlockhash;
     private AccountKeysList accountKeys;
     private List<TransactionInstruction> instructions;
-    private Account feePayer;
+    private PublicKey feePayer;
 
     public Message() {
         this.accountKeys = new AccountKeysList();
@@ -66,7 +66,7 @@ public class Message {
             throw new IllegalArgumentException("recentBlockhash required");
         }
 
-        if (instructions.size() == 0) {
+        if (instructions.isEmpty()) {
             throw new IllegalArgumentException("No instructions provided");
         }
 
@@ -143,15 +143,20 @@ public class Message {
         return out.array();
     }
 
-    protected void setFeePayer(Account feePayer) {
-        this.feePayer = feePayer;
+    public void setFeePayer(Account feePayer) {
+        setFeePayer(feePayer.getPublicKey());
+    }
+
+    /** Prepend specific account as fee payer (place it as first entry on account list). */
+    public void setFeePayer(PublicKey feePayer) {
+        AccountKeysList old = this.accountKeys;
+        this.accountKeys = new AccountKeysList();
+        this.accountKeys.add(new AccountMeta(feePayer, true, true));
+        this.accountKeys.addAll(old);
     }
 
     public List<AccountMeta> getAccountKeys() {
-        AccountKeysList accounts = new AccountKeysList();
-        accounts.add(new AccountMeta(feePayer.getPublicKey(), true, true));
-        accounts.addAll(accountKeys);
-        return accounts.getList();
+        return this.accountKeys.getList();
     }
 
     private int findAccountIndex(List<AccountMeta> accountMetaList, PublicKey key) {
@@ -161,6 +166,6 @@ public class Message {
             }
         }
 
-        throw new RuntimeException("unable to find account index");
+        throw new RuntimeException("unable to find index for account " + key.toBase58());
     }
 }
