@@ -41,7 +41,6 @@ public class Message {
     private String recentBlockhash;
     private AccountKeysList accountKeys;
     private List<TransactionInstruction> instructions;
-    private PublicKey feePayer;
 
     public Message() {
         this.accountKeys = new AccountKeysList();
