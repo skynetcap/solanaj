@@ -1,11 +1,16 @@
 package org.p2p.solanaj.utils;
 
+import com.google.common.primitives.Bytes;
+
 import static org.bitcoinj.core.Utils.*;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class ByteUtils {
     public static final int UINT_32_LENGTH = 4;
@@ -71,5 +76,20 @@ public class ByteUtils {
         int valInt = (valByte >> posBit) & 1;
         return valInt;
     }
+
+    public static byte[] toByteArray(List<Byte> byteList) {
+        return Bytes.toArray(byteList);
+    }
+
+    public static List<Byte> toByteList(byte[] bytes) {
+        return IntStream.range(0, bytes.length)
+                .mapToObj(i -> bytes[i])
+                .collect(Collectors.toList());
+    }
+
+    public static byte[] emptyByteArray() {
+        return new byte[]{};
+    }
+
 
 }
