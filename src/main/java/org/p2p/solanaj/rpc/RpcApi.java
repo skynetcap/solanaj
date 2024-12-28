@@ -106,9 +106,36 @@ public class RpcApi {
         return sendTransaction(transaction, signers, recentBlockHash, new RpcSendTransactionConfig());
     }
 
+    /**
+     * Sends a raw transaction to the network for processing.
+     *
+     * @param encodeSerializedTransaction The serialized transaction encoded in Base64 or Base58.
+     * @param rpcSendTransactionConfig The configuration object for sending transactions via RPC.
+     * @return The transaction ID as a string.
+     * @throws RpcException If an error occurs during the RPC call.
+     */
+    public String sendRawTransaction(String encodeSerializedTransaction, RpcSendTransactionConfig rpcSendTransactionConfig)
+            throws RpcException {
+
+        List<Object> params = new ArrayList<>();
+
+        params.add(encodeSerializedTransaction);
+        params.add(rpcSendTransactionConfig);
+
+        return client.call("sendTransaction", params, String.class);
+    }
+
     public void sendAndConfirmTransaction(Transaction transaction, List<Account> signers,
-            NotificationEventListener listener) throws RpcException {
+                                          NotificationEventListener listener) throws RpcException {
         String signature = sendTransaction(transaction, signers, null);
+
+        SubscriptionWebSocketClient subClient = SubscriptionWebSocketClient.getInstance(client.getEndpoint());
+        subClient.signatureSubscribe(signature, listener);
+    }
+
+    public void sendAndConfirmRawTransaction(String encodeSerializedTransaction, RpcSendTransactionConfig rpcSendTransactionConfig,
+                                             NotificationEventListener listener) throws RpcException {
+        String signature = sendRawTransaction(encodeSerializedTransaction, rpcSendTransactionConfig);
 
         SubscriptionWebSocketClient subClient = SubscriptionWebSocketClient.getInstance(client.getEndpoint());
         subClient.signatureSubscribe(signature, listener);
@@ -496,12 +523,12 @@ public class RpcApi {
         }
 
         List<Map<String, Object>> rawResult = client.call("getRecentPrioritizationFees", params, List.class);
-        
+
         List<RecentPrioritizationFees> result = new ArrayList<>();
         for (Map<String, Object> item : rawResult) {
             result.add(new RecentPrioritizationFees(item));
         }
-        
+
         return result;
     }
 
@@ -524,7 +551,7 @@ public class RpcApi {
      */
     public Long getStakeMinimumDelegation(Commitment commitment) throws RpcException {
         List<Object> params = new ArrayList<>();
-        
+
         if (commitment != null) {
             Map<String, Object> configMap = new HashMap<>();
             configMap.put("commitment", commitment.getValue());
@@ -924,17 +951,17 @@ public class RpcApi {
     }
 
     public TokenAccountInfo getTokenAccountsByOwner(PublicKey accountOwner, Map<String, Object> requiredParams,
-            Map<String, Object> optionalParams) throws RpcException {
+                                                    Map<String, Object> optionalParams) throws RpcException {
         return getTokenAccount(accountOwner, requiredParams, optionalParams, "getTokenAccountsByOwner");
     }
 
     public TokenAccountInfo getTokenAccountsByDelegate(PublicKey accountDelegate, Map<String, Object> requiredParams,
-            Map<String, Object> optionalParams) throws RpcException {
+                                                       Map<String, Object> optionalParams) throws RpcException {
         return getTokenAccount(accountDelegate, requiredParams, optionalParams, "getTokenAccountsByDelegate");
     }
 
     private TokenAccountInfo getTokenAccount(PublicKey account, Map<String, Object> requiredParams,
-            Map<String, Object> optionalParams, String method) throws RpcException {
+                                             Map<String, Object> optionalParams, String method) throws RpcException {
         List<Object> params = new ArrayList<>();
         params.add(account.toString());
 
