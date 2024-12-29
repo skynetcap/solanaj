@@ -9,6 +9,9 @@ import org.p2p.solanaj.rpc.types.TokenResultObjects.TokenAccount;
 import org.p2p.solanaj.rpc.types.TokenResultObjects.TokenAmountInfo;
 import org.p2p.solanaj.rpc.types.config.*;
 import org.p2p.solanaj.rpc.types.config.RpcSendTransactionConfig.Encoding;
+import org.p2p.solanaj.transaction.confirm.SolanaPollingTransactionConfirmProcessor;
+import org.p2p.solanaj.transaction.confirm.SolanaTransactionConfirmProcessor;
+import org.p2p.solanaj.transaction.exceptions.SolanaTransactionException;
 import org.p2p.solanaj.ws.SubscriptionWebSocketClient;
 import org.p2p.solanaj.ws.listeners.NotificationEventListener;
 
@@ -133,12 +136,39 @@ public class RpcApi {
         subClient.signatureSubscribe(signature, listener);
     }
 
+    /**
+     * Send the transaction and block the current thread until the transaction status is confirmed or the waiting time is exceeded.
+     * @param transaction the transaction to send
+     * @param signers the list of accounts that will sign the transaction
+     * @param confirmProcessor the processor that will process the transaction
+     * @return the confirmation transaction
+     * @throws RpcException if an error occurs during the RPC call
+     * @throws SolanaTransactionException Transaction confirmation failed or exceeded the maximum waiting time.
+     */
+    public ConfirmedTransaction sendAndConfirmTransaction(Transaction transaction, List<Account> signers, SolanaTransactionConfirmProcessor confirmProcessor) throws RpcException, SolanaTransactionException {
+        String signature = sendTransaction(transaction, signers, null);
+        return confirmProcessor.waitForTransactionConfirm(signature);
+    }
+
+    public ConfirmedTransaction sendAndConfirmTransaction(Transaction transaction, List<Account> signers) throws RpcException, SolanaTransactionException {
+        return sendAndConfirmTransaction(transaction, signers, new SolanaPollingTransactionConfirmProcessor());
+    }
+
     public void sendAndConfirmRawTransaction(String encodeSerializedTransaction, RpcSendTransactionConfig rpcSendTransactionConfig,
                                              NotificationEventListener listener) throws RpcException {
         String signature = sendRawTransaction(encodeSerializedTransaction, rpcSendTransactionConfig);
 
         SubscriptionWebSocketClient subClient = SubscriptionWebSocketClient.getInstance(client.getEndpoint());
         subClient.signatureSubscribe(signature, listener);
+    }
+
+    public ConfirmedTransaction sendAndConfirmRawTransaction(String encodeSerializedTransaction, RpcSendTransactionConfig rpcSendTransactionConfig, SolanaTransactionConfirmProcessor confirmProcessor) throws RpcException, SolanaTransactionException {
+        String signature = sendRawTransaction(encodeSerializedTransaction, rpcSendTransactionConfig);
+        return confirmProcessor.waitForTransactionConfirm(signature);
+    }
+
+    public ConfirmedTransaction sendAndConfirmRawTransaction(String encodeSerializedTransaction, RpcSendTransactionConfig rpcSendTransactionConfig) throws RpcException, SolanaTransactionException {
+        return sendAndConfirmRawTransaction(encodeSerializedTransaction, rpcSendTransactionConfig, new SolanaPollingTransactionConfirmProcessor());
     }
 
     public long getBalance(PublicKey account) throws RpcException {
