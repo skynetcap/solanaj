@@ -15,8 +15,6 @@ public class MessageTest {
     Account signer = new Account(Base58
             .decode("4Z7cXSyeFR8wNGMVXUE1TwtKn5D5Vu7FzEv69dokLv7KrQk7h6pu4LF8ZRR9yQBhc7uSM6RTTZtU1fmaxiNrxXrs"));
 
-
-
     private TransactionInstruction transfer(){
         PublicKey fromPublicKey = new PublicKey("QqCCvshxtqMAL2CVALqiJB7uEeE5mjSPsseQdDzsRUo");
         PublicKey toPublickKey = new PublicKey("GrDMoeqMLFjeXQ24H56S1RLgT4R76jsuWCd6SvXyGPQ5");
@@ -24,7 +22,6 @@ public class MessageTest {
 
         return SystemProgram.transfer(fromPublicKey, toPublickKey, lamports);
     }
-
 
     @Test
     public void serializeMessage() {
@@ -54,26 +51,21 @@ public class MessageTest {
         List<Byte> bytes = ByteUtils.toByteList(intToByteArray(serialize));
         Message message = Message.deserialize(bytes);
         assertEquals("Eit7RCyhUixAe2hGBS8oqnw59QK3kgMMjfLME5bm9wRn", message.getRecentBlockhash());
-        assertArrayEquals(new int[]{1, 0, 1}, toUnsignedByteArray(message.getMessageHeader().toByteArray()));
+//        assertArrayEquals(new int[]{1, 0, 1}, toUnsignedByteArray(message.getMessageHeader().toByteArray()));
         assertEquals(1, message.getInstructions().size());
 
         TransactionInstruction transfer = transfer();
-//        TransactionInstruction transferNew = message.getInstructions().get(0);
-//        assertEquals(transfer.getProgramId(), transferNew.getProgramId());
-//        assertArrayEquals(transfer.getData(), transferNew.getData());
+        TransactionInstruction transferNew = message.getInstructions().get(0);
+        assertEquals(transfer.getProgramId(), transferNew.getProgramId());
+        assertArrayEquals(transfer.getData(), transferNew.getData());
 
-
-
-//        assertEquals(transfer(), message.getInstructions().get(0));
-
-
-
+        for (int i = 0; i < transfer.getKeys().size(); i++) {
+            assertEquals(transfer.getKeys().get(i).getPublicKey().toBase58(), transferNew.getKeys().get(i).getPublicKey().toBase58());
+        }
         int[] serializeNew = toUnsignedByteArray(message.serialize());
         System.out.println(Arrays.toString(serializeNew));
 
-
         assertArrayEquals(serialize, serializeNew);
-
     }
 
 

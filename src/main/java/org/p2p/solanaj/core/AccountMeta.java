@@ -23,4 +23,12 @@ public class AccountMeta {
         this.isSigner = isSigner;
         this.isWritable = isWritable;
     }
+
+    public void setSigner(boolean signer) {
+        isSigner = signer;
+    }
+
+    public void setWritable(boolean writable) {
+        isWritable = writable;
+    }
 }

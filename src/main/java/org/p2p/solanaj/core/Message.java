@@ -1,21 +1,18 @@
 package org.p2p.solanaj.core;
 
 import org.bitcoinj.core.Base58;
+import org.p2p.solanaj.utils.GuardedArrayUtils;
 import org.p2p.solanaj.utils.ShortvecEncoding;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Collectors;
 
-import lombok.Getter;
-
-import org.p2p.solanaj.utils.GuardedArrayUtils;
-
 public class Message {
-    public static class MessageHeader {
+    private static class MessageHeader {
         static final int HEADER_LENGTH = 3;
 
         byte numRequiredSignatures = 0;
@@ -75,22 +72,6 @@ public class Message {
         accountKeys.addAll(instruction.getKeys());
         accountKeys.add(new AccountMeta(instruction.getProgramId(), false, false));
         instructions.add(instruction);
-
-//        List<AccountMeta> keysList = getAccountKeys();
-//        int keysSize = instruction.getKeys().size();
-//
-//        CompiledInstruction compiledInstruction = new CompiledInstruction();
-//        compiledInstruction.programIdIndex = (byte) findAccountIndex(keysList, instruction.getProgramId());
-//        compiledInstruction.keyIndicesCount = ShortvecEncoding.encodeLength(keysSize);
-//        byte[] keyIndices = new byte[keysSize];
-//        for (int i = 0; i < instruction.getKeys().size(); i++) {
-//            keyIndices[i] = (byte) findAccountIndex(keysList, instruction.getKeys().get(i).getPublicKey());
-//        }
-//        compiledInstruction.keyIndices = keyIndices;
-//        compiledInstruction.dataLength = ShortvecEncoding.encodeLength(instruction.getData().length);
-//        compiledInstruction.data = instruction.getData();
-//        instructions.add(compiledInstruction);
-
         return this;
     }
 
@@ -123,6 +104,24 @@ public class Message {
         messageHeader = new MessageHeader();
 
         List<AccountMeta> keysList = getAccountKeys();
+        /**
+         * #################################################
+         * ########## Here's the change. sort ##############
+         * #################################################
+         *
+         */
+        Collections.sort(keysList, new Comparator<AccountMeta>() {
+            @Override
+            public int compare(AccountMeta o1, AccountMeta o2) {
+                if(o2.isSigner()){
+                    return 1;
+                }else if(o1.isSigner()){
+                    return -1;
+                }else{
+                    return 0;
+                }
+            }
+        });
         int accountKeysSize = keysList.size();
 
         byte[] accountAddressesLength = ShortvecEncoding.encodeLength(accountKeysSize);
@@ -239,18 +238,10 @@ public class Message {
 
         // Remove three bytes for header
         byte[] messageHeaderBytes = GuardedArrayUtils.guardedSplice(serializedMessageList, 0, MessageHeader.HEADER_LENGTH);
-        byte numRequiredSignatures = messageHeaderBytes[0];
-        byte numReadonlySignedAccounts = messageHeaderBytes[1];
-        byte numReadonlyUnsignedAccounts = messageHeaderBytes[2];
         MessageHeader messageHeader = new MessageHeader(messageHeaderBytes);
 
         // Total static account keys
         int accountKeysSize = ShortvecEncoding.decodeLength(serializedMessageList);
-//        byte[] accountAddressesLength = ShortvecEncoding.encodeLength(accountKeysSize);
-//        GuardedArrayUtils.guardedSplice(serializedMessageList, 0, accountAddressesLength.length);
-
-
-
         List<AccountMeta> accountKeys = new ArrayList<>(accountKeysSize);
         for (int i = 0; i < accountKeysSize; i++) {
             byte[] accountMetaPublicKeyByteArray = GuardedArrayUtils.guardedSplice(serializedMessageList, 0,
@@ -258,6 +249,16 @@ public class Message {
             PublicKey publicKey = new PublicKey(accountMetaPublicKeyByteArray);
             accountKeys.add(new AccountMeta(publicKey, false, false));
         }
+
+        // setSigner VS setWritable
+        for (AccountMeta accountKey : accountKeys) {
+            PublicKey publicKey = accountKey.getPublicKey();
+            boolean isSigner = isSigner(accountKeys, publicKey, messageHeader);
+            boolean isWriter = isWriter(accountKeys, publicKey, messageHeader);
+            accountKey.setSigner(isSigner);
+            accountKey.setWritable(isWriter);
+        }
+
         AccountKeysList accountKeysList = new AccountKeysList();
         accountKeysList.addAll(accountKeys);
 
@@ -290,7 +291,39 @@ public class Message {
         }
 
         return new Message(messageHeader, recentBlockHash, accountKeysList, instructions);
-//        return new Message();
+    }
+
+    private static boolean isWriter(List<AccountMeta> accountKeys, PublicKey account, MessageHeader messageHeader){
+
+        int index = indexOf(accountKeys, account);
+        if(index == -1){
+            return false;
+        }
+        boolean isSignerWriter= index < messageHeader.numRequiredSignatures - messageHeader.numReadonlySignedAccounts;
+        boolean isNonSigner = index >= messageHeader.numRequiredSignatures;
+        boolean isNonSignerReadonly = index >= (accountKeys.size() - messageHeader.numReadonlyUnsignedAccounts);
+        boolean isNonSignerWriter = isNonSigner && !isNonSignerReadonly;
+        return isSignerWriter || isNonSignerWriter;
+    }
+
+    private static boolean isSigner(List<AccountMeta> accountKeys, PublicKey account, MessageHeader messageHeader) {
+        int index = indexOf(accountKeys, account);
+
+        if (index == -1) {
+            return false;
+        }
+
+        return index < messageHeader.numRequiredSignatures;
+    }
+
+    private static int indexOf(List<AccountMeta> accountKeys, PublicKey account){
+        for (int i = 0; i < accountKeys.size(); i++) {
+            if(account.toBase58().equals(accountKeys.get(i).getPublicKey().toBase58())){
+                return i;
+            }
+        }
+
+        return -1;
     }
 
 }
