@@ -1,16 +1,14 @@
 package org.p2p.solanaj.core;
 
+import org.bitcoinj.core.Base58;
+import org.junit.jupiter.api.Test;
 import org.p2p.solanaj.programs.MemoProgram;
 import org.p2p.solanaj.programs.SystemProgram;
-
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Base64;
 import java.util.List;
 
-import org.bitcoinj.core.Base58;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TransactionTest {
 
@@ -45,7 +43,9 @@ public class TransactionTest {
 
         assertEquals("nXkZvmiP3kzZbR7u95NSoK78Y3YqgSSthseuba99uBGsEBnR4RXugEhrAFmqhvWiN8k9aZNTZTE22NH6nBX3B7T", transaction.getTxHash());
 
+        byte[] serializedNew = transaction.serialize();
 
+        assertEquals(Base64.getEncoder().encodeToString(serializedNew), serializedTxBase64);
     }
 
     @Test

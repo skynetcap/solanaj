@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class GuardedArrayUtils {
+public class ArrayUtils {
 
     public static Byte guardedShift(List<Byte> byteArray) {
         if (byteArray.isEmpty()) {
@@ -13,6 +13,13 @@ public class GuardedArrayUtils {
         return byteArray.remove(0);
     }
 
+    /**
+     * @param byteList array source
+     * @param start array start index
+     * @param deleteCount fetch count
+     * @param items
+     * @return
+     */
     public static byte[] guardedSplice(
             List<Byte> byteList,
             Integer start,

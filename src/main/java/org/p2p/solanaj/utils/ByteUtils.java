@@ -91,5 +91,13 @@ public class ByteUtils {
         return new byte[]{};
     }
 
+    public static byte[] intToByteArray(int[] in) {
+        byte[] out = new byte[in.length];
+        for (int i = 0; i < in.length; i++) {
+            out[i] = (byte) (in[i] & 0xff);
+        }
+        return out;
+    }
+
 
 }

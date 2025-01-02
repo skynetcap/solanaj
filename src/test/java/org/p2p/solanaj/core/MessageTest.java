@@ -48,7 +48,7 @@ public class MessageTest {
                 0, 0, 0, 0, 0, 0, 203, 226, 136, 193, 153, 148, 240, 50, 230, 98, 9, 79, 221, 179, 243, 174, 90, 67,
                 104, 169, 6, 187, 165, 72, 36, 156, 19, 57, 132, 38, 69, 245, 1, 2, 2, 0, 1, 12, 2, 0, 0, 0, 184, 11, 0,
                 0, 0, 0, 0, 0 };
-        List<Byte> bytes = ByteUtils.toByteList(intToByteArray(serialize));
+        List<Byte> bytes = ByteUtils.toByteList(ByteUtils.intToByteArray(serialize));
         Message message = Message.deserialize(bytes);
         assertEquals("Eit7RCyhUixAe2hGBS8oqnw59QK3kgMMjfLME5bm9wRn", message.getRecentBlockhash());
 //        assertArrayEquals(new int[]{1, 0, 1}, toUnsignedByteArray(message.getMessageHeader().toByteArray()));
@@ -79,11 +79,11 @@ public class MessageTest {
                 104, 169, 6, 187, 165, 72, 36, 156, 19, 57, 132, 38, 69, 245, 1, 2, 2, 0, 1, 12, 2, 0, 0, 0, 184, 11, 0,
                 0, 0, 0, 0, 0 };
 
-        byte[] bytes = intToByteArray(serialize);
+        byte[] bytes = ByteUtils.intToByteArray(serialize);
 
         int[] serializeNew = toUnsignedByteArray(bytes);
 
-        byte[] bytesNew = intToByteArray(serializeNew);
+        byte[] bytesNew = ByteUtils.intToByteArray(serializeNew);
 
         assertArrayEquals(serialize, serializeNew);
         assertArrayEquals(bytes, bytesNew);
@@ -96,14 +96,6 @@ public class MessageTest {
             out[i] = in[i] & 0xff;
         }
 
-        return out;
-    }
-
-    public static byte[] intToByteArray(int[] in) {
-        byte[] out = new byte[in.length];
-        for (int i = 0; i < in.length; i++) {
-            out[i] = (byte) (in[i] & 0xff);
-        }
         return out;
     }
 

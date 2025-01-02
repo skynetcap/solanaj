@@ -1,7 +1,7 @@
 package org.p2p.solanaj.core;
 
 import org.bitcoinj.core.Base58;
-import org.p2p.solanaj.utils.GuardedArrayUtils;
+import org.p2p.solanaj.utils.ArrayUtils;
 import org.p2p.solanaj.utils.ShortvecEncoding;
 
 import java.nio.ByteBuffer;
@@ -232,19 +232,25 @@ public class Message {
         throw new RuntimeException("unable to find account index");
     }
 
+    /**
+     * deserialize Message
+     * @param serializedMessageList message serialize byte array
+     * @return Message
+     * @author jc0803kevin
+     */
     public static Message deserialize(List<Byte> serializedMessageList) {
         // Remove the byte as it is used to indicate legacy Transaction.
 //        GuardedArrayUtils.guardedShift(serializedMessageList);
 
         // Remove three bytes for header
-        byte[] messageHeaderBytes = GuardedArrayUtils.guardedSplice(serializedMessageList, 0, MessageHeader.HEADER_LENGTH);
+        byte[] messageHeaderBytes = ArrayUtils.guardedSplice(serializedMessageList, 0, MessageHeader.HEADER_LENGTH);
         MessageHeader messageHeader = new MessageHeader(messageHeaderBytes);
 
         // Total static account keys
         int accountKeysSize = ShortvecEncoding.decodeLength(serializedMessageList);
         List<AccountMeta> accountKeys = new ArrayList<>(accountKeysSize);
         for (int i = 0; i < accountKeysSize; i++) {
-            byte[] accountMetaPublicKeyByteArray = GuardedArrayUtils.guardedSplice(serializedMessageList, 0,
+            byte[] accountMetaPublicKeyByteArray = ArrayUtils.guardedSplice(serializedMessageList, 0,
                     PublicKey.PUBLIC_KEY_LENGTH);
             PublicKey publicKey = new PublicKey(accountMetaPublicKeyByteArray);
             accountKeys.add(new AccountMeta(publicKey, false, false));
@@ -263,7 +269,7 @@ public class Message {
         accountKeysList.addAll(accountKeys);
 
         // recent_blockhash
-        String recentBlockHash = Base58.encode(GuardedArrayUtils.guardedSplice(serializedMessageList, 0,
+        String recentBlockHash = Base58.encode(ArrayUtils.guardedSplice(serializedMessageList, 0,
                 PublicKey.PUBLIC_KEY_LENGTH));
 
         // Deserialize instructions
@@ -272,13 +278,13 @@ public class Message {
         List<CompiledInstruction> compiledInstructions = new ArrayList<>(instructionsLength);
         for (int i = 0; i < instructionsLength; i++) {
             CompiledInstruction compiledInstruction = new CompiledInstruction();
-            compiledInstruction.programIdIndex = GuardedArrayUtils.guardedShift(serializedMessageList);
+            compiledInstruction.programIdIndex = ArrayUtils.guardedShift(serializedMessageList);
             int keysSize = ShortvecEncoding.decodeLength(serializedMessageList); // keysSize
             compiledInstruction.keyIndicesCount = ShortvecEncoding.encodeLength(keysSize);
-            compiledInstruction.keyIndices = GuardedArrayUtils.guardedSplice(serializedMessageList, 0, keysSize);
+            compiledInstruction.keyIndices = ArrayUtils.guardedSplice(serializedMessageList, 0, keysSize);
             var dataLength = ShortvecEncoding.decodeLength(serializedMessageList);
             compiledInstruction.dataLength = ShortvecEncoding.encodeLength(dataLength);
-            compiledInstruction.data = GuardedArrayUtils.guardedSplice(serializedMessageList, 0, dataLength);
+            compiledInstruction.data = ArrayUtils.guardedSplice(serializedMessageList, 0, dataLength);
 
             compiledInstructions.add(compiledInstruction);
 

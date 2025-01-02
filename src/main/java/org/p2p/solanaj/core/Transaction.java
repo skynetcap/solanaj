@@ -2,13 +2,12 @@ package org.p2p.solanaj.core;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
 import org.bitcoinj.core.Base58;
 import org.p2p.solanaj.utils.ByteUtils;
-import org.p2p.solanaj.utils.GuardedArrayUtils;
+import org.p2p.solanaj.utils.ArrayUtils;
 import org.p2p.solanaj.utils.ShortvecEncoding;
 import org.p2p.solanaj.utils.TweetNaclFast;
 
@@ -35,6 +34,7 @@ public class Transaction {
     public Transaction(Message message, List<String> signatures) {
         this.message = message;
         this.signatures = signatures;
+        this.serializedMessage = message.serialize();
     }
 
     /**
@@ -130,54 +130,12 @@ public class Transaction {
         return out.array();
     }
 
-
-//    public static Transaction deserialize(byte[] serializeTx){
-//        int signaturesSize = ShortvecEncoding.decodeLength(serializeTx);
-//        List<String> signatures = new ArrayList<>(signaturesSize);
-//
-//        List<Byte> serializedTransactionList = ByteUtils.toByteList(serializeTx);
-//
-//        for (int i = 0; i < signaturesSize; i++) {
-//
-//            byte[] signatureBytes = GuardedArrayUtils.guardedSplice(serializedTransactionList, 0, SIGNATURE_LENGTH);
-//            signatures.add(Base58.encode(signatureBytes));
-//        }
-//
-////        Message message = Message.deserialize(serializedTransactionList);
-//        return new Transaction(null, signatures);
-//    }
-
-
-//    public static Transaction deserialize(byte[] serializedTransaction) {
-//        List<Byte> serializedTransactionList = ByteUtils.toByteList(serializedTransaction);
-//
-//        int signaturesSize = ShortvecEncoding.decodeLength(serializedTransaction);
-//        List<String> signatures = new ArrayList<>(signaturesSize);
-//
-//        byte[] byteArray = serializedTransaction;
-//
-//        for (int i = 0; i < signaturesSize; i++) {
-//
-//            byte[] signatureBytes = GuardedArrayUtils.guardedSplice(serializedTransactionList, 0, SIGNATURE_LENGTH);
-//            signatures.add(Base58.encode(signatureBytes));
-//
-////            System.out.println("byteArray--1->" + Arrays.toString(byteArray));
-////            byte[] signature = slice(byteArray, 0, Transaction.SIGNATURE_LENGTH);
-////            System.out.println("signature-- ->" + Arrays.toString(signature));
-////            signatures.add(Base58.encode(signature));
-////
-////            System.out.println("byteArray--2->" + Arrays.toString(byteArray));
-////            byteArray = Arrays.copyOfRange(byteArray, Transaction.SIGNATURE_LENGTH, byteArray.length);
-////
-////            System.out.println("byteArray--3->" + Arrays.toString(byteArray));
-////            signatures.add(Base58.encode(signature));
-//        }
-//
-//        // Message message = Message.deserialize(serializedTransactionList);
-//        // todo kevin
-//        return new Transaction(null, signatures);
-//    }
-
+    /**
+     * deserialize Transaction
+     * @param serializedTransaction transaction serialize byte array
+     * @return
+     * @author jc080kevin
+     */
     public static Transaction deserialize(byte[] serializedTransaction) {
         List<Byte> serializedTransactionList = ByteUtils.toByteList(serializedTransaction);
 
@@ -186,17 +144,11 @@ public class Transaction {
 
         for (int i = 0; i < signaturesSize; i++) {
 
-            byte[] signatureBytes = GuardedArrayUtils.guardedSplice(serializedTransactionList, 0, SIGNATURE_LENGTH);
+            byte[] signatureBytes = ArrayUtils.guardedSplice(serializedTransactionList, 0, SIGNATURE_LENGTH);
             signatures.add(Base58.encode(signatureBytes));
         }
 
-         Message message = Message.deserialize(serializedTransactionList);
+        Message message = Message.deserialize(serializedTransactionList);
         return new Transaction(message, signatures);
-    }
-
-    public static byte[] slice(byte[] data, int start, int length) {
-        byte[] slice = new byte[length];
-        System.arraycopy(data, start, slice, 0, length);
-        return slice;
     }
 }

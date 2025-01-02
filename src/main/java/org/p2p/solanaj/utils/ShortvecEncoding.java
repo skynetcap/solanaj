@@ -1,6 +1,5 @@
 package org.p2p.solanaj.utils;
 
-import java.util.Arrays;
 import java.util.List;
 
 import static org.bitcoinj.core.Utils.uint16ToByteArrayLE;
@@ -30,28 +29,6 @@ public class ShortvecEncoding {
 
         return bytes;
     }
-
-//    public static int decodeLength(byte[] bytes){
-//        int len = 0;
-//        int size = 0;
-//
-//        byte[] out = bytes;
-//
-//        for (;;){
-//            //从数组中删除第一个元素，并返回该元素的值。此方法更改数组的长度。
-//            int elem = Byte.toUnsignedInt(out[0]) ;
-//            out = Arrays.copyOfRange(out, 1, out.length);
-//
-//            len |= (elem & 0x7f) << (size * 7);
-//            size += 1;
-//            if((elem & 0x80) == 0){
-//                break;
-//            }
-//
-//        }
-//        return len;
-//    }
-
 
     public static int decodeLength(List<Byte> dataBytesList) {
         int len = 0;
