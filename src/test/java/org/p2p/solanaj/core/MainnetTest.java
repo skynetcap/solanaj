@@ -90,6 +90,129 @@ public class MainnetTest extends AccountBasedTest {
         }
     }
 
+    @Test
+    public void testPdaStakeAccountDerive() throws RpcException {
+        PublicKey miner = new PublicKey("mineXqpDeBeMR8bPQCyy9UneJZbjFywraS3koWZ8SSH");
+        PublicKey programId = new PublicKey("J6XAzG8S5KmoBM8GcCFfF8NmtzD7U3QPnbhNiYwsu9we");
+        PublicKey boostProgramId = new PublicKey("boostmPwypNUQu8qZ8RoWt5DXyYSVYxnBXqbbrGjecc");
+        PublicKey staker = new PublicKey("skynetDj29GH6o6bAqoixCpDuYtWqi1rm8ZNx1hB3vq");
+        PublicKey oreSolMeteoraLpTokenMint = new PublicKey("DrSS5RM7zUd9qjUEdDaf31vnDUSbCrMto6mjqTrHFifN");
+
+        // Managed Proof Address
+        var managedProofAddress = PublicKey.findProgramAddress(
+            List.of(
+                "managed-proof-account".getBytes(),
+                miner.toByteArray()
+            ),
+            programId
+        );
+
+        var delegatedBoostAddress = PublicKey.findProgramAddress(
+            List.of(
+                "v2-delegated-boost".getBytes(),
+                staker.toByteArray(),
+                oreSolMeteoraLpTokenMint.toByteArray(),
+                managedProofAddress.getAddress().toByteArray()
+            ),
+            programId
+        );
+
+        var boostPda = PublicKey.findProgramAddress(
+            List.of(
+                "boost".getBytes(),
+                oreSolMeteoraLpTokenMint.toByteArray()
+            ),
+            boostProgramId
+        );
+
+        var stakePda = PublicKey.findProgramAddress(
+            List.of(
+                "stake".getBytes(),
+                managedProofAddress.getAddress().toByteArray(),
+                boostPda.getAddress().toByteArray()
+            ),
+            boostProgramId
+        );
+
+        LOGGER.info("managedProofAddress: " + managedProofAddress.getAddress());
+        LOGGER.info("delegatedBoostAddress: " + delegatedBoostAddress.getAddress());
+        LOGGER.info("boostPda: " + boostPda.getAddress());
+        LOGGER.info("stakePda: " + stakePda.getAddress());
+
+        // Deserialize delegatedBoostAddress
+        byte[] delegatedBoostAddressData = client.getApi().getAccountInfo(delegatedBoostAddress.getAddress()).getDecodedData();
+        LOGGER.info("delegatedBoostAddressData: " + Arrays.toString(delegatedBoostAddressData));
+    }
+
+    @Test
+    public void getToken2022AccountInfoLegacyDto() throws RpcException {
+        SplTokenAccountInfo token2022AccountInfo = client.getApi().getSplTokenAccountInfo(PublicKey.valueOf("HeLp6NuQkmYB4pYWo2zYs22mESHXPQYzXbB8n4V98jwC"));
+        LOGGER.info(token2022AccountInfo.toString());
+
+        int decimals = token2022AccountInfo.getValue().getData().getParsed().getInfo().getDecimals();
+        LOGGER.info("decimals: " + decimals);
+
+        assertEquals(9, decimals);
+
+        Optional<Extension> tokenExtension = token2022AccountInfo.getValue().getData().getParsed().getInfo().getExtensions().stream()
+            .filter(e -> e.getExtensionType().equals("tokenMetadata"))
+            .findAny();
+
+        assertTrue(tokenExtension.isPresent());
+
+        Extension extension = tokenExtension.get();
+
+        LOGGER.info("name: " + extension.getState().getName());
+        assertEquals("ai16z", extension.getState().getName());
+    }
+
+    @Test
+    public void getToken2022AccountInfo() throws RpcException {
+        SplTokenAccountInfo token2022AccountInfo = client.getApi().getSplTokenAccountInfo(PublicKey.valueOf("HeLp6NuQkmYB4pYWo2zYs22mESHXPQYzXbB8n4V98jwC"));
+        LOGGER.info(token2022AccountInfo.toString());
+
+        int decimals = token2022AccountInfo.getValue().getData().getParsed().getInfo().getDecimals();
+        LOGGER.info("decimals: " + decimals);
+        assertEquals(9, decimals);
+
+        Optional<Extension> tokenExtension = token2022AccountInfo.getValue().getData().getParsed().getInfo().getExtensions().stream()
+            .filter(e -> e.getExtensionType().equals("tokenMetadata"))
+            .findAny();
+        assertTrue(tokenExtension.isPresent());
+
+        Extension extension = tokenExtension.get();
+        LOGGER.info("name: " + extension.getState().getName());
+        assertEquals("ai16z", extension.getState().getName());
+
+        Extension tokenMetadataExtension = token2022AccountInfo.getExtension("tokenMetadata").get();
+        LOGGER.info("tokenMetadataExtension: " + tokenMetadataExtension.toString());
+
+        Optional<ExtensionState> extensionState = token2022AccountInfo.getToken2022Metadata();
+        assertTrue(extensionState.isPresent());
+
+        ExtensionState extensionStateFinal = extensionState.get();
+        LOGGER.info("name: " + extensionStateFinal.getName());
+        assertEquals("ai16z", extensionStateFinal.getName());
+    }
+
+    @Test
+    public void getToken2022Metadata() throws RpcException {
+        SplTokenAccountInfo token2022AccountInfo = client.getApi().getSplTokenAccountInfo(PublicKey.valueOf("HeLp6NuQkmYB4pYWo2zYs22mESHXPQYzXbB8n4V98jwC"));
+        LOGGER.info(token2022AccountInfo.toString());
+
+        Optional<String> name = token2022AccountInfo.getTokenName();
+        assertTrue(name.isPresent());
+        assertEquals("ai16z", name.get());
+
+        Optional<String> symbol = token2022AccountInfo.getTokenSymbol();
+        assertTrue(symbol.isPresent());
+        assertEquals("ai16z", symbol.get());    
+
+        Optional<String> uri = token2022AccountInfo.getTokenUri();
+        assertTrue(uri.isPresent());
+        assertEquals("https://ipfs.io/ipfs/bafkreigaf4mmibkmjmz4mn4opsvzbcp74k2edldui2hxtecoflaltog7x4", uri.get());
+    }
+
     /**
      * Calls sendLegacyTransaction with a call to the Memo program included.
      */

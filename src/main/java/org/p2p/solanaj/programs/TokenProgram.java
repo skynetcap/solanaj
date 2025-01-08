@@ -70,18 +70,40 @@ public class TokenProgram extends Program {
      * @param destination The public key of the destination account
      * @param amount The amount of tokens to transfer
      * @param decimals The number of decimals in the token
-     * @param owner The public key of the source account owner
+     * @param owner The public key of the source account owner, also the fee payer
      * @param tokenMint The public key of the token's mint
      * @return A TransactionInstruction for the transfer
      */
     public static TransactionInstruction transferChecked(PublicKey source, PublicKey destination, long amount, byte decimals, PublicKey owner, PublicKey tokenMint) {
+        return transferChecked(source, destination, amount, decimals, owner, owner, tokenMint);
+    }
+
+
+    /**
+     * Creates a transaction instruction for a checked token transfer.
+     *
+     * @param source The public key of the source account
+     * @param destination The public key of the destination account
+     * @param amount The amount of tokens to transfer
+     * @param decimals The number of decimals in the token
+     * @param owner The public key of the source account owner
+     * @param fee The public key of the account paying fees
+     * @param tokenMint The public key of the token's mint
+     * @return A TransactionInstruction for the transfer
+     */
+    public static TransactionInstruction transferChecked(PublicKey source, PublicKey destination, long amount, byte decimals, PublicKey owner, PublicKey fee, PublicKey tokenMint) {
         final List<AccountMeta> keys = new ArrayList<>();
 
-        keys.add(new AccountMeta(source,false, true));
+        keys.add(new AccountMeta(source, false, true));
         // index 1 = token mint (https://docs.rs/spl-token/3.1.0/spl_token/instruction/enum.TokenInstruction.html#variant.TransferChecked)
         keys.add(new AccountMeta(tokenMint, false, false));
-        keys.add(new AccountMeta(destination,false, true));
-        keys.add(new AccountMeta(owner,true, false));
+        keys.add(new AccountMeta(destination, false, true));
+        if(owner == fee) {
+            keys.add(new AccountMeta(fee, true, true));
+        } else {
+            keys.add(new AccountMeta(owner, true, false));
+            keys.add(new AccountMeta(fee, true, true));
+        }
 
         byte[] transactionData = encodeTransferCheckedTokenInstructionData(
                 amount,

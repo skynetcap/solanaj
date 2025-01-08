@@ -8,6 +8,8 @@ import org.p2p.solanaj.core.TransactionInstruction;
 import org.p2p.solanaj.core.AccountMeta;
 
 import static org.bitcoinj.core.Utils.*;
+import static org.p2p.solanaj.core.Sysvar.RECENT_BLOCKHASHES;
+import static org.p2p.solanaj.core.Sysvar.SYSVAR_RENT_ADDRESS;
 
 /**
  * Represents the System Program on the Solana blockchain.
@@ -24,6 +26,16 @@ public class SystemProgram {
     private static final int UINT32_SIZE = 4;
     private static final int INT64_SIZE = 8;
     private static final int PUBKEY_SIZE = 32;
+
+    public static final int PROGRAM_INDEX_NONCE_INIT_INSTRUCTION = 6;
+    /**
+     * The instruction code for advancing a nonce.
+     * <p>
+     * This constant defines the instruction code used to advance a nonce in a nonce account in Solana.
+     * </p>
+     */
+    public static final int ADVANCE_NONCE_INSTRUCTION = 4;
+
 
     private SystemProgram() {
         // Private constructor to prevent instantiation
@@ -99,6 +111,49 @@ public class SystemProgram {
         byte[] data = new byte[UINT32_SIZE + PUBKEY_SIZE]; // 4 + 32 = 36 bytes
         uint32ToByteArrayLE(PROGRAM_INDEX_ASSIGN, data, 0);
         System.arraycopy(newOwner.toByteArray(), 0, data, UINT32_SIZE, PUBKEY_SIZE);
+
+        return new TransactionInstruction(PROGRAM_ID, keys, data);
+    }
+
+    /**
+     * Initializes a nonce account.
+     *
+     * @param nonce      the public key of the nonce account
+     * @param authorized the public key of the authorized account
+     * @return A {@code TransactionInstruction} of the created instruction
+     */
+    public static TransactionInstruction nonceInitialize(PublicKey nonce, PublicKey authorized){
+
+        List<AccountMeta> keys = Arrays.asList(
+                new AccountMeta(nonce, false, true),
+                new AccountMeta(RECENT_BLOCKHASHES, false, false),
+                new AccountMeta(SYSVAR_RENT_ADDRESS, false, false)
+        );
+
+        byte[] data = new byte[UINT32_SIZE + PUBKEY_SIZE]; // 36 bytes
+        uint32ToByteArrayLE(PROGRAM_INDEX_NONCE_INIT_INSTRUCTION, data, 0);
+        System.arraycopy(authorized.toByteArray(), 0, data, UINT32_SIZE, PUBKEY_SIZE);
+
+        return new TransactionInstruction(PROGRAM_ID, keys, data);
+    }
+
+    /**
+     * Advances a nonce.
+     *
+     * @param nonce      the public key of the nonce account
+     * @param authorized the public key of the authorized account
+     * @return A {@code TransactionInstruction} of the created instruction
+     */
+    public static TransactionInstruction nonceAdvance(PublicKey nonce, PublicKey authorized){
+
+        List<AccountMeta> keys = Arrays.asList(
+                new AccountMeta(nonce, false, true),
+                new AccountMeta(RECENT_BLOCKHASHES, false, false),
+                new AccountMeta(authorized, true, false)
+        );
+
+        byte[] data = new byte[UINT32_SIZE]; // 4 bytes
+        uint32ToByteArrayLE(ADVANCE_NONCE_INSTRUCTION, data, 0);
 
         return new TransactionInstruction(PROGRAM_ID, keys, data);
     }
