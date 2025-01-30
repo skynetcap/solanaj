@@ -29,14 +29,11 @@ public class SolanaBip44 {
      * @return PrivateKey
      */
     public byte[] getPrivateKeyFromSeed(byte[] seed, DerivableType derivableType) {
-        switch (derivableType){
-            case BIP44:
-                return getPrivateKeyFromBip44Seed(seed);
-            case BIP44CHANGE:
-                return getPrivateKeyFromBip44SeedWithChange(seed);
-            default:
-                throw new RuntimeException("DerivableType not supported");
-        }
+        return switch (derivableType) {
+            case BIP44 -> getPrivateKeyFromBip44Seed(seed);
+            case BIP44CHANGE -> getPrivateKeyFromBip44SeedWithChange(seed);
+            default -> throw new RuntimeException("DerivableType not supported");
+        };
     }
 
     private byte[] getPrivateKeyFromBip44SeedWithChange(byte[] seed) {

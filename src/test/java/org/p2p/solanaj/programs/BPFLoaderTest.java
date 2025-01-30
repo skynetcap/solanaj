@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Disabled;
 import static org.junit.jupiter.api.Assertions.*;
 import org.p2p.solanaj.core.Account;
-import org.p2p.solanaj.core.Transaction;
+import org.p2p.solanaj.core.LegacyTransaction;
 import org.p2p.solanaj.core.TransactionInstruction;
 import org.p2p.solanaj.rpc.Cluster;
 import org.p2p.solanaj.rpc.RpcClient;
@@ -119,10 +119,10 @@ public class BPFLoaderTest {
     @Disabled
     public void initializeBufferIntegrationTest() throws RpcException {
         Account account = new Account(); // Replace with your actual account setup
-        Transaction transaction = new Transaction();
+        LegacyTransaction legacyTransaction = new LegacyTransaction();
 
         // Initialize buffer
-        transaction.addInstruction(
+        legacyTransaction.addInstruction(
                 SystemProgram.createAccount(
                         account.getPublicKey(),
                         bufferAccount.getPublicKey(),
@@ -132,7 +132,7 @@ public class BPFLoaderTest {
                 )
         );
 
-        transaction.addInstruction(
+        legacyTransaction.addInstruction(
                 BPFLoader.initializeBuffer(
                         bufferAccount.getPublicKey(),
                         account.getPublicKey()
@@ -140,9 +140,9 @@ public class BPFLoaderTest {
         );
 
         String hash = client.getApi().getRecentBlockhash();
-        transaction.setRecentBlockHash(hash);
+        legacyTransaction.setRecentBlockHash(hash);
 
-        String txId = client.getApi().sendTransaction(transaction, List.of(account, bufferAccount), hash);
+        String txId = client.getApi().sendLegacyTransaction(legacyTransaction, List.of(account, bufferAccount), hash);
         assertNotNull(txId);
         System.out.println("Transaction ID: " + txId);
     }

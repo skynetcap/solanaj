@@ -6,7 +6,7 @@ import org.p2p.solanaj.rpc.types.config.Commitment;
 public class ConfirmedSignFAddr2 {
 
     @Json(name = "limit")
-    private long limit;
+    private final long limit;
 
     @Json(name = "before")
     private String before;
@@ -15,10 +15,26 @@ public class ConfirmedSignFAddr2 {
     private String until;
 
     @Json(name = "commitment")
-    private String commitment;
+    private final String commitment;
 
     public ConfirmedSignFAddr2(int limit, Commitment commitment) {
         this.limit = limit;
         this.commitment = commitment.getValue();
+    }
+
+    public ConfirmedSignFAddr2(String before, int limit, Commitment commitment) {
+        this.before = before;
+        this.limit = limit;
+        this.commitment = commitment.getValue();
+    }
+
+    @Override
+    public String toString() {
+        return "ConfirmedSignFAddr2{" +
+                "limit=" + limit +
+                ", before='" + before + '\'' +
+                ", until='" + until + '\'' +
+                ", commitment='" + commitment + '\'' +
+                '}';
     }
 }

@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Objects;
 
 import org.bitcoinj.core.Base58;
+import org.p2p.solanaj.utils.ByteUtils;
+import org.p2p.solanaj.utils.GuardedArrayUtils;
 import org.p2p.solanaj.utils.ShortvecEncoding;
 import org.p2p.solanaj.utils.TweetNaclFast;
 
@@ -27,7 +29,12 @@ public class Transaction {
      */
     public Transaction() {
         this.message = new Message();
-        this.signatures = new ArrayList<>(); // Use diamond operator
+        this.signatures = new ArrayList<>();
+    }
+
+    public Transaction(Message message, List<String> signatures) {
+        this.message = message;
+        this.signatures = signatures;
     }
 
     /**
@@ -61,7 +68,7 @@ public class Transaction {
      * @throws NullPointerException if the signer is null
      */
     public void sign(Account signer) {
-        sign(Arrays.asList(Objects.requireNonNull(signer, "Signer cannot be null"))); // Add input validation
+        sign(List.of(Objects.requireNonNull(signer, "Signer cannot be null"))); // Add input validation
     }
 
     /**
@@ -78,13 +85,21 @@ public class Transaction {
         Account feePayer = signers.get(0);
         message.setFeePayer(feePayer);
 
+        List<AccountMeta> signerPubKeys = List.copyOf(message.getAccountKeys());
+        signerPubKeys = signerPubKeys.subList(0, signers.size());
+
         serializedMessage = message.serialize();
 
         for (Account signer : signers) {
+            int signerIndex = message.findAccountIndex(signerPubKeys, signer.getPublicKey());
+            if (signerIndex < 0) {
+                throw new IllegalArgumentException("Cannot sign with non signer key: " +
+                        signer.getPublicKey().toBase58());
+            }
             try {
                 TweetNaclFast.Signature signatureProvider = new TweetNaclFast.Signature(new byte[0], signer.getSecretKey());
                 byte[] signature = signatureProvider.detached(serializedMessage);
-                signatures.add(Base58.encode(signature));
+                this.signatures.set(signerIndex, Base58.encode(signature));
             } catch (Exception e) {
                 throw new RuntimeException("Error signing transaction", e); // Improve exception handling
             }
@@ -114,5 +129,30 @@ public class Transaction {
         out.put(serializedMessage);
 
         return out.array();
+    }
+
+    public static Transaction deserialize(byte[] serializedTransaction) {
+        List<Byte> serializedTransactionList = ByteUtils.toByteList(serializedTransaction);
+
+        int signaturesSize = ShortvecEncoding.decodeLength(serializedTransactionList);
+        List<String> signatures = new ArrayList<>(signaturesSize);
+
+        for (int i = 0; i < signaturesSize; i++) {
+
+            byte[] signatureBytes = GuardedArrayUtils.guardedSplice(serializedTransactionList, 0, SIGNATURE_LENGTH);
+            signatures.add(Base58.encode(signatureBytes));
+        }
+
+        Message message = Message.deserialize(serializedTransactionList);
+        return new Transaction(message, signatures);
+    }
+
+    @Override
+    public String toString() {
+        return "Transaction{" +
+                "message=" + message +
+                ", signatures=" + signatures +
+                ", serializedMessage=" + Arrays.toString(serializedMessage) +
+                '}';
     }
 }

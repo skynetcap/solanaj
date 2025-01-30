@@ -25,12 +25,9 @@ public class BlockProduction {
     @Getter
     @ToString
     public static class BlockProductionValue {
+        @Getter
         @Json(name = "byIdentity")
         private Map<String, List<Double>> byIdentity;
-
-        public Map<String, List<Double>> getByIdentity() {
-            return byIdentity;
-        }
 
         @Json(name = "range")
         private BlockProductionRange blockProductionRange;

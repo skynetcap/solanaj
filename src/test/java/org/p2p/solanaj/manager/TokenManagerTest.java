@@ -2,13 +2,12 @@ package org.p2p.solanaj.manager;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Disabled;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.mockito.Mockito;
 import org.p2p.solanaj.core.Account;
 import org.p2p.solanaj.core.PublicKey;
-import org.p2p.solanaj.core.Transaction;
+import org.p2p.solanaj.core.LegacyTransaction;
 import org.p2p.solanaj.programs.SystemProgram;
 import org.p2p.solanaj.rpc.RpcClient;
 import org.p2p.solanaj.rpc.RpcApi;
@@ -61,12 +60,12 @@ public class TokenManagerTest {
         long amount = 1000L;
         String expectedTxId = "MockTransactionId";
 
-        when(mockRpcApi.sendTransaction(any(Transaction.class), eq(owner))).thenReturn(expectedTxId);
+        when(mockRpcApi.sendLegacyTransaction(any(LegacyTransaction.class), eq(owner))).thenReturn(expectedTxId);
 
         String result = tokenManager.transfer(owner, source, destination, tokenMint, amount);
 
         assertEquals(expectedTxId, result);
-        verify(mockRpcApi).sendTransaction(any(Transaction.class), eq(owner));
+        verify(mockRpcApi).sendLegacyTransaction(any(LegacyTransaction.class), eq(owner));
     }
 
     /**
@@ -83,13 +82,13 @@ public class TokenManagerTest {
         String expectedTxId = "MockTransactionId";
 
         when(mockRpcApi.getTokenAccountsByOwner(eq(destination), eq(tokenMint))).thenReturn(destinationATA);
-        when(mockRpcApi.sendTransaction(any(Transaction.class), eq(owner))).thenReturn(expectedTxId);
+        when(mockRpcApi.sendLegacyTransaction(any(LegacyTransaction.class), eq(owner))).thenReturn(expectedTxId);
 
         String result = tokenManager.transferCheckedToSolAddress(owner, source, destination, tokenMint, amount, decimals);
 
         assertEquals(expectedTxId, result);
         verify(mockRpcApi).getTokenAccountsByOwner(eq(destination), eq(tokenMint));
-        verify(mockRpcApi).sendTransaction(any(Transaction.class), eq(owner));
+        verify(mockRpcApi).sendLegacyTransaction(any(LegacyTransaction.class), eq(owner));
     }
 
     /**
@@ -104,12 +103,12 @@ public class TokenManagerTest {
         PublicKey usdcTokenMint = new PublicKey("A4k3Dyjzvzp8e1Z1g1g1g1g1g1g1g1g1g1g1g1g1g1"); // Example USDC mint
         String expectedTxId = "MockTransactionId";
 
-        when(mockRpcApi.sendTransaction(any(Transaction.class), eq(owner))).thenReturn(expectedTxId);
+        when(mockRpcApi.sendLegacyTransaction(any(LegacyTransaction.class), eq(owner))).thenReturn(expectedTxId);
 
         String result = tokenManager.initializeAccount(newAccount, usdcTokenMint, owner);
 
         assertEquals(expectedTxId, result);
-        verify(mockRpcApi).sendTransaction(any(Transaction.class), eq(owner));
+        verify(mockRpcApi).sendLegacyTransaction(any(LegacyTransaction.class), eq(owner));
     }
 
     /**
@@ -130,13 +129,13 @@ public class TokenManagerTest {
         String expectedTxId = "MockTransactionId";
 
         when(mockRpcApi.getTokenAccountsByOwner(eq(destination), eq(bonkMint))).thenReturn(destinationATA);
-        when(mockRpcApi.sendTransaction(any(Transaction.class), eq(owner))).thenReturn(expectedTxId);
+        when(mockRpcApi.sendLegacyTransaction(any(LegacyTransaction.class), eq(owner))).thenReturn(expectedTxId);
 
         String result = tokenManager.transferCheckedToSolAddress(owner, sourceATA, destination, bonkMint, amount, decimals);
 
         assertEquals(expectedTxId, result);
         verify(mockRpcApi).getTokenAccountsByOwner(eq(destination), eq(bonkMint));
-        verify(mockRpcApi).sendTransaction(any(Transaction.class), eq(owner));
+        verify(mockRpcApi).sendLegacyTransaction(any(LegacyTransaction.class), eq(owner));
     }
 
     /**
@@ -152,17 +151,17 @@ public class TokenManagerTest {
         long amount = 1_000_000_000L; // 1 SOL (lamports)
         String expectedTxId = "MockTransactionId";
 
-        when(mockRpcApi.sendTransaction(any(Transaction.class), eq(owner))).thenReturn(expectedTxId);
+        when(mockRpcApi.sendLegacyTransaction(any(LegacyTransaction.class), eq(owner))).thenReturn(expectedTxId);
 
-        Transaction transaction = new Transaction();
+        LegacyTransaction transaction = new LegacyTransaction();
         transaction.addInstruction(
                 SystemProgram.transfer(owner.getPublicKey(), recipient, amount)
         );
 
-        String result = mockRpcApi.sendTransaction(transaction, owner);
+        String result = mockRpcApi.sendLegacyTransaction(transaction, owner);
 
         assertEquals(expectedTxId, result);
-        verify(mockRpcApi).sendTransaction(any(Transaction.class), eq(owner));
+        verify(mockRpcApi).sendLegacyTransaction(any(LegacyTransaction.class), eq(owner));
     }
 
     /**
@@ -183,12 +182,12 @@ public class TokenManagerTest {
         String expectedTxId = "MockTransactionId";
 
         when(mockRpcApi.getTokenAccountsByOwner(eq(destination), eq(wsolMint))).thenReturn(destinationWSOLATA);
-        when(mockRpcApi.sendTransaction(any(Transaction.class), eq(owner))).thenReturn(expectedTxId);
+        when(mockRpcApi.sendLegacyTransaction(any(LegacyTransaction.class), eq(owner))).thenReturn(expectedTxId);
 
         String result = tokenManager.transferCheckedToSolAddress(owner, sourceWSOLATA, destination, wsolMint, amount, decimals);
 
         assertEquals(expectedTxId, result);
         verify(mockRpcApi).getTokenAccountsByOwner(eq(destination), eq(wsolMint));
-        verify(mockRpcApi).sendTransaction(any(Transaction.class), eq(owner));
+        verify(mockRpcApi).sendLegacyTransaction(any(LegacyTransaction.class), eq(owner));
     }
 }

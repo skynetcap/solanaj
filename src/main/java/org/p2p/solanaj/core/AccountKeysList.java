@@ -32,6 +32,13 @@ public class AccountKeysList {
         return accountKeysList;
     }
 
+    @Override
+    public String toString() {
+        return "AccountKeysList{" +
+                "accounts=" + accounts +
+                '}';
+    }
+
     private static final Comparator<AccountMeta> metaComparator = Comparator
         .comparing(AccountMeta::isSigner)
         .thenComparing(AccountMeta::isWritable).reversed();

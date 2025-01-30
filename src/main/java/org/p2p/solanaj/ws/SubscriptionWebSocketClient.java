@@ -68,7 +68,7 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
      */
     private static class SubscriptionParams {
         final RpcRequest request;
-        final NotificationEventListener listener;
+        NotificationEventListener listener;
 
         /**
          * Constructs a SubscriptionParams object.
@@ -79,6 +79,10 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
         SubscriptionParams(RpcRequest request, NotificationEventListener listener) {
             this.request = request;
             this.listener = listener;
+        }
+
+        SubscriptionParams(RpcRequest request) {
+            this.request = request;
         }
     }
 
@@ -167,6 +171,37 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
 
         RpcRequest rpcRequest = new RpcRequest("signatureSubscribe", params);
         addSubscription(rpcRequest, listener);
+    }
+
+    public void transactionSubscribe(String key, NotificationEventListener listener) {
+        List<Object> params = new ArrayList<>();
+        params.add(Map.of("vote", false,
+                "failed", false,
+                "accountRequired", key));
+        params.add(Map.of("encoding", "jsonParsed",
+                "commitment", Commitment.PROCESSED.getValue(),
+                "transaction_details", "full"));
+
+        RpcRequest rpcRequest = new RpcRequest("transactionSubscribe", params);
+
+        subscriptions.put(rpcRequest.getId(), new SubscriptionParams(rpcRequest, listener));
+        subscriptionIds.put(rpcRequest.getId(), 0L);
+
+        updateSubscriptions();
+    }
+
+    public String logsSubscribeWithId(String mention, NotificationEventListener listener) {
+        List<Object> params = new ArrayList<>();
+        params.add(Map.of("mentions", List.of(mention)));
+        params.add(Map.of("commitment", Commitment.PROCESSED.getValue()));
+
+        RpcRequest rpcRequest = new RpcRequest("logsSubscribe", params);
+
+        subscriptions.put(rpcRequest.getId(), new SubscriptionParams(rpcRequest, listener));
+        subscriptionIds.put(rpcRequest.getId(), 0L);
+
+        updateSubscriptions();
+        return rpcRequest.getId();
     }
 
     /**
@@ -376,6 +411,26 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
             subscriptionLock.unlock();
         }
         updateSubscriptions();
+    }
+
+    public void logsUnSubscribe(String subscriptionIdKey) {
+        List<Object> params = new ArrayList<>();
+
+        RpcRequest rpcRequest = new RpcRequest("logsUnSubscribe", params);
+        Long subscriptionId = subscriptionIds.get(subscriptionIdKey);
+        params.add(subscriptionId);
+
+        subscriptions.remove(subscriptionIdKey);
+        subscriptionIds.remove(subscriptionIdKey);
+        subscriptionListeners.remove(subscriptionId);
+
+        subscriptions.put(rpcRequest.getId(), new SubscriptionParams(rpcRequest));
+        subscriptionIds.put(rpcRequest.getId(), 0L);
+
+        updateSubscriptions();
+
+        subscriptions.remove(rpcRequest.getId());
+        subscriptionIds.remove(rpcRequest.getId());
     }
 
     /**
@@ -675,7 +730,9 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
      */
     public String getSubscriptionId(String account) {
         for (Map.Entry<String, SubscriptionParams> entry : activeSubscriptions.entrySet()) {
-            if (entry.getValue().request.getParams().get(0).equals(account)) {
+            Object params = entry.getValue().request.getParams();
+            List<?> paramsList = (List<?>) params;
+            if (paramsList.get(0).equals(account)) {
                 return entry.getKey();
             }
         }

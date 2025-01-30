@@ -147,7 +147,7 @@ public class RpcClient {
      * @return the result of the RPC call
      * @throws RpcException if an error occurs during the RPC call
      */
-    public <T> T call(String method, List<Object> params, Class<T> clazz) throws RpcException {
+    public <T> T call(String method, Object params, Class<T> clazz) throws RpcException {
         RpcRequest rpcRequest = new RpcRequest(method, params);
 
         JsonAdapter<RpcRequest> rpcRequestJsonAdapter = moshi.adapter(RpcRequest.class);

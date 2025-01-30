@@ -24,16 +24,16 @@ public class ProgramAccount {
         private String data;
 
         @Json(name = "executable")
-        private boolean executable;
+        private final boolean executable;
 
         @Json(name = "lamports")
-        private double lamports;
+        private final double lamports;
 
         @Json(name = "owner")
-        private String owner;
+        private final String owner;
 
         @Json(name = "rentEpoch")
-        private double rentEpoch;
+        private final double rentEpoch;
 
         private String encoding;
 
@@ -46,7 +46,7 @@ public class ProgramAccount {
                 List<String> dataList = ((List<String>) rawData);
 
                 this.data = dataList.get(0);
-                this.encoding = (String) dataList.get(1);
+                this.encoding = dataList.get(1);
             } else if (rawData instanceof String) {
                 this.data = (String) rawData;
             }
@@ -67,10 +67,10 @@ public class ProgramAccount {
     }
 
     @Json(name = "account")
-    private Account account;
+    private final Account account;
 
     @Json(name = "pubkey")
-    private String pubkey;
+    private final String pubkey;
 
     public PublicKey getPublicKey() {
         return new PublicKey(pubkey);

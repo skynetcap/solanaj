@@ -214,7 +214,7 @@ public class MainnetTest extends AccountBasedTest {
     }
 
     /**
-     * Calls sendTransaction with a call to the Memo program included.
+     * Calls sendLegacyTransaction with a call to the Memo program included.
      */
     @Test
     @Disabled
@@ -225,7 +225,7 @@ public class MainnetTest extends AccountBasedTest {
         // Create account from private key
         final Account feePayer = testAccount;
 
-        final Transaction transaction = new Transaction();
+        final LegacyTransaction legacyTransaction = new LegacyTransaction();
 
         // First intruction it adds here is a small amount of SOL (like 0.000001) just to have some content in the tx
         // Probably not really needed
@@ -238,14 +238,14 @@ public class MainnetTest extends AccountBasedTest {
 //        );
 
         // Add instruction to write memo
-        transaction.addInstruction(
+        legacyTransaction.addInstruction(
                 MemoProgram.writeUtf8(feePayer.getPublicKey(), "Twitter: skynetcap")
         );
 
-        // Call sendTransaction
+        // Call sendLegacyTransaction
         String result = null;
         try {
-            result = client.getApi().sendTransaction(transaction, feePayer);
+            result = client.getApi().sendLegacyTransaction(legacyTransaction, feePayer);
             LOGGER.info("Result = " + result);
         } catch (RpcException e) {
             e.printStackTrace();
