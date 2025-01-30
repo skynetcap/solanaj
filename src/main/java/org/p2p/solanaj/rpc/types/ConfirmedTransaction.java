@@ -77,34 +77,48 @@ public class ConfirmedTransaction {
         private TokenResultObjects.TokenAmountInfo uiTokenAmount;
     }
 
-    @Getter
-    @ToString
-    public static class Meta {
+	@Getter
+	@ToString
+	public static class LoadedAddresses {
 
-        @Json(name = "err")
-        private Object err;
+		@Json(name = "readonly")
+		public List<String> readOnly;
 
-        @Json(name = "fee")
-        private long fee;
+		@Json(name = "writable")
+		public List<String> writable;
+	}
 
-        @Json(name = "innerInstructions")
-        private List<Object> innerInstructions;
+	@Getter
+	@ToString
+	public static class Meta {
 
-        @Json(name = "preTokenBalances")
-        private List<TokenBalance> preTokenBalances;
+		@Json(name = "err")
+		private Object err;
 
-        @Json(name = "postTokenBalances")
-        private List<TokenBalance> postTokenBalances;
+		@Json(name = "fee")
+		private long fee;
 
-        @Json(name = "postBalances")
-        private List<Long> postBalances;
+		@Json(name = "innerInstructions")
+		private List<Object> innerInstructions;
 
-        @Json(name = "preBalances")
-        private List<Long> preBalances;
+		@Json(name = "preTokenBalances")
+		private List<TokenBalance> preTokenBalances;
 
-        @Json(name = "status")
-        private Status status;
-    }
+		@Json(name = "postTokenBalances")
+		private List<TokenBalance> postTokenBalances;
+
+		@Json(name = "postBalances")
+		private List<Long> postBalances;
+
+		@Json(name = "preBalances")
+		private List<Long> preBalances;
+
+		@Json(name = "status")
+		private Status status;
+
+		@Json(name = "loadedAddresses")
+		private LoadedAddresses loadedAddresses;
+	}
 
     @Getter
     @ToString
@@ -116,7 +130,7 @@ public class ConfirmedTransaction {
         @Json(name = "signatures")
         private List<String> signatures;
 
-        
+
         @Json(name = "blockTime")
         private String blocktime;
 
