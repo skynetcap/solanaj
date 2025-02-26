@@ -32,21 +32,22 @@ public class AddressLookupTableProgram extends Program {
      * @return A TransactionInstruction to create a new address lookup table
      */
     public static TransactionInstruction createLookupTable(PublicKey authority, PublicKey payer, long recentSlot) {
-        PublicKey derivedAddress = PublicKey.findProgramAddress(
+        PublicKey.ProgramDerivedAddress derivedAddress = PublicKey.findProgramAddress(
             List.of(authority.toByteArray(), ByteBuffer.allocate(8).order(ByteOrder.LITTLE_ENDIAN).putLong(recentSlot).array()),
             PROGRAM_ID
-        ).getAddress();
+        );
 
         List<AccountMeta> keys = new ArrayList<>();
-        keys.add(new AccountMeta(derivedAddress, false, true));
+        keys.add(new AccountMeta(derivedAddress.getAddress(), false, true));
         keys.add(new AccountMeta(authority, true, false));
         keys.add(new AccountMeta(payer, true, true));
         keys.add(new AccountMeta(SystemProgram.PROGRAM_ID, false, false));
 
-        ByteBuffer data = ByteBuffer.allocate(9);
+        ByteBuffer data = ByteBuffer.allocate(4 + 8 + 1);
         data.order(ByteOrder.LITTLE_ENDIAN);
-        data.put(CREATE_LOOKUP_TABLE);
+        data.putInt(CREATE_LOOKUP_TABLE);
         data.putLong(recentSlot);
+        data.put((byte) derivedAddress.getNonce());
 
         return createTransactionInstruction(PROGRAM_ID, keys, data.array());
     }
