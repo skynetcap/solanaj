@@ -86,10 +86,10 @@ public class AddressLookupTableProgram extends Program {
         keys.add(new AccountMeta(payer, true, true));
         keys.add(new AccountMeta(SystemProgram.PROGRAM_ID, false, false));
 
-        ByteBuffer data = ByteBuffer.allocate(1 + 4 + addresses.size() * 32);
+        ByteBuffer data = ByteBuffer.allocate(4 + 8 + addresses.size() * 32);
         data.order(ByteOrder.LITTLE_ENDIAN);
-        data.put(EXTEND_LOOKUP_TABLE);
-        data.putInt(addresses.size());
+        data.putInt(EXTEND_LOOKUP_TABLE);
+        data.putLong(addresses.size());
         for (PublicKey address : addresses) {
             data.put(address.toByteArray());
         }
