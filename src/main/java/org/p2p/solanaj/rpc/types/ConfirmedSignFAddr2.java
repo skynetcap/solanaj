@@ -21,4 +21,11 @@ public class ConfirmedSignFAddr2 {
         this.limit = limit;
         this.commitment = commitment.getValue();
     }
+
+    public ConfirmedSignFAddr2(int limit, Commitment commitment, String before, String until) {
+        this.limit = limit;
+        this.commitment = commitment.getValue();
+        this.before = before;
+        this.until = until;
+    }
 }

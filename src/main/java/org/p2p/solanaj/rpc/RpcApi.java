@@ -194,10 +194,15 @@ public class RpcApi {
 
     public List<SignatureInformation> getSignaturesForAddress(PublicKey account, int limit, Commitment commitment)
             throws RpcException {
+                return getSignaturesForAddress(account, limit, commitment, null, null)
+    }
+
+    public List<SignatureInformation> getSignaturesForAddress(PublicKey account, int limit, Commitment commitment, String before, String until)
+            throws RpcException {
         List<Object> params = new ArrayList<>();
 
         params.add(account.toString());
-        params.add(new ConfirmedSignFAddr2(limit, commitment));
+        params.add(new ConfirmedSignFAddr2(limit, commitment, before, until));
 
         List<AbstractMap> rawResult = client.call("getSignaturesForAddress", params, List.class);
 
