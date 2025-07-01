@@ -42,7 +42,7 @@
         <dependency>
             <groupId>org.bitcoinj</groupId>
             <artifactId>bitcoinj-core</artifactId>
-            <version>0.16.3</version>
+            <version>0.17</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.google.protobuf</groupId>
