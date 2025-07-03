@@ -11,7 +11,7 @@ import lombok.ToString;
 import org.p2p.solanaj.core.PublicKey;
 import org.p2p.solanaj.rpc.types.config.RpcSendTransactionConfig.Encoding;
 
-import org.bitcoinj.core.Base58;
+import org.bitcoinj.base.Base58;
 
 @Getter
 @ToString

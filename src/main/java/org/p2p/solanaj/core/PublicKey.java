@@ -7,8 +7,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import org.bitcoinj.core.Base58;
-import org.bitcoinj.core.Sha256Hash;
+import org.bitcoinj.base.Base58;
+import org.bitcoinj.base.Sha256Hash;
 import org.p2p.solanaj.utils.ByteUtils;
 import org.p2p.solanaj.utils.PublicKeySerializer;
 import org.p2p.solanaj.utils.TweetNaclFast;

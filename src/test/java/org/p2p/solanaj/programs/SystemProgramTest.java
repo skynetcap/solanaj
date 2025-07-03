@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Disabled;
 import static org.junit.jupiter.api.Assertions.*;
 
-import org.bitcoinj.core.Base58;
+import org.bitcoinj.base.Base58;
 
 public class SystemProgramTest {
 

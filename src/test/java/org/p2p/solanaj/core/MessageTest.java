@@ -1,6 +1,6 @@
 package org.p2p.solanaj.core;
 
-import org.bitcoinj.core.Base58;
+import org.bitcoinj.base.Base58;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import org.p2p.solanaj.programs.SystemProgram;

@@ -27,4 +27,10 @@ public class ShortvecEncoding {
 
         return bytes;
     }
+
+    /** Write 2 bytes to the byte array (starting at the offset) as unsigned 16-bit integer in little endian format. */
+    public static void uint16ToByteArrayLE(int val, byte[] out, int offset) {
+        out[offset] = (byte) (0xFF & val);
+        out[offset + 1] = (byte) (0xFF & (val >> 8));
+    }    
 }

@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
-import org.bitcoinj.core.Base58;
+import org.bitcoinj.base.Base58;
 import org.p2p.solanaj.utils.ShortvecEncoding;
 import org.p2p.solanaj.utils.TweetNaclFast;
 

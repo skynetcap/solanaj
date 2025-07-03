@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
-import org.bitcoinj.core.Base58;
+import org.bitcoinj.base.Base58;
 
 public class AccountTest {
 
