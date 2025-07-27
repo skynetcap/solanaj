@@ -1,8 +1,6 @@
 package org.p2p.solanaj.programs;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Disabled;
 import static org.junit.jupiter.api.Assertions.*;
 import org.p2p.solanaj.core.PublicKey;
 import org.p2p.solanaj.core.TransactionInstruction;
