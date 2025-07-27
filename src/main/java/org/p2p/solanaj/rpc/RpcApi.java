@@ -194,7 +194,7 @@ public class RpcApi {
 
     public List<SignatureInformation> getSignaturesForAddress(PublicKey account, int limit, Commitment commitment)
             throws RpcException {
-                return getSignaturesForAddress(account, limit, commitment, null, null)
+                return getSignaturesForAddress(account, limit, commitment, null, null);
     }
 
     public List<SignatureInformation> getSignaturesForAddress(PublicKey account, int limit, Commitment commitment, String before, String until)
