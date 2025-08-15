@@ -5,14 +5,19 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.Protocol;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.JsonReader;
 import com.squareup.moshi.Moshi;
 import com.squareup.moshi.Types;
+import okio.Buffer;
+import java.util.zip.GZIPInputStream;
+import java.io.ByteArrayInputStream;
 
 import org.p2p.solanaj.rpc.types.RpcRequest;
 import org.p2p.solanaj.rpc.types.RpcResponse;
@@ -22,6 +27,8 @@ import javax.net.ssl.*;
 
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.util.Arrays;
+
 
 /**
  * RpcClient is responsible for making RPC calls to a Solana cluster.
@@ -34,6 +41,18 @@ public class RpcClient {
     private WeightedCluster cluster;
     private final Moshi moshi; // Reuse Moshi instance
 
+
+    /**
+     * Creates a configured OkHttpClient builder with gzip compression and HTTP/2 enabled.
+     *
+     * @return OkHttpClient.Builder with optimized settings
+     */
+    private static OkHttpClient.Builder createOptimizedClientBuilder() {
+        return new OkHttpClient.Builder()
+                .protocols(Arrays.asList(Protocol.HTTP_2, Protocol.HTTP_1_1));
+                // Note: OkHttp automatically handles gzip response decompression when Accept-Encoding header is added
+    }
+
     /**
      * Constructs an RpcClient with a specified weighted cluster.
      *
@@ -42,7 +61,7 @@ public class RpcClient {
     public RpcClient(WeightedCluster cluster) {
         this.cluster = cluster;
         this.endpoint = cluster.getEndpoints().get(0).getUrl(); // Initialize endpoint from the cluster
-        this.httpClient = new OkHttpClient.Builder().readTimeout(20, TimeUnit.SECONDS).build();
+        this.httpClient = createOptimizedClientBuilder().readTimeout(20, TimeUnit.SECONDS).build();
         this.rpcApi = new RpcApi(this);
         this.moshi = new Moshi.Builder().build(); // Initialize Moshi
     }
@@ -62,7 +81,7 @@ public class RpcClient {
      * @param endpoint the RPC endpoint
      */
     public RpcClient(String endpoint) {
-        this(endpoint, new OkHttpClient.Builder().readTimeout(20, TimeUnit.SECONDS).build());
+        this(endpoint, createOptimizedClientBuilder().readTimeout(20, TimeUnit.SECONDS).build());
     }
 
     /**
@@ -72,9 +91,14 @@ public class RpcClient {
      * @param userAgent the user agent to set in the request header
      */
     public RpcClient(String endpoint, String userAgent) {
-        this(endpoint, new OkHttpClient.Builder()
-                .addNetworkInterceptor(chain -> chain.proceed(
-                        chain.request().newBuilder().header("User-Agent", userAgent).build()))
+        this(endpoint, createOptimizedClientBuilder()
+                .addNetworkInterceptor(chain -> {
+                    Request originalRequest = chain.request();
+                    Request requestWithUserAgent = originalRequest.newBuilder()
+                            .header("User-Agent", userAgent)
+                            .build();
+                    return chain.proceed(requestWithUserAgent);
+                })
                 .readTimeout(20, TimeUnit.SECONDS)
                 .build());
     }
@@ -86,7 +110,7 @@ public class RpcClient {
      * @param timeout  the read timeout in seconds
      */
     public RpcClient(String endpoint, int timeout) {
-        this(endpoint, new OkHttpClient.Builder().readTimeout(timeout, TimeUnit.SECONDS).build());
+        this(endpoint, createOptimizedClientBuilder().readTimeout(timeout, TimeUnit.SECONDS).build());
     }
 
     /**
@@ -99,7 +123,7 @@ public class RpcClient {
      */
     public RpcClient(String endpoint, int readTimeoutMs, int connectTimeoutMs, int writeTimeoutMs) {
         this.endpoint = endpoint;
-        this.httpClient = new OkHttpClient.Builder()
+        this.httpClient = createOptimizedClientBuilder()
                 .readTimeout(readTimeoutMs, TimeUnit.MILLISECONDS)
                 .connectTimeout(connectTimeoutMs, TimeUnit.MILLISECONDS)
                 .writeTimeout(writeTimeoutMs, TimeUnit.MILLISECONDS)
@@ -130,7 +154,7 @@ public class RpcClient {
      */
     public RpcClient(String endpoint, String proxyHost, int proxyPort) {
         this.endpoint = endpoint;
-        this.httpClient = new OkHttpClient.Builder()
+        this.httpClient = createOptimizedClientBuilder()
                 .proxy(new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(proxyHost, proxyPort))) // Set SOCKS proxy
                 .readTimeout(20, TimeUnit.SECONDS)
                 .build();
@@ -154,20 +178,38 @@ public class RpcClient {
         JsonAdapter<RpcResponse<T>> resultAdapter = moshi.adapter(Types.newParameterizedType(RpcResponse.class, clazz));
 
         Request request = new Request.Builder().url(getEndpoint())
+                .header("Accept-Encoding", "gzip, deflate")
                 .post(RequestBody.create(rpcRequestJsonAdapter.toJson(rpcRequest), JSON)).build();
 
         try {
             Response response = httpClient.newCall(request).execute();
-            final String result = response.body().string();
-            RpcResponse<T> rpcResult = resultAdapter.fromJson(result);
-
-            if (rpcResult == null || rpcResult.getError() != null) {
-                throw new RpcException(rpcResult != null ? rpcResult.getError().getMessage() : "RPC response is null");
+            
+            // Handle gzip decompression manually if needed
+            String result;
+            String contentEncoding = response.header("Content-Encoding");
+            if ("gzip".equals(contentEncoding)) {
+                // Manually decompress gzipped content
+                try (GZIPInputStream gzipStream = new GZIPInputStream(new ByteArrayInputStream(response.body().bytes()))) {
+                    result = new String(gzipStream.readAllBytes());
+                }
+            } else {
+                result = response.body().string();
             }
-
-            return rpcResult.getResult();
+            
+            try (Buffer buffer = new Buffer().writeUtf8(result)) {
+                JsonReader reader = JsonReader.of(buffer);
+                reader.setLenient(true);
+                RpcResponse<T> rpcResult = resultAdapter.fromJson(reader);
+          
+                if (rpcResult == null || rpcResult.getError() != null) {
+                    throw new RpcException(rpcResult != null ?
+                    rpcResult.getError().getMessage() : "RPC response is null");
+                }
+          
+                return rpcResult.getResult();
+            }
         } catch (SSLHandshakeException e) {
-            this.httpClient = new OkHttpClient.Builder().build();
+            this.httpClient = createOptimizedClientBuilder().build();
             throw new RpcException("SSL Handshake failed: " + e.getMessage());
         } catch (IOException e) {
             throw new RpcException("IO error during RPC call: " + e.getMessage());
