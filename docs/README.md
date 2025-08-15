@@ -50,7 +50,7 @@ Add the following Maven dependency to your project's `pom.xml`:
 <dependency>
     <groupId>com.mmorrell</groupId>
     <artifactId>solanaj</artifactId>
-    <version>1.22.0</version>
+    <version>1.23.0</version>
 </dependency>
 ```
 
