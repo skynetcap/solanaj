@@ -122,6 +122,8 @@ public class ConfirmedTransaction {
 
 
     }
+    @Json(name = "blockTime")
+    private long blocktime;
 
     @Json(name = "meta")
     private Meta meta;
