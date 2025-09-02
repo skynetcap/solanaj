@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.Base64;
 import java.util.List;
 
-import org.bitcoinj.core.Base58;
+import org.bitcoinj.base.Base58;
 
 public class TransactionTest {
 
