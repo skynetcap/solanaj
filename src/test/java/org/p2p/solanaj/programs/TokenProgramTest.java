@@ -27,7 +27,7 @@ public class TokenProgramTest {
         PublicKey mintAuthority = new PublicKey("FuLFkNQzNEAzZ2dEgXVUqVVLxJYLYhbSgpZf9RVVXZuT");
         PublicKey freezeAuthority = new PublicKey("HNGVuL5kqjDehw7KR63w9gxow32sX6xzRNgLb8GkbwCM");
 
-        TransactionInstruction instruction = TokenProgram.initializeMint(mintPubkey, decimals, mintAuthority, freezeAuthority);
+        TransactionInstruction instruction = TokenProgram.initializeMint(mintPubkey, decimals, mintAuthority, freezeAuthority, false);
 
         assertEquals(TokenProgram.PROGRAM_ID, instruction.getProgramId());
         assertEquals(2, instruction.getKeys().size());
@@ -57,7 +57,7 @@ public class TokenProgramTest {
         );
         int m = 2;
 
-        TransactionInstruction instruction = TokenProgram.initializeMultisig(multisigPubkey, signerPubkeys, m);
+        TransactionInstruction instruction = TokenProgram.initializeMultisig(multisigPubkey, signerPubkeys, m, false);
 
         assertEquals(TokenProgram.PROGRAM_ID, instruction.getProgramId());
         assertEquals(4, instruction.getKeys().size());
@@ -81,7 +81,7 @@ public class TokenProgramTest {
         PublicKey ownerPubkey = new PublicKey("HNGVuL5kqjDehw7KR63w9gxow32sX6xzRNgLb8GkbwCM");
         long amount = 1000000000;  // 1 billion (assuming 9 decimals)
 
-        TransactionInstruction instruction = TokenProgram.approve(sourcePubkey, delegatePubkey, ownerPubkey, amount);
+        TransactionInstruction instruction = TokenProgram.approve(sourcePubkey, delegatePubkey, ownerPubkey, amount, false);
 
         assertEquals(TokenProgram.PROGRAM_ID, instruction.getProgramId());
         assertEquals(3, instruction.getKeys().size());
@@ -114,7 +114,7 @@ public class TokenProgramTest {
         long amount = 1000000000;  // 1 billion (assuming 9 decimals)
         PublicKey owner = new PublicKey("HNGVuL5kqjDehw7KR63w9gxow32sX6xzRNgLb8GkbwCM");
 
-        TransactionInstruction instruction = TokenProgram.transfer(source, destination, amount, owner);
+        TransactionInstruction instruction = TokenProgram.transfer(source, destination, amount, owner, false);
 
         assertEquals(TokenProgram.PROGRAM_ID, instruction.getProgramId());
         assertEquals(3, instruction.getKeys().size());
@@ -141,7 +141,7 @@ public class TokenProgramTest {
         PublicKey owner = new PublicKey("HNGVuL5kqjDehw7KR63w9gxow32sX6xzRNgLb8GkbwCM");
         long amount = 500000000;  // 500 million (assuming 9 decimals)
 
-        TransactionInstruction instruction = TokenProgram.burn(account, mint, owner, amount);
+        TransactionInstruction instruction = TokenProgram.burn(account, mint, owner, amount, false);
 
         assertEquals(TokenProgram.PROGRAM_ID, instruction.getProgramId());
         assertEquals(3, instruction.getKeys().size());
@@ -168,7 +168,7 @@ public class TokenProgramTest {
         PublicKey authority = new PublicKey("HNGVuL5kqjDehw7KR63w9gxow32sX6xzRNgLb8GkbwCM");
         long amount = 750000000;  // 750 million (assuming 9 decimals)
 
-        TransactionInstruction instruction = TokenProgram.mintTo(mint, destination, authority, amount);
+        TransactionInstruction instruction = TokenProgram.mintTo(mint, destination, authority, amount, false);
 
         assertEquals(TokenProgram.PROGRAM_ID, instruction.getProgramId());
         assertEquals(3, instruction.getKeys().size());
@@ -194,7 +194,7 @@ public class TokenProgramTest {
         PublicKey mint = new PublicKey("FuLFkNQzNEAzZ2dEgXVUqVVLxJYLYhbSgpZf9RVVXZuT");
         PublicKey authority = new PublicKey("HNGVuL5kqjDehw7KR63w9gxow32sX6xzRNgLb8GkbwCM");
 
-        TransactionInstruction instruction = TokenProgram.freezeAccount(account, mint, authority);
+        TransactionInstruction instruction = TokenProgram.freezeAccount(account, mint, authority, false);
 
         assertEquals(TokenProgram.PROGRAM_ID, instruction.getProgramId());
         assertEquals(3, instruction.getKeys().size());
@@ -216,7 +216,7 @@ public class TokenProgramTest {
         PublicKey mint = new PublicKey("FuLFkNQzNEAzZ2dEgXVUqVVLxJYLYhbSgpZf9RVVXZuT");
         PublicKey authority = new PublicKey("HNGVuL5kqjDehw7KR63w9gxow32sX6xzRNgLb8GkbwCM");
 
-        TransactionInstruction instruction = TokenProgram.thawAccount(account, mint, authority);
+        TransactionInstruction instruction = TokenProgram.thawAccount(account, mint, authority, false);
 
         assertEquals(TokenProgram.PROGRAM_ID, instruction.getProgramId());
         assertEquals(3, instruction.getKeys().size());

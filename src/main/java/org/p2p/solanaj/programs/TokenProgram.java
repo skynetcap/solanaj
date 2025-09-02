@@ -15,6 +15,7 @@ import java.util.List;
 public class TokenProgram extends Program {
 
     public static final PublicKey PROGRAM_ID = new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
+    public static final PublicKey PROGRAM_ID_2022 = new PublicKey("TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb");
 
     /**
      * The public key of the Solana rent sysvar.
@@ -45,7 +46,13 @@ public class TokenProgram extends Program {
      * @param owner account/private key signing this transaction
      * @return transaction id for explorer
      */
-    public static TransactionInstruction transfer(PublicKey source, PublicKey destination, long amount, PublicKey owner) {
+    public static TransactionInstruction transfer(
+            PublicKey source,
+            PublicKey destination,
+            long amount,
+            PublicKey owner,
+            boolean isToken2022
+    ) {
         final List<AccountMeta> keys = new ArrayList<>();
 
         keys.add(new AccountMeta(source,false, true));
@@ -57,7 +64,7 @@ public class TokenProgram extends Program {
         );
 
         return createTransactionInstruction(
-                PROGRAM_ID,
+                isToken2022? PROGRAM_ID_2022: PROGRAM_ID,
                 keys,
                 transactionData
         );
@@ -74,7 +81,15 @@ public class TokenProgram extends Program {
      * @param tokenMint The public key of the token's mint
      * @return A TransactionInstruction for the transfer
      */
-    public static TransactionInstruction transferChecked(PublicKey source, PublicKey destination, long amount, byte decimals, PublicKey owner, PublicKey tokenMint) {
+    public static TransactionInstruction transferChecked(
+            PublicKey source,
+            PublicKey destination,
+            long amount,
+            byte decimals,
+            PublicKey owner,
+            PublicKey tokenMint,
+            boolean isToken2022
+    ) {
         final List<AccountMeta> keys = new ArrayList<>();
 
         keys.add(new AccountMeta(source,false, true));
@@ -89,13 +104,18 @@ public class TokenProgram extends Program {
         );
 
         return createTransactionInstruction(
-                PROGRAM_ID,
+                isToken2022? PROGRAM_ID_2022: PROGRAM_ID,
                 keys,
                 transactionData
         );
     }
 
-    public static TransactionInstruction initializeAccount(final PublicKey account, final PublicKey mint, final PublicKey owner) {
+    public static TransactionInstruction initializeAccount(
+            final PublicKey account,
+            final PublicKey mint,
+            final PublicKey owner,
+            boolean isToken2022
+    ) {
         final List<AccountMeta> keys = new ArrayList<>();
 
         keys.add(new AccountMeta(account,false, true));
@@ -108,13 +128,18 @@ public class TokenProgram extends Program {
         buffer.put((byte) INITIALIZE_ACCOUNT_METHOD_ID);
 
         return createTransactionInstruction(
-                PROGRAM_ID,
+                isToken2022? PROGRAM_ID_2022: PROGRAM_ID,
                 keys,
                 buffer.array()
         );
     }
 
-    public static TransactionInstruction closeAccount(final PublicKey accountPubkey, final PublicKey destinationPubkey, final PublicKey ownerPubkey) {
+    public static TransactionInstruction closeAccount(
+            final PublicKey accountPubkey,
+            final PublicKey destinationPubkey,
+            final PublicKey ownerPubkey,
+            boolean isToken2022
+    ) {
         final List<AccountMeta> keys = new ArrayList<>();
 
         keys.add(new AccountMeta(accountPubkey, false, true));
@@ -126,7 +151,7 @@ public class TokenProgram extends Program {
         buffer.put((byte) CLOSE_ACCOUNT_METHOD_ID);
 
         return createTransactionInstruction(
-                PROGRAM_ID,
+                isToken2022? PROGRAM_ID_2022: PROGRAM_ID,
                 keys,
                 buffer.array()
         );
@@ -179,7 +204,8 @@ public class TokenProgram extends Program {
             PublicKey mintPubkey,
             int decimals,
             PublicKey mintAuthority,
-            PublicKey freezeAuthority
+            PublicKey freezeAuthority,
+            boolean isToken2022
     ) {
         List<AccountMeta> keys = new ArrayList<>();
         keys.add(new AccountMeta(mintPubkey, false, true));
@@ -195,7 +221,7 @@ public class TokenProgram extends Program {
             buffer.put(freezeAuthority.toByteArray());
         }
 
-        return createTransactionInstruction(PROGRAM_ID, keys, buffer.array());
+        return createTransactionInstruction(isToken2022? PROGRAM_ID_2022: PROGRAM_ID, keys, buffer.array());
     }
 
     /**
@@ -209,7 +235,8 @@ public class TokenProgram extends Program {
     public static TransactionInstruction initializeMultisig(
             PublicKey multisigPubkey,
             List<PublicKey> signerPubkeys,
-            int m
+            int m,
+            boolean isToken2022
     ) {
         List<AccountMeta> keys = new ArrayList<>();
         keys.add(new AccountMeta(multisigPubkey, false, true));
@@ -223,7 +250,7 @@ public class TokenProgram extends Program {
         buffer.put((byte) INITIALIZE_MULTISIG_METHOD_ID);
         buffer.put((byte) m);
 
-        return createTransactionInstruction(PROGRAM_ID, keys, buffer.array());
+        return createTransactionInstruction(isToken2022? PROGRAM_ID_2022: PROGRAM_ID, keys, buffer.array());
     }
 
     /**
@@ -239,7 +266,8 @@ public class TokenProgram extends Program {
             PublicKey sourcePubkey,
             PublicKey delegatePubkey,
             PublicKey ownerPubkey,
-            long amount
+            long amount,
+            boolean isToken2022
     ) {
         List<AccountMeta> keys = new ArrayList<>();
         keys.add(new AccountMeta(sourcePubkey, false, true));
@@ -251,7 +279,7 @@ public class TokenProgram extends Program {
         buffer.put((byte) APPROVE_METHOD_ID);
         buffer.putLong(amount);
 
-        return createTransactionInstruction(PROGRAM_ID, keys, buffer.array());
+        return createTransactionInstruction(isToken2022? PROGRAM_ID_2022: PROGRAM_ID, keys, buffer.array());
     }
 
     /**
@@ -263,7 +291,8 @@ public class TokenProgram extends Program {
      */
     public static TransactionInstruction revoke(
             PublicKey accountPubkey,
-            PublicKey ownerPubkey
+            PublicKey ownerPubkey,
+            boolean isToken2022
     ) {
         List<AccountMeta> keys = new ArrayList<>();
         keys.add(new AccountMeta(accountPubkey, false, true));
@@ -272,7 +301,7 @@ public class TokenProgram extends Program {
         ByteBuffer buffer = ByteBuffer.allocate(1);
         buffer.put((byte) REVOKE_METHOD_ID);
 
-        return createTransactionInstruction(PROGRAM_ID, keys, buffer.array());
+        return createTransactionInstruction(isToken2022? PROGRAM_ID_2022: PROGRAM_ID, keys, buffer.array());
     }
 
     /**
@@ -288,7 +317,8 @@ public class TokenProgram extends Program {
             PublicKey accountPubkey,
             PublicKey currentAuthorityPubkey,
             PublicKey newAuthorityPubkey,
-            AuthorityType authorityType
+            AuthorityType authorityType,
+            boolean isToken2022
     ) {
         List<AccountMeta> keys = new ArrayList<>();
         keys.add(new AccountMeta(accountPubkey, false, true));
@@ -303,7 +333,7 @@ public class TokenProgram extends Program {
             buffer.put(newAuthorityPubkey.toByteArray());
         }
 
-        return createTransactionInstruction(PROGRAM_ID, keys, buffer.array());
+        return createTransactionInstruction(isToken2022? PROGRAM_ID_2022: PROGRAM_ID, keys, buffer.array());
     }
 
     /**
@@ -319,7 +349,8 @@ public class TokenProgram extends Program {
             PublicKey mintPubkey,
             PublicKey destinationPubkey,
             PublicKey authorityPubkey,
-            long amount
+            long amount,
+            boolean isToken2022
     ) {
         List<AccountMeta> keys = new ArrayList<>();
         keys.add(new AccountMeta(mintPubkey, false, true));
@@ -331,7 +362,7 @@ public class TokenProgram extends Program {
         buffer.put((byte) MINT_TO_METHOD_ID);
         buffer.putLong(amount);
 
-        return createTransactionInstruction(PROGRAM_ID, keys, buffer.array());
+        return createTransactionInstruction(isToken2022? PROGRAM_ID_2022: PROGRAM_ID, keys, buffer.array());
     }
 
     /**
@@ -347,7 +378,8 @@ public class TokenProgram extends Program {
             PublicKey accountPubkey,
             PublicKey mintPubkey,
             PublicKey ownerPubkey,
-            long amount
+            long amount,
+            boolean isToken2022
     ) {
         List<AccountMeta> keys = new ArrayList<>();
         keys.add(new AccountMeta(accountPubkey, false, true));
@@ -359,7 +391,7 @@ public class TokenProgram extends Program {
         buffer.put((byte) BURN_METHOD_ID);
         buffer.putLong(amount);
 
-        return createTransactionInstruction(PROGRAM_ID, keys, buffer.array());
+        return createTransactionInstruction(isToken2022? PROGRAM_ID_2022: PROGRAM_ID, keys, buffer.array());
     }
 
     /**
@@ -373,7 +405,8 @@ public class TokenProgram extends Program {
     public static TransactionInstruction freezeAccount(
             PublicKey accountPubkey,
             PublicKey mintPubkey,
-            PublicKey authorityPubkey
+            PublicKey authorityPubkey,
+            boolean isToken2022
     ) {
         List<AccountMeta> keys = new ArrayList<>();
         keys.add(new AccountMeta(accountPubkey, false, true));
@@ -383,7 +416,7 @@ public class TokenProgram extends Program {
         ByteBuffer buffer = ByteBuffer.allocate(1);
         buffer.put((byte) FREEZE_ACCOUNT_METHOD_ID);
 
-        return createTransactionInstruction(PROGRAM_ID, keys, buffer.array());
+        return createTransactionInstruction(isToken2022? PROGRAM_ID_2022: PROGRAM_ID, keys, buffer.array());
     }
 
     /**
@@ -397,7 +430,8 @@ public class TokenProgram extends Program {
     public static TransactionInstruction thawAccount(
             PublicKey accountPubkey,
             PublicKey mintPubkey,
-            PublicKey authorityPubkey
+            PublicKey authorityPubkey,
+            boolean isToken2022
     ) {
         List<AccountMeta> keys = new ArrayList<>();
         keys.add(new AccountMeta(accountPubkey, false, true));
@@ -407,7 +441,7 @@ public class TokenProgram extends Program {
         ByteBuffer buffer = ByteBuffer.allocate(1);
         buffer.put((byte) THAW_ACCOUNT_METHOD_ID);
 
-        return createTransactionInstruction(PROGRAM_ID, keys, buffer.array());
+        return createTransactionInstruction(isToken2022? PROGRAM_ID_2022: PROGRAM_ID, keys, buffer.array());
     }
 
     /**

@@ -28,7 +28,8 @@ public class TokenManager {
                         source,
                         destination,
                         amount,
-                        owner.getPublicKey()
+                        owner.getPublicKey(),
+                        false
                 )
         );
 
@@ -70,7 +71,8 @@ public class TokenManager {
                         amount,
                         decimals,
                         owner.getPublicKey(),
-                        tokenMint
+                        tokenMint,
+                        false
                 )
         );
 
@@ -101,7 +103,8 @@ public class TokenManager {
                 TokenProgram.initializeAccount(
                         newAccount.getPublicKey(),
                         usdcTokenMint,
-                        owner.getPublicKey()
+                        owner.getPublicKey(),
+                        false
                 )
         );
 

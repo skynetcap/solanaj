@@ -30,8 +30,9 @@ public class AssociatedTokenProgram extends Program {
      */
     public static TransactionInstruction create(PublicKey fundingAccount,
                                                 PublicKey walletAddress,
-                                                PublicKey mint) {
-        return createInstruction(CREATE_METHOD_ID, fundingAccount, walletAddress, mint);
+                                                PublicKey mint,
+                                                PublicKey tokenProgram) {
+        return createInstruction(CREATE_METHOD_ID, fundingAccount, walletAddress, mint, tokenProgram);
     }
 
     /**
@@ -45,8 +46,9 @@ public class AssociatedTokenProgram extends Program {
      */
     public static TransactionInstruction createIdempotent(PublicKey fundingAccount,
                                                           PublicKey walletAddress,
-                                                          PublicKey mint) {
-        return createInstruction(CREATE_IDEMPOTENT_METHOD_ID, fundingAccount, walletAddress, mint);
+                                                          PublicKey mint,
+                                                          PublicKey tokenProgram) {
+        return createInstruction(CREATE_IDEMPOTENT_METHOD_ID, fundingAccount, walletAddress, mint, tokenProgram);
     }
 
     /**
@@ -66,7 +68,8 @@ public class AssociatedTokenProgram extends Program {
                                                        PublicKey destinationAccount,
                                                        PublicKey ownerAccount,
                                                        PublicKey ownerMint,
-                                                       PublicKey wallet) {
+                                                       PublicKey wallet,
+                                                       PublicKey tokenProgram) {
         final List<AccountMeta> keys = new ArrayList<>();
 
         keys.add(new AccountMeta(nestedAccount, false, true));
@@ -75,7 +78,7 @@ public class AssociatedTokenProgram extends Program {
         keys.add(new AccountMeta(ownerAccount, false, false));
         keys.add(new AccountMeta(ownerMint, false, false));
         keys.add(new AccountMeta(wallet, true, true));
-        keys.add(new AccountMeta(TokenProgram.PROGRAM_ID, false, false));
+        keys.add(new AccountMeta(tokenProgram, false, false));
 
         byte[] transactionData = encodeInstructionData(RECOVER_NESTED_METHOD_ID);
 
@@ -85,29 +88,30 @@ public class AssociatedTokenProgram extends Program {
     private static TransactionInstruction createInstruction(int methodId,
                                                             PublicKey fundingAccount,
                                                             PublicKey walletAddress,
-                                                            PublicKey mint) {
+                                                            PublicKey mint,
+                                                            PublicKey tokenProgram) {
         final List<AccountMeta> keys = new ArrayList<>();
 
-        PublicKey pda = findAssociatedTokenAddress(walletAddress, mint);
+        PublicKey pda = findAssociatedTokenAddress(walletAddress, mint, tokenProgram);
 
         keys.add(new AccountMeta(fundingAccount, true, true));
         keys.add(new AccountMeta(pda, false, true));
         keys.add(new AccountMeta(walletAddress, false, false));
         keys.add(new AccountMeta(mint, false, false));
         keys.add(new AccountMeta(SystemProgram.PROGRAM_ID, false, false));
-        keys.add(new AccountMeta(TokenProgram.PROGRAM_ID, false, false));
+        keys.add(new AccountMeta(tokenProgram, false, false));
 
         byte[] transactionData = encodeInstructionData(methodId);
 
         return createTransactionInstruction(PROGRAM_ID, keys, transactionData);
     }
 
-    private static PublicKey findAssociatedTokenAddress(PublicKey walletAddress, PublicKey mint) {
+    private static PublicKey findAssociatedTokenAddress(PublicKey walletAddress, PublicKey mint, PublicKey tokenProgram) {
         try {
             PublicKey pda = PublicKey.findProgramAddress(
                     List.of(
                             walletAddress.toByteArray(),
-                            TokenProgram.PROGRAM_ID.toByteArray(),
+                            tokenProgram.toByteArray(),
                             mint.toByteArray()
                     ),
                     PROGRAM_ID

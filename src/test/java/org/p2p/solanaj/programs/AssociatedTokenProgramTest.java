@@ -23,7 +23,7 @@ public class AssociatedTokenProgramTest {
 
     @Test
     public void testCreate() {
-        TransactionInstruction instruction = AssociatedTokenProgram.create(FUNDING_ACCOUNT, WALLET_ADDRESS, MINT);
+        TransactionInstruction instruction = AssociatedTokenProgram.create(FUNDING_ACCOUNT, WALLET_ADDRESS, MINT, TokenProgram.PROGRAM_ID);
 
         assertEquals(AssociatedTokenProgram.PROGRAM_ID, instruction.getProgramId());
         assertEquals(6, instruction.getKeys().size());
@@ -35,7 +35,7 @@ public class AssociatedTokenProgramTest {
 
     @Test
     public void testCreateIdempotent() {
-        TransactionInstruction instruction = AssociatedTokenProgram.createIdempotent(FUNDING_ACCOUNT, WALLET_ADDRESS, MINT);
+        TransactionInstruction instruction = AssociatedTokenProgram.createIdempotent(FUNDING_ACCOUNT, WALLET_ADDRESS, MINT, TokenProgram.PROGRAM_ID);
 
         assertEquals(AssociatedTokenProgram.PROGRAM_ID, instruction.getProgramId());
         assertEquals(6, instruction.getKeys().size());
@@ -48,7 +48,7 @@ public class AssociatedTokenProgramTest {
     @Test
     public void testRecoverNested() {
         TransactionInstruction instruction = AssociatedTokenProgram.recoverNested(
-                NESTED_ACCOUNT, NESTED_MINT, DESTINATION_ACCOUNT, OWNER_ACCOUNT, OWNER_MINT, WALLET_ADDRESS);
+                NESTED_ACCOUNT, NESTED_MINT, DESTINATION_ACCOUNT, OWNER_ACCOUNT, OWNER_MINT, WALLET_ADDRESS, TokenProgram.PROGRAM_ID);
 
         assertEquals(AssociatedTokenProgram.PROGRAM_ID, instruction.getProgramId());
         assertEquals(7, instruction.getKeys().size());
