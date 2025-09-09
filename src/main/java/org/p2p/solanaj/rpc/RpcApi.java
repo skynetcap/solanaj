@@ -1286,4 +1286,41 @@ public class RpcApi {
         return result.stream().map(Double::longValue).collect(Collectors.toList());
     }
 
+    public List<ProgramAccount> getProgramAccountsV2(PublicKey account, ProgramAccountConfig programAccountConfig)
+            throws RpcException {
+        List<Object> params = new ArrayList<>();
+
+        params.add(account.toString());
+
+        if (programAccountConfig != null) {
+            params.add(programAccountConfig);
+        }
+
+        // Helius V2 envelope: { accounts: [...], paginationKey: string|null, totalResults: number }
+        Map<String, Object> envelope = client.call("getProgramAccountsV2", params, Map.class);
+
+        @SuppressWarnings("unchecked")
+        List<AbstractMap> rawAccounts = (List<AbstractMap>) envelope.getOrDefault("accounts", List.of());
+
+        List<ProgramAccount> result = new ArrayList<>();
+        for (AbstractMap item : rawAccounts) {
+            result.add(new ProgramAccount(item));
+        }
+
+        return result;
+    }
+
+    public List<ProgramAccount> getProgramAccountsV2(PublicKey account, ProgramAccountConfig programAccountConfig, int dataSize)
+            throws RpcException {
+        // Ensure DataSize filter is applied in addition to any custom filters
+        List<Object> filters = new ArrayList<>();
+        if (programAccountConfig.getFilters() != null) {
+            filters.addAll(programAccountConfig.getFilters());
+        }
+        filters.add(new DataSize(dataSize));
+        programAccountConfig.setFilters(filters);
+
+        return getProgramAccountsV2(account, programAccountConfig);
+    }
+
 }

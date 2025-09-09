@@ -183,6 +183,9 @@ public class RpcClient {
 
         try {
             Response response = httpClient.newCall(request).execute();
+
+            // Log the payload request JSON
+            System.out.println("RPC Request JSON: " + rpcRequestJsonAdapter.toJson(rpcRequest));
             
             // Handle gzip decompression manually if needed
             String result;
@@ -195,6 +198,8 @@ public class RpcClient {
             } else {
                 result = response.body().string();
             }
+
+            System.out.println("result: " + result);
             
             try (Buffer buffer = new Buffer().writeUtf8(result)) {
                 JsonReader reader = JsonReader.of(buffer);
