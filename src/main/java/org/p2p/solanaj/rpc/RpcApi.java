@@ -287,6 +287,35 @@ public class RpcApi {
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
+    public List<ProgramAccount> getProgramAccounts(PublicKey account, List<Memcmp> memcmpList, int dataSize, long changedSinceSlot)
+            throws RpcException {
+        List<Object> params = new ArrayList<>();
+
+        params.add(account.toString());
+
+        List<Object> filters = new ArrayList<>();
+        memcmpList.forEach(memcmp -> {
+            filters.add(new Filter(memcmp));
+        });
+
+        filters.add(new DataSize(dataSize));
+
+        ProgramAccountConfig programAccountConfig = new ProgramAccountConfig(filters);
+        programAccountConfig.setEncoding(Encoding.base64);
+        programAccountConfig.setChangedSinceSlot(changedSinceSlot);
+        params.add(programAccountConfig);
+
+        List<AbstractMap> rawResult = client.call("getProgramAccounts", params, List.class);
+
+        List<ProgramAccount> result = new ArrayList<>();
+        for (AbstractMap item : rawResult) {
+            result.add(new ProgramAccount(item));
+        }
+
+        return result;
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public List<ProgramAccount> getProgramAccounts(PublicKey account, List<Memcmp> memcmpList) throws RpcException {
         List<Object> params = new ArrayList<>();
 
