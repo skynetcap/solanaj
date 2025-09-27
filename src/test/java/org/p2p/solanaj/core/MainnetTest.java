@@ -206,7 +206,7 @@ public class MainnetTest extends AccountBasedTest {
 
         Optional<String> symbol = token2022AccountInfo.getTokenSymbol();
         assertTrue(symbol.isPresent());
-        assertEquals("ai16z", symbol.get());    
+        assertEquals("ai16z", symbol.get());
 
         Optional<String> uri = token2022AccountInfo.getTokenUri();
         assertTrue(uri.isPresent());
@@ -994,4 +994,21 @@ public class MainnetTest extends AccountBasedTest {
         assertTrue(blocks.get(0) >= startSlot);
         assertTrue(blocks.size() <= limit);
     }
+
+	@Test
+	public void getTransactionLoadedAccounts() throws RpcException {
+		String transactionSignature =
+			"5CZPX2R1Sjg7m6y79buiXah3QYcrrBBQ3WuTigqUcmKYScHGUiFvJ1UuCZaG63kB2ivwpUrHNSbvQf7N1riBaeUC";
+
+		ConfirmedTransaction transactionInfo = client.getApi().getTransaction(transactionSignature);
+
+		String fromKey = transactionInfo.getTransaction().getMessage().getAccountKeys().get(0);
+		String toKey = transactionInfo.getTransaction().getMessage().getAccountKeys().get(1);
+
+		assertEquals("7Xa3P2XCmyasD3vQEz8igWM2KAhQyTSiPd2zKcrgFvBd", fromKey.toBase58());
+		assertEquals("3L4BCuZ8YzHzMoCLQ6wnp1Y7SDjzVQckq6xpGWkU3CJ8", toKey.toBase58());
+
+		assertEquals("SysvarRent111111111111111111111111111111111",transactionInfo.getMeta().getLoadedAddresses().getReadOnly().get(0));
+		assertEquals("5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1",transactionInfo.getMeta().getLoadedAddresses().getReadOnly().get(3));
+	}
 }
