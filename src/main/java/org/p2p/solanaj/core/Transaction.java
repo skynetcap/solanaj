@@ -2,11 +2,12 @@ package org.p2p.solanaj.core;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
 import org.bitcoinj.core.Base58;
+import org.p2p.solanaj.utils.ByteUtils;
+import org.p2p.solanaj.utils.ArrayUtils;
 import org.p2p.solanaj.utils.ShortvecEncoding;
 import org.p2p.solanaj.utils.TweetNaclFast;
 
@@ -28,6 +29,12 @@ public class Transaction {
     public Transaction() {
         this.message = new Message();
         this.signatures = new ArrayList<>(); // Use diamond operator
+    }
+
+    public Transaction(Message message, List<String> signatures) {
+        this.message = message;
+        this.signatures = signatures;
+        this.serializedMessage = message.serialize();
     }
 
     /**
@@ -61,7 +68,7 @@ public class Transaction {
      * @throws NullPointerException if the signer is null
      */
     public void sign(Account signer) {
-        sign(Arrays.asList(Objects.requireNonNull(signer, "Signer cannot be null"))); // Add input validation
+        sign(List.of(Objects.requireNonNull(signer, "Signer cannot be null"))); // Add input validation
     }
 
     /**
@@ -76,7 +83,7 @@ public class Transaction {
         }
 
         Account feePayer = signers.get(0);
-        message.setFeePayer(feePayer);
+        message.setFeePayer(feePayer.getPublicKey());
 
         serializedMessage = message.serialize();
 
@@ -89,6 +96,13 @@ public class Transaction {
                 throw new RuntimeException("Error signing transaction", e); // Improve exception handling
             }
         }
+    }
+
+    public String getTxHash(){
+        if (signatures == null || signatures.isEmpty()){
+            return null;
+        }
+        return signatures.get(0);
     }
 
     /**
@@ -114,5 +128,27 @@ public class Transaction {
         out.put(serializedMessage);
 
         return out.array();
+    }
+
+    /**
+     * deserialize Transaction
+     * @param serializedTransaction transaction serialize byte array
+     * @return
+     * @author jc080kevin
+     */
+    public static Transaction deserialize(byte[] serializedTransaction) {
+        List<Byte> serializedTransactionList = ByteUtils.toByteList(serializedTransaction);
+
+        int signaturesSize = ShortvecEncoding.decodeLength(serializedTransactionList);
+        List<String> signatures = new ArrayList<>(signaturesSize);
+
+        for (int i = 0; i < signaturesSize; i++) {
+
+            byte[] signatureBytes = ArrayUtils.guardedSplice(serializedTransactionList, 0, SIGNATURE_LENGTH);
+            signatures.add(Base58.encode(signatureBytes));
+        }
+
+        Message message = Message.deserialize(serializedTransactionList);
+        return new Transaction(message, signatures);
     }
 }

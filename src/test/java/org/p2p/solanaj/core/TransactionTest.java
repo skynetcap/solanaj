@@ -1,15 +1,14 @@
 package org.p2p.solanaj.core;
 
+import org.bitcoinj.core.Base58;
+import org.junit.jupiter.api.Test;
 import org.p2p.solanaj.programs.MemoProgram;
 import org.p2p.solanaj.programs.SystemProgram;
-
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Base64;
 import java.util.List;
 
-import org.bitcoinj.core.Base58;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TransactionTest {
 
@@ -28,9 +27,25 @@ public class TransactionTest {
         transaction.sign(signer);
         byte[] serializedTransaction = transaction.serialize();
 
+        assertEquals("nXkZvmiP3kzZbR7u95NSoK78Y3YqgSSthseuba99uBGsEBnR4RXugEhrAFmqhvWiN8k9aZNTZTE22NH6nBX3B7T", transaction.getTxHash());
+
         assertEquals(
                 "ASdDdWBaKXVRA+6flVFiZokic9gK0+r1JWgwGg/GJAkLSreYrGF4rbTCXNJvyut6K6hupJtm72GztLbWNmRF1Q4BAAEDBhrZ0FOHFUhTft4+JhhJo9+3/QL6vHWyI8jkatuFPQzrerzQ2HXrwm2hsYGjM5s+8qMWlbt6vbxngnO8rc3lqgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAy+KIwZmU8DLmYglP3bPzrlpDaKkGu6VIJJwTOYQmRfUBAgIAAQwCAAAAuAsAAAAAAAA=",
                 Base64.getEncoder().encodeToString(serializedTransaction));
+    }
+
+
+    @Test
+    public void deserialize() {
+        String serializedTxBase64 = "ASdDdWBaKXVRA+6flVFiZokic9gK0+r1JWgwGg/GJAkLSreYrGF4rbTCXNJvyut6K6hupJtm72GztLbWNmRF1Q4BAAEDBhrZ0FOHFUhTft4+JhhJo9+3/QL6vHWyI8jkatuFPQzrerzQ2HXrwm2hsYGjM5s+8qMWlbt6vbxngnO8rc3lqgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAy+KIwZmU8DLmYglP3bPzrlpDaKkGu6VIJJwTOYQmRfUBAgIAAQwCAAAAuAsAAAAAAAA=";
+        byte[] serializedTransaction = Base64.getDecoder().decode(serializedTxBase64);
+        Transaction transaction = Transaction.deserialize(serializedTransaction);
+
+        assertEquals("nXkZvmiP3kzZbR7u95NSoK78Y3YqgSSthseuba99uBGsEBnR4RXugEhrAFmqhvWiN8k9aZNTZTE22NH6nBX3B7T", transaction.getTxHash());
+
+        byte[] serializedNew = transaction.serialize();
+
+        assertEquals(Base64.getEncoder().encodeToString(serializedNew), serializedTxBase64);
     }
 
     @Test

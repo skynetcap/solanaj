@@ -1,6 +1,8 @@
 package org.p2p.solanaj.utils;
 
-import static org.bitcoinj.core.Utils.*;
+import java.util.List;
+
+import static org.bitcoinj.core.Utils.uint16ToByteArrayLE;
 
 public class ShortvecEncoding {
 
@@ -27,4 +29,20 @@ public class ShortvecEncoding {
 
         return bytes;
     }
+
+    public static int decodeLength(List<Byte> dataBytesList) {
+        int len = 0;
+        int size = 0;
+
+        for (;;) {
+            int elem = (int) dataBytesList.remove(0);
+            len |= (elem & 0x7f) << (size * 7);
+            size += 1;
+            if ((elem & 0x80) == 0) {
+                break;
+            }
+        }
+        return len;
+    }
+
 }
