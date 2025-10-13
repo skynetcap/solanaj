@@ -4,7 +4,7 @@
     <groupId>com.mmorrell</groupId>
     <artifactId>solanaj</artifactId>
     <packaging>jar</packaging>
-    <version>1.25.0</version>
+    <version>1.25.1</version>
     <name>${project.groupId}:${project.artifactId}</name>
     <description>Java client for Solana RPC</description>
     <url>https://github.com/skynetcap/solanaj</url>
@@ -48,11 +48,6 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>33.5.0-jre</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.protobuf</groupId>
-            <artifactId>protobuf-javalite</artifactId>
-            <version>4.32.1</version>
         </dependency>
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
