@@ -336,6 +336,7 @@ public class SubscriptionWebSocketClient {
                             if (result != null && result.has("value")) {
                                 JsonNode value = result.get("value");
                                 // Convert JsonNode to Map for compatibility
+                                @SuppressWarnings("unchecked")
                                 Map<String, Object> valueMap = objectMapper.convertValue(value, Map.class);
                                 listener.onNotificationEvent(valueMap);
                             }
