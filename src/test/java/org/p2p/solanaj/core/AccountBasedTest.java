@@ -1,6 +1,6 @@
 package org.p2p.solanaj.core;
 
-import org.p2p.solanaj.utils.Base58Utils;
+import org.p2p.solanaj.utils.Base58;
 import org.junit.jupiter.api.BeforeAll;
 
 import java.io.FileInputStream;
@@ -26,7 +26,7 @@ public class AccountBasedTest {
 
         try {
             data = Files.readAllBytes(Paths.get("testnet.dat"));
-            testAccount = new Account(Base58Utils.decode(new String(data)));
+            testAccount = new Account(Base58.decode(new String(data)));
         } catch (IOException e) {
             LOGGER.warning("Unable to read testnet.dat - tests may fail");
             testAccount = new Account();

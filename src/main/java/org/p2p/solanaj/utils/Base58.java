@@ -10,7 +10,7 @@ import java.util.Arrays;
  * Base58 is used in Bitcoin and other cryptocurrencies to encode addresses and other data.
  * It avoids characters that could be confused (0, O, I, l) and uses only alphanumeric characters.
  */
-public class Base58Utils {
+public class Base58 {
     
     private static final String ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
     private static final BigInteger BASE = BigInteger.valueOf(58);

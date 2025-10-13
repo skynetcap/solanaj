@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import org.p2p.solanaj.utils.Base58Utils;
+import org.p2p.solanaj.utils.Base58;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import org.p2p.solanaj.utils.ByteUtils;
@@ -25,7 +25,7 @@ public class PublicKey {
         if (pubkey.length() < PUBLIC_KEY_LENGTH) {
             throw new IllegalArgumentException("Invalid public key input: length must be at least " + PUBLIC_KEY_LENGTH);
         }
-        this.pubkey = Base58Utils.decode(pubkey);
+        this.pubkey = Base58.decode(pubkey);
     }
 
     public PublicKey(byte[] pubkey) {
@@ -45,7 +45,7 @@ public class PublicKey {
     }
 
     public String toBase58() {
-        return Base58Utils.encode(pubkey);
+        return Base58.encode(pubkey);
     }
 
     public boolean equals(PublicKey pubkey) {

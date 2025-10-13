@@ -6,13 +6,13 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
-import org.p2p.solanaj.utils.Base58Utils;
+import org.p2p.solanaj.utils.Base58;
 
 public class AccountTest {
 
     @Test
     public void accountFromSecretKey() {
-        byte[] secretKey = Base58Utils
+        byte[] secretKey = Base58
                 .decode("4Z7cXSyeFR8wNGMVXUE1TwtKn5D5Vu7FzEv69dokLv7KrQk7h6pu4LF8ZRR9yQBhc7uSM6RTTZtU1fmaxiNrxXrs");
         assertEquals("QqCCvshxtqMAL2CVALqiJB7uEeE5mjSPsseQdDzsRUo", new Account(secretKey).getPublicKey().toString());
 
@@ -73,7 +73,7 @@ public class AccountTest {
 
     @Test
     public void testAccountEquality() {
-        byte[] secretKey = Base58Utils.decode("4Z7cXSyeFR8wNGMVXUE1TwtKn5D5Vu7FzEv69dokLv7KrQk7h6pu4LF8ZRR9yQBhc7uSM6RTTZtU1fmaxiNrxXrs");
+        byte[] secretKey = Base58.decode("4Z7cXSyeFR8wNGMVXUE1TwtKn5D5Vu7FzEv69dokLv7KrQk7h6pu4LF8ZRR9yQBhc7uSM6RTTZtU1fmaxiNrxXrs");
         Account account1 = new Account(secretKey);
         Account account2 = new Account(secretKey);
         Account account3 = new Account();

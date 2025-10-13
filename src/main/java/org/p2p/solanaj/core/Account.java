@@ -6,7 +6,7 @@ import java.util.List;
 
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.SecretKeyFactory;
-import org.p2p.solanaj.utils.Base58Utils;
+import org.p2p.solanaj.utils.Base58;
 import org.p2p.solanaj.utils.TweetNaclFast;
 import org.p2p.solanaj.utils.bip32.wallet.SolanaBip44;
 import org.p2p.solanaj.utils.bip32.wallet.DerivableType;
@@ -127,7 +127,7 @@ public class Account {
      * @return A new Account instance
      */
     public static Account fromBase58PrivateKey(String base58PrivateKey) {
-        byte[] privateKey = Base58Utils.decode(base58PrivateKey);
+        byte[] privateKey = Base58.decode(base58PrivateKey);
         return new Account(privateKey);
     }
 
@@ -144,7 +144,7 @@ public class Account {
      * @return The base58-encoded private key
      */
     public String getPrivateKeyBase58() {
-        return Base58Utils.encode(this.getSecretKey());
+        return Base58.encode(this.getSecretKey());
     }
 
     /**

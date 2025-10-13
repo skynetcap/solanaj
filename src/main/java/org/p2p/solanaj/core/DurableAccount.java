@@ -3,7 +3,7 @@ package org.p2p.solanaj.core;
 
 import com.syntifi.near.borshj.Borsh;
 import com.syntifi.near.borshj.annotation.BorshField;
-import org.p2p.solanaj.utils.Base58Utils;
+import org.p2p.solanaj.utils.Base58;
 
 import java.util.Arrays;
 
@@ -34,7 +34,7 @@ public class DurableAccount implements Borsh {
     }
 
     public String getAuthorityBase58(){
-        return Base58Utils.encode(authority);
+        return Base58.encode(authority);
     }
 
     public void setAuthority(byte[] authority) {
@@ -45,7 +45,7 @@ public class DurableAccount implements Borsh {
         return blockhash;
     }
     public String getBlockhashBase58(){
-        return Base58Utils.encode(blockhash);
+        return Base58.encode(blockhash);
     }
     public void setBlockhash(byte[] blockhash) {
         this.blockhash = blockhash;
