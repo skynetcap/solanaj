@@ -214,8 +214,6 @@ public class SubscriptionWebSocketClient {
      */
     private void handleMessage(String message) {
         try {
-            LOGGER.info("Received WebSocket message: " + message);
-            
             JsonNode messageNode = objectMapper.readTree(message);
             
             // Check if this is a subscription confirmation

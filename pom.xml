@@ -4,7 +4,7 @@
     <groupId>com.mmorrell</groupId>
     <artifactId>solanaj</artifactId>
     <packaging>jar</packaging>
-    <version>1.24.0</version>
+    <version>1.25.0</version>
     <name>${project.groupId}:${project.artifactId}</name>
     <description>Java client for Solana RPC</description>
     <url>https://github.com/skynetcap/solanaj</url>
@@ -22,9 +22,9 @@
     <developers>
         <developer>
             <name>Michael Morrell</name>
-            <email>michael@mmorrell.com</email>
-            <organization>mmorrell.com</organization>
-            <organizationUrl>https://mmorrell.com/</organizationUrl>
+            <email>michael@cosmic.markets</email>
+            <organization>cosmic.markets</organization>
+            <organizationUrl>https://cosmic.markets/</organizationUrl>
         </developer>
     </developers>
     <properties>
@@ -42,7 +42,7 @@
         <dependency>
             <groupId>org.bitcoinj</groupId>
             <artifactId>bitcoinj-core</artifactId>
-            <version>0.16.5</version>
+            <version>0.17</version>
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
@@ -52,12 +52,12 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>33.4.8-jre</version>
+            <version>33.5.0-jre</version>
         </dependency>
         <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-javalite</artifactId>
-            <version>4.31.1</version>
+            <version>4.32.1</version>
         </dependency>
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
@@ -88,7 +88,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.40</version>
+            <version>1.18.42</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
