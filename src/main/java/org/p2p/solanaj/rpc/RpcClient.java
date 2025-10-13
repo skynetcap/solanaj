@@ -179,7 +179,7 @@ public class RpcClient {
 
         Request request = new Request.Builder().url(getEndpoint())
                 .header("Accept-Encoding", "gzip, deflate")
-                .post(RequestBody.create(rpcRequestJsonAdapter.toJson(rpcRequest), JSON)).build();
+                .post(RequestBody.create(JSON, rpcRequestJsonAdapter.toJson(rpcRequest))).build();
 
         try {
             Response response = httpClient.newCall(request).execute();
