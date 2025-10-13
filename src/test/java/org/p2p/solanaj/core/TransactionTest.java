@@ -9,11 +9,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.Base64;
 import java.util.List;
 
-import org.bitcoinj.core.Base58;
+import org.p2p.solanaj.utils.Base58Utils;
 
 public class TransactionTest {
 
-    private final static Account signer = new Account(Base58
+    private final static Account signer = new Account(Base58Utils
             .decode("4Z7cXSyeFR8wNGMVXUE1TwtKn5D5Vu7FzEv69dokLv7KrQk7h6pu4LF8ZRR9yQBhc7uSM6RTTZtU1fmaxiNrxXrs"));
 
     @Test

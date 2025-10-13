@@ -1,11 +1,12 @@
 package org.p2p.solanaj.core;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import org.bitcoinj.crypto.*;
-import org.bitcoinj.core.Base58;
+import org.p2p.solanaj.utils.Base58Utils;
 import org.p2p.solanaj.utils.TweetNaclFast;
 import org.p2p.solanaj.utils.bip32.wallet.SolanaBip44;
 import org.p2p.solanaj.utils.bip32.wallet.DerivableType;
@@ -25,12 +26,42 @@ public class Account {
         this.keyPair = keyPair;
     }
 
-    @Deprecated
+    /**
+     * Parse a BIP32 derivation path string into a list of child numbers.
+     * Supports paths like "M/501H/0H/0/0" where H indicates hardened derivation.
+     */
+    private static List<ChildNumber> parsePath(String path) {
+        List<ChildNumber> result = new ArrayList<>();
+        String[] parts = path.split("/");
+        
+        for (String part : parts) {
+            if (part.isEmpty() || part.equals("M")) continue;
+            
+            boolean hardened = part.endsWith("H");
+            String numberStr = hardened ? part.substring(0, part.length() - 1) : part;
+            int number = Integer.parseInt(numberStr);
+            
+            if (hardened) {
+                result.add(new ChildNumber(number, true));
+            } else {
+                result.add(new ChildNumber(number, false));
+            }
+        }
+        
+        return result;
+    }
+
+    /**
+     * Derive a Solana account from a mnemonic using the legacy path M/501H/0H/0/0.
+     * @param words seed words
+     * @param passphrase seed passphrase
+     * @return Solana account
+     */
     public static Account fromMnemonic(List<String> words, String passphrase) {
         byte[] seed = MnemonicCode.toSeed(words, passphrase);
         DeterministicKey masterPrivateKey = HDKeyDerivation.createMasterPrivateKey(seed);
         DeterministicHierarchy deterministicHierarchy = new DeterministicHierarchy(masterPrivateKey);
-        DeterministicKey child = deterministicHierarchy.get(HDUtils.parsePath("M/501H/0H/0/0"), true, true);
+        DeterministicKey child = deterministicHierarchy.get(parsePath("M/501H/0H/0/0"), true, true);
         TweetNaclFast.Signature.KeyPair keyPair = TweetNaclFast.Signature.keyPair_fromSeed(child.getPrivKeyBytes());
         return new Account(keyPair);
     }
@@ -124,7 +155,7 @@ public class Account {
      * @return A new Account instance
      */
     public static Account fromBase58PrivateKey(String base58PrivateKey) {
-        byte[] privateKey = Base58.decode(base58PrivateKey);
+        byte[] privateKey = Base58Utils.decode(base58PrivateKey);
         return new Account(privateKey);
     }
 
@@ -141,6 +172,6 @@ public class Account {
      * @return The base58-encoded private key
      */
     public String getPrivateKeyBase58() {
-        return Base58.encode(this.getSecretKey());
+        return Base58Utils.encode(this.getSecretKey());
     }
 }

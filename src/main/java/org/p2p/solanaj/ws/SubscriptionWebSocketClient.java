@@ -59,6 +59,7 @@ public class SubscriptionWebSocketClient {
     
     private final Map<String, SubscriptionInfo> subscriptions = new ConcurrentHashMap<>();
     private final Map<Long, NotificationEventListener> subscriptionListeners = new ConcurrentHashMap<>();
+    private final Map<Long, String> subscriptionToAccount = new ConcurrentHashMap<>();
     private final AtomicLong requestIdCounter = new AtomicLong(1);
     
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
@@ -226,7 +227,14 @@ public class SubscriptionWebSocketClient {
                     if (info != null) {
                         subscriptionListeners.put((long) subscriptionId, info.listener);
                         subscriptions.remove(requestId);
-                        LOGGER.info("Subscription established with ID: " + subscriptionId);
+                        
+                        // Track the account for this subscription
+                        String account = extractAccountFromRequest((CustomRpcRequest) info.request);
+                        if (account != null) {
+                            subscriptionToAccount.put((long) subscriptionId, account);
+                        }
+                        
+                        LOGGER.info("Subscription established with ID: " + subscriptionId + " for account: " + account);
                     }
                 }
                 return;
@@ -249,6 +257,48 @@ public class SubscriptionWebSocketClient {
         }
     }
 
+
+    /**
+     * Extracts the account from a subscription request.
+     *
+     * @param request The subscription request
+     * @return The account address, or null if not found
+     */
+    private String extractAccountFromRequest(CustomRpcRequest request) {
+        try {
+            String method = request.getMethod();
+            List<Object> params = request.getParams();
+            
+            if (params == null || params.isEmpty()) {
+                return null;
+            }
+            
+            switch (method) {
+                case "accountSubscribe":
+                    return (String) params.get(0);
+                case "logsSubscribe":
+                    if (params.get(0) instanceof Map) {
+                        @SuppressWarnings("unchecked")
+                        Map<String, Object> mentionsMap = (Map<String, Object>) params.get(0);
+                        if (mentionsMap.containsKey("mentions")) {
+                            @SuppressWarnings("unchecked")
+                            List<String> mentions = (List<String>) mentionsMap.get("mentions");
+                            return mentions.isEmpty() ? null : mentions.get(0);
+                        }
+                    }
+                    return null;
+                case "signatureSubscribe":
+                    return (String) params.get(0);
+                case "programSubscribe":
+                    return (String) params.get(0);
+                default:
+                    return null;
+            }
+        } catch (Exception ex) {
+            LOGGER.log(Level.WARNING, "Error extracting account from request", ex);
+            return null;
+        }
+    }
 
     /**
      * Handles notification messages.
@@ -498,10 +548,13 @@ public class SubscriptionWebSocketClient {
      * @param subscriptionId The subscription ID to unsubscribe from
      */
     public void unsubscribe(String subscriptionId) {
-        NotificationEventListener listener = subscriptionListeners.remove(Long.parseLong(subscriptionId));
+        Long subId = Long.parseLong(subscriptionId);
+        NotificationEventListener listener = subscriptionListeners.remove(subId);
+        String account = subscriptionToAccount.remove(subId);
+        
         if (listener != null) {
             List<Object> params = new ArrayList<>();
-            params.add(Long.parseLong(subscriptionId));
+            params.add(subId);
             
             // Find the unsubscribe method for this subscription
             String unsubscribeMethod = "accountUnsubscribe"; // Default
@@ -516,7 +569,7 @@ public class SubscriptionWebSocketClient {
             unsubRequest.setId(String.valueOf(requestIdCounter.getAndIncrement()));
             
             sendRequest(unsubRequest);
-            LOGGER.info("Unsubscribed from subscription: " + subscriptionId);
+            LOGGER.info("Unsubscribed from subscription: " + subscriptionId + " for account: " + account);
         } else {
             LOGGER.warning("Attempted to unsubscribe from non-existent subscription: " + subscriptionId);
         }
@@ -529,10 +582,10 @@ public class SubscriptionWebSocketClient {
      * @return The subscription ID, or null if not found
      */
     public String getSubscriptionId(String account) {
-        for (Long subscriptionId : subscriptionListeners.keySet()) {
-            // This is a simplified implementation - in practice you'd need to track
-            // which subscription corresponds to which account
-            return String.valueOf(subscriptionId);
+        for (Map.Entry<Long, String> entry : subscriptionToAccount.entrySet()) {
+            if (account.equals(entry.getValue())) {
+                return String.valueOf(entry.getKey());
+            }
         }
         return null;
     }

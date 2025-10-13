@@ -6,7 +6,7 @@ import org.p2p.solanaj.core.TransactionInstruction;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-import org.bitcoinj.core.Base58;
+import org.p2p.solanaj.utils.Base58Utils;
 
 public class SystemProgramTest {
 
@@ -62,7 +62,7 @@ public class SystemProgramTest {
         assertTrue(instruction.getKeys().get(1).isWritable());
 
         String expectedDataBase58 = "11119os1e9qSs2u7TsThXqkBSRUo9x7kpbdqtNNbTeaxHGPdWbvoHsks9hpp6mb2ed1NeB";
-        assertEquals(expectedDataBase58, Base58.encode(instruction.getData()));
+        assertEquals(expectedDataBase58, Base58Utils.encode(instruction.getData()));
     }
 
     @Test

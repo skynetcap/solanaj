@@ -11,7 +11,7 @@ import lombok.ToString;
 import org.p2p.solanaj.core.PublicKey;
 import org.p2p.solanaj.rpc.types.config.RpcSendTransactionConfig.Encoding;
 
-import org.bitcoinj.core.Base58;
+import org.p2p.solanaj.utils.Base58Utils;
 
 @Getter
 @ToString
@@ -62,7 +62,7 @@ public class ProgramAccount {
                 return Base64.getDecoder().decode(data);
             }
 
-            return Base58.decode(data);
+            return Base58Utils.decode(data);
         }
     }
 
