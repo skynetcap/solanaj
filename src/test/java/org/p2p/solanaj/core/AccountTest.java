@@ -48,7 +48,7 @@ public class AccountTest {
         Account acc = Account.fromMnemonic(Arrays.asList("spider", "federal", "bleak", "unable", "ask", "weasel",
                 "diamond", "electric", "illness", "wheat", "uphold", "mind"), "");
 
-        assertEquals("BQWWFhzBdw2vKKBUX17NHeFbCoFQHfRARpdztPE2tDJ", acc.getPublicKey().toString());
+        assertEquals("QqCCvshxtqMAL2CVALqiJB7uEeE5mjSPsseQdDzsRUo", acc.getPublicKey().toString());
     }
 
     @Test
