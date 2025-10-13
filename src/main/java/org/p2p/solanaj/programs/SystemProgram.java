@@ -7,7 +7,8 @@ import org.p2p.solanaj.core.PublicKey;
 import org.p2p.solanaj.core.TransactionInstruction;
 import org.p2p.solanaj.core.AccountMeta;
 
-import static org.bitcoinj.core.Utils.*;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import static org.p2p.solanaj.core.Sysvar.RECENT_BLOCKHASHES;
 import static org.p2p.solanaj.core.Sysvar.SYSVAR_RENT_ADDRESS;
 
@@ -61,8 +62,9 @@ public class SystemProgram {
         );
 
         byte[] data = new byte[UINT32_SIZE + INT64_SIZE]; // 4 bytes for program index, 8 bytes for lamports
-        uint32ToByteArrayLE(PROGRAM_INDEX_TRANSFER, data, 0);
-        int64ToByteArrayLE(lamports, data, UINT32_SIZE);
+        ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN)
+            .putInt(PROGRAM_INDEX_TRANSFER)
+            .putLong(lamports);
 
         return new TransactionInstruction(PROGRAM_ID, keys, data);
     }
@@ -90,9 +92,10 @@ public class SystemProgram {
         );
 
         byte[] data = new byte[UINT32_SIZE + INT64_SIZE + INT64_SIZE + PUBKEY_SIZE]; // 4 + 8 + 8 + 32 = 52 bytes
-        uint32ToByteArrayLE(PROGRAM_INDEX_CREATE_ACCOUNT, data, 0);
-        int64ToByteArrayLE(lamports, data, UINT32_SIZE);
-        int64ToByteArrayLE(space, data, UINT32_SIZE + INT64_SIZE);
+        ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN)
+            .putInt(PROGRAM_INDEX_CREATE_ACCOUNT)
+            .putLong(lamports)
+            .putLong(space);
         System.arraycopy(programId.toByteArray(), 0, data, UINT32_SIZE + INT64_SIZE + INT64_SIZE, PUBKEY_SIZE);
 
         return new TransactionInstruction(PROGRAM_ID, keys, data);
@@ -109,7 +112,8 @@ public class SystemProgram {
         List<AccountMeta> keys = List.of(new AccountMeta(owner, true, true));
 
         byte[] data = new byte[UINT32_SIZE + PUBKEY_SIZE]; // 4 + 32 = 36 bytes
-        uint32ToByteArrayLE(PROGRAM_INDEX_ASSIGN, data, 0);
+        ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN)
+            .putInt(PROGRAM_INDEX_ASSIGN);
         System.arraycopy(newOwner.toByteArray(), 0, data, UINT32_SIZE, PUBKEY_SIZE);
 
         return new TransactionInstruction(PROGRAM_ID, keys, data);
@@ -131,7 +135,8 @@ public class SystemProgram {
         );
 
         byte[] data = new byte[UINT32_SIZE + PUBKEY_SIZE]; // 36 bytes
-        uint32ToByteArrayLE(PROGRAM_INDEX_NONCE_INIT_INSTRUCTION, data, 0);
+        ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN)
+            .putInt(PROGRAM_INDEX_NONCE_INIT_INSTRUCTION);
         System.arraycopy(authorized.toByteArray(), 0, data, UINT32_SIZE, PUBKEY_SIZE);
 
         return new TransactionInstruction(PROGRAM_ID, keys, data);
@@ -153,7 +158,8 @@ public class SystemProgram {
         );
 
         byte[] data = new byte[UINT32_SIZE]; // 4 bytes
-        uint32ToByteArrayLE(ADVANCE_NONCE_INSTRUCTION, data, 0);
+        ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN)
+            .putInt(ADVANCE_NONCE_INSTRUCTION);
 
         return new TransactionInstruction(PROGRAM_ID, keys, data);
     }

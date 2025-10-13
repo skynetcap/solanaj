@@ -5,24 +5,22 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.concurrent.locks.Lock;
 import org.p2p.solanaj.rpc.types.config.Commitment;
 
-import com.squareup.moshi.JsonAdapter;
-import com.squareup.moshi.Moshi;
-import com.squareup.moshi.Types;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.java_websocket.client.WebSocketClient;
-import org.java_websocket.framing.CloseFrame;
-import org.java_websocket.handshake.ServerHandshake;
-import org.p2p.solanaj.rpc.types.RpcNotificationResult;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.WebSocket;
+import okhttp3.WebSocketListener;
 import org.p2p.solanaj.rpc.types.RpcRequest;
-import org.p2p.solanaj.rpc.types.RpcResponse;
 import org.p2p.solanaj.ws.listeners.NotificationEventListener;
 
 /**
@@ -41,44 +39,68 @@ import org.p2p.solanaj.ws.listeners.NotificationEventListener;
  * 
  * The class also provides methods for unsubscribing from notifications, ensuring that resources 
  * are properly released when subscriptions are no longer needed. Thread safety is maintained 
- * through the use of locks to protect shared data structures during subscription management.
+ * through the use of concurrent data structures and proper synchronization.
  */
-public class SubscriptionWebSocketClient extends WebSocketClient {
+public class SubscriptionWebSocketClient {
 
     private static final Logger LOGGER = Logger.getLogger(SubscriptionWebSocketClient.class.getName());
     private static final int MAX_RECONNECT_DELAY = 30000;
     private static final int INITIAL_RECONNECT_DELAY = 1000;
-    private static final int HEARTBEAT_INTERVAL = 30;
+    private static final int CONNECTION_TIMEOUT = 10;
 
-    private final Map<String, SubscriptionParams> subscriptions = new ConcurrentHashMap<>();
-    private final Map<String, Long> subscriptionIds = new ConcurrentHashMap<>();
+    private final OkHttpClient httpClient;
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final String endpoint;
+    
+    private WebSocket webSocket;
+    private final AtomicBoolean isConnected = new AtomicBoolean(false);
+    private final AtomicBoolean isConnecting = new AtomicBoolean(false);
+    private final AtomicBoolean shouldReconnect = new AtomicBoolean(true);
+    
+    private final Map<String, SubscriptionInfo> subscriptions = new ConcurrentHashMap<>();
     private final Map<Long, NotificationEventListener> subscriptionListeners = new ConcurrentHashMap<>();
-    private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+    private final Map<Long, String> subscriptionToAccount = new ConcurrentHashMap<>();
+    private final AtomicLong requestIdCounter = new AtomicLong(1);
+    
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
     private final CountDownLatch connectLatch = new CountDownLatch(1);
-
+    
     private int reconnectDelay = INITIAL_RECONNECT_DELAY;
-    private final Moshi moshi = new Moshi.Builder().build();
-
-    private final Map<String, SubscriptionParams> activeSubscriptions = new ConcurrentHashMap<>();
-    private final Lock subscriptionLock = new ReentrantLock();
-    private final Lock listenerLock = new ReentrantLock();
 
     /**
-     * Inner class to hold subscription parameters.
+     * Inner class to hold subscription information.
      */
-    private static class SubscriptionParams {
+    private static class SubscriptionInfo {
         final RpcRequest request;
         final NotificationEventListener listener;
+        final String method;
+        final String unsubscribeMethod;
 
-        /**
-         * Constructs a SubscriptionParams object.
-         *
-         * @param request The RPC request for the subscription
-         * @param listener The listener for notification events
-         */
-        SubscriptionParams(RpcRequest request, NotificationEventListener listener) {
+        SubscriptionInfo(RpcRequest request, NotificationEventListener listener, String method, String unsubscribeMethod) {
             this.request = request;
             this.listener = listener;
+            this.method = method;
+            this.unsubscribeMethod = unsubscribeMethod;
+        }
+    }
+
+    /**
+     * Custom RpcRequest that allows setting the ID.
+     */
+    private static class CustomRpcRequest extends RpcRequest {
+        private String id;
+
+        public CustomRpcRequest(String method, List<Object> params) {
+            super(method, params);
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        @Override
+        public String getId() {
+            return id != null ? id : super.getId();
         }
     }
 
@@ -89,16 +111,7 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
      * @return A new SubscriptionWebSocketClient instance
      */
     public static SubscriptionWebSocketClient getExactPathInstance(String endpoint) {
-        try {
-            URI serverURI = new URI(endpoint);
-            SubscriptionWebSocketClient instance = new SubscriptionWebSocketClient(serverURI);
-            if (!instance.isOpen()) {
-                instance.connect();
-            }
-            return instance;
-        } catch (URISyntaxException e) {
-            throw new IllegalArgumentException("Invalid endpoint URI", e);
-        }
+        return new SubscriptionWebSocketClient(endpoint);
     }
 
     /**
@@ -111,22 +124,233 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
         try {
             URI endpointURI = new URI(endpoint);
             String scheme = "https".equals(endpointURI.getScheme()) ? "wss" : "ws";
-            URI serverURI = new URI(scheme + "://" + endpointURI.getHost());
-            SubscriptionWebSocketClient instance = new SubscriptionWebSocketClient(serverURI);
-            instance.connect();
-            return instance;
+            String wsEndpoint = scheme + "://" + endpointURI.getHost();
+            return new SubscriptionWebSocketClient(wsEndpoint);
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException("Invalid endpoint URI", e);
         }
     }
 
     /**
-     * Constructs a SubscriptionWebSocketClient with the given server URI.
+     * Constructs a SubscriptionWebSocketClient with the given endpoint.
      *
-     * @param serverURI The URI of the WebSocket server
+     * @param endpoint The WebSocket endpoint URL
      */
-    public SubscriptionWebSocketClient(URI serverURI) {
-        super(serverURI);
+    public SubscriptionWebSocketClient(String endpoint) {
+        this.endpoint = endpoint;
+        this.httpClient = new OkHttpClient.Builder()
+                .connectTimeout(CONNECTION_TIMEOUT, TimeUnit.SECONDS)
+                .readTimeout(0, TimeUnit.SECONDS) // No read timeout for WebSocket
+                .writeTimeout(0, TimeUnit.SECONDS) // No write timeout for WebSocket
+                .build();
+        
+        connect();
+    }
+
+    /**
+     * Connects to the WebSocket server.
+     */
+    public void connect() {
+        if (isConnecting.get() || isConnected.get()) {
+            return;
+        }
+        
+        isConnecting.set(true);
+        LOGGER.info("Connecting to WebSocket endpoint: " + endpoint);
+        
+        Request request = new Request.Builder()
+                .url(endpoint)
+                .build();
+                
+        webSocket = httpClient.newWebSocket(request, new WebSocketListener() {
+            @Override
+            public void onOpen(WebSocket webSocket, Response response) {
+                LOGGER.info("WebSocket connection opened");
+                isConnected.set(true);
+                isConnecting.set(false);
+                reconnectDelay = INITIAL_RECONNECT_DELAY;
+                connectLatch.countDown();
+                startHeartbeat();
+                resubscribeAll();
+            }
+
+            @Override
+            public void onMessage(WebSocket webSocket, String text) {
+                handleMessage(text);
+            }
+
+            @Override
+            public void onClosing(WebSocket webSocket, int code, String reason) {
+                LOGGER.info("WebSocket closing: " + code + " - " + reason);
+                isConnected.set(false);
+            }
+
+            @Override
+            public void onClosed(WebSocket webSocket, int code, String reason) {
+                LOGGER.info("WebSocket closed: " + code + " - " + reason);
+                isConnected.set(false);
+                stopHeartbeat();
+                if (shouldReconnect.get()) {
+                    scheduleReconnect();
+                }
+            }
+
+            @Override
+            public void onFailure(WebSocket webSocket, Throwable t, Response response) {
+                LOGGER.log(Level.SEVERE, "WebSocket connection failed", t);
+                isConnected.set(false);
+                isConnecting.set(false);
+                stopHeartbeat();
+                if (shouldReconnect.get()) {
+                    scheduleReconnect();
+                }
+            }
+        });
+    }
+
+    /**
+     * Handles incoming WebSocket messages.
+     *
+     * @param message The received message
+     */
+    private void handleMessage(String message) {
+        try {
+            JsonNode messageNode = objectMapper.readTree(message);
+            
+            // Check if this is a subscription confirmation
+            if (messageNode.has("result") && messageNode.get("result").isInt()) {
+                int subscriptionId = messageNode.get("result").asInt();
+                String requestId = messageNode.has("id") ? messageNode.get("id").asText() : null;
+                
+                if (requestId != null) {
+                    SubscriptionInfo info = subscriptions.get(requestId);
+                    if (info != null) {
+                        subscriptionListeners.put((long) subscriptionId, info.listener);
+                        subscriptions.remove(requestId);
+                        
+                        // Track the account for this subscription
+                        String account = extractAccountFromRequest((CustomRpcRequest) info.request);
+                        if (account != null) {
+                            subscriptionToAccount.put((long) subscriptionId, account);
+                        }
+                        
+                        LOGGER.info("Subscription established with ID: " + subscriptionId + " for account: " + account);
+                    }
+                }
+                return;
+            }
+            
+            // Check if this is an error
+            if (messageNode.has("error")) {
+                JsonNode error = messageNode.get("error");
+                LOGGER.severe("RPC Error: " + error);
+                return;
+            }
+            
+            // Check if this is a notification
+            if (messageNode.has("method")) {
+                handleNotification(messageNode);
+            }
+            
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Error processing message", ex);
+        }
+    }
+
+
+    /**
+     * Extracts the account from a subscription request.
+     *
+     * @param request The subscription request
+     * @return The account address, or null if not found
+     */
+    private String extractAccountFromRequest(CustomRpcRequest request) {
+        try {
+            String method = request.getMethod();
+            List<Object> params = request.getParams();
+            
+            if (params == null || params.isEmpty()) {
+                return null;
+            }
+            
+            switch (method) {
+                case "accountSubscribe":
+                    return (String) params.get(0);
+                case "logsSubscribe":
+                    if (params.get(0) instanceof Map) {
+                        @SuppressWarnings("unchecked")
+                        Map<String, Object> mentionsMap = (Map<String, Object>) params.get(0);
+                        if (mentionsMap.containsKey("mentions")) {
+                            @SuppressWarnings("unchecked")
+                            List<String> mentions = (List<String>) mentionsMap.get("mentions");
+                            return mentions.isEmpty() ? null : mentions.get(0);
+                        }
+                    }
+                    return null;
+                case "signatureSubscribe":
+                    return (String) params.get(0);
+                case "programSubscribe":
+                    return (String) params.get(0);
+                default:
+                    return null;
+            }
+        } catch (Exception ex) {
+            LOGGER.log(Level.WARNING, "Error extracting account from request", ex);
+            return null;
+        }
+    }
+
+    /**
+     * Handles notification messages.
+     *
+     * @param messageNode The notification message as JsonNode
+     */
+    private void handleNotification(JsonNode messageNode) {
+        try {
+            String method = messageNode.get("method").asText();
+            JsonNode params = messageNode.get("params");
+            
+            if (params != null && params.has("subscription")) {
+                Long subscriptionId = params.get("subscription").asLong();
+                NotificationEventListener listener = subscriptionListeners.get(subscriptionId);
+                
+                if (listener != null) {
+                    JsonNode result = params.get("result");
+                    
+                    switch (method) {
+                        case "signatureNotification":
+                            if (result != null && result.has("value")) {
+                                JsonNode value = result.get("value");
+                                Object err = value.has("err") ? value.get("err") : null;
+                                listener.onNotificationEvent(new SignatureNotification(err));
+                            }
+                            break;
+                        case "accountNotification":
+                        case "logsNotification":
+                        case "blockNotification":
+                        case "programNotification":
+                        case "rootNotification":
+                        case "slotNotification":
+                        case "slotsUpdatesNotification":
+                        case "voteNotification":
+                            if (result != null && result.has("value")) {
+                                JsonNode value = result.get("value");
+                                // Convert JsonNode to Map for compatibility
+                                @SuppressWarnings("unchecked")
+                                Map<String, Object> valueMap = objectMapper.convertValue(value, Map.class);
+                                listener.onNotificationEvent(valueMap);
+                            }
+                            break;
+                        default:
+                            LOGGER.warning("Unknown notification method: " + method);
+                    }
+                } else {
+                    LOGGER.warning("No listener found for subscription ID: " + subscriptionId);
+                }
+            }
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Error handling notification", ex);
+        }
     }
 
     /**
@@ -142,8 +366,8 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
         params.add(key);
         params.add(Map.of("encoding", encoding, "commitment", commitment.getValue()));
 
-        RpcRequest rpcRequest = new RpcRequest("accountSubscribe", params);
-        addSubscription(rpcRequest, listener);
+        CustomRpcRequest rpcRequest = new CustomRpcRequest("accountSubscribe", params);
+        addSubscription(rpcRequest, listener, "accountSubscribe", "accountUnsubscribe");
     }
 
     // Overload methods to maintain backwards compatibility
@@ -165,8 +389,8 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
         List<Object> params = new ArrayList<>();
         params.add(signature);
 
-        RpcRequest rpcRequest = new RpcRequest("signatureSubscribe", params);
-        addSubscription(rpcRequest, listener);
+        CustomRpcRequest rpcRequest = new CustomRpcRequest("signatureSubscribe", params);
+        addSubscription(rpcRequest, listener, "signatureSubscribe", "signatureUnsubscribe");
     }
 
     /**
@@ -188,10 +412,10 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
     public void logsSubscribe(List<String> mentions, NotificationEventListener listener) {
         List<Object> params = new ArrayList<>();
         params.add(Map.of("mentions", mentions));
-        params.add(Map.of("commitment", "finalized"));
+        params.add(Map.of("commitment", "processed"));
 
-        RpcRequest rpcRequest = new RpcRequest("logsSubscribe", params);
-        addSubscription(rpcRequest, listener);
+        CustomRpcRequest rpcRequest = new CustomRpcRequest("logsSubscribe", params);
+        addSubscription(rpcRequest, listener, "logsSubscribe", "logsUnsubscribe");
     }
 
     /**
@@ -205,8 +429,8 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
         List<Object> params = new ArrayList<>();
         params.add(Map.of("encoding", encoding, "commitment", commitment.getValue()));
 
-        RpcRequest rpcRequest = new RpcRequest("blockSubscribe", params);
-        addSubscription(rpcRequest, listener);
+        CustomRpcRequest rpcRequest = new CustomRpcRequest("blockSubscribe", params);
+        addSubscription(rpcRequest, listener, "blockSubscribe", "blockUnsubscribe");
     }
 
     public void blockSubscribe(NotificationEventListener listener, Commitment commitment) {
@@ -215,15 +439,6 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
 
     public void blockSubscribe(NotificationEventListener listener) {
         blockSubscribe(listener, Commitment.FINALIZED, "json");
-    }
-
-    /**
-     * Unsubscribes from block updates.
-     *
-     * @param subscriptionId The ID of the subscription to cancel
-     */
-    public void blockUnsubscribe(String subscriptionId) {
-        unsubscribe("blockUnsubscribe", subscriptionId);
     }
 
     /**
@@ -239,8 +454,8 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
         params.add(programId);
         params.add(Map.of("encoding", encoding, "commitment", commitment.getValue()));
 
-        RpcRequest rpcRequest = new RpcRequest("programSubscribe", params);
-        addSubscription(rpcRequest, listener);
+        CustomRpcRequest rpcRequest = new CustomRpcRequest("programSubscribe", params);
+        addSubscription(rpcRequest, listener, "programSubscribe", "programUnsubscribe");
     }
 
     public void programSubscribe(String programId, NotificationEventListener listener, Commitment commitment) {
@@ -252,31 +467,13 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
     }
 
     /**
-     * Unsubscribes from program updates.
-     *
-     * @param subscriptionId The ID of the subscription to cancel
-     */
-    public void programUnsubscribe(String subscriptionId) {
-        unsubscribe("programUnsubscribe", subscriptionId);
-    }
-
-    /**
      * Subscribes to root updates.
      *
      * @param listener The listener to handle notifications
      */
     public void rootSubscribe(NotificationEventListener listener) {
-        RpcRequest rpcRequest = new RpcRequest("rootSubscribe", new ArrayList<>());
-        addSubscription(rpcRequest, listener);
-    }
-
-    /**
-     * Unsubscribes from root updates.
-     *
-     * @param subscriptionId The ID of the subscription to cancel
-     */
-    public void rootUnsubscribe(String subscriptionId) {
-        unsubscribe("rootUnsubscribe", subscriptionId);
+        CustomRpcRequest rpcRequest = new CustomRpcRequest("rootSubscribe", new ArrayList<>());
+        addSubscription(rpcRequest, listener, "rootSubscribe", "rootUnsubscribe");
     }
 
     /**
@@ -285,17 +482,8 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
      * @param listener The listener to handle notifications
      */
     public void slotSubscribe(NotificationEventListener listener) {
-        RpcRequest rpcRequest = new RpcRequest("slotSubscribe", new ArrayList<>());
-        addSubscription(rpcRequest, listener);
-    }
-
-    /**
-     * Unsubscribes from slot updates.
-     *
-     * @param subscriptionId The ID of the subscription to cancel
-     */
-    public void slotUnsubscribe(String subscriptionId) {
-        unsubscribe("slotUnsubscribe", subscriptionId);
+        CustomRpcRequest rpcRequest = new CustomRpcRequest("slotSubscribe", new ArrayList<>());
+        addSubscription(rpcRequest, listener, "slotSubscribe", "slotUnsubscribe");
     }
 
     /**
@@ -304,17 +492,8 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
      * @param listener The listener to handle notifications
      */
     public void slotsUpdatesSubscribe(NotificationEventListener listener) {
-        RpcRequest rpcRequest = new RpcRequest("slotsUpdatesSubscribe", new ArrayList<>());
-        addSubscription(rpcRequest, listener);
-    }
-
-    /**
-     * Unsubscribes from slots updates.
-     *
-     * @param subscriptionId The ID of the subscription to cancel
-     */
-    public void slotsUpdatesUnsubscribe(String subscriptionId) {
-        unsubscribe("slotsUpdatesUnsubscribe", subscriptionId);
+        CustomRpcRequest rpcRequest = new CustomRpcRequest("slotsUpdatesSubscribe", new ArrayList<>());
+        addSubscription(rpcRequest, listener, "slotsUpdatesSubscribe", "slotsUpdatesUnsubscribe");
     }
 
     /**
@@ -323,40 +502,8 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
      * @param listener The listener to handle notifications
      */
     public void voteSubscribe(NotificationEventListener listener) {
-        RpcRequest rpcRequest = new RpcRequest("voteSubscribe", new ArrayList<>());
-        addSubscription(rpcRequest, listener);
-    }
-
-    /**
-     * Unsubscribes from vote updates.
-     *
-     * @param subscriptionId The ID of the subscription to cancel
-     */
-    public void voteUnsubscribe(String subscriptionId) {
-        unsubscribe("voteUnsubscribe", subscriptionId);
-    }
-
-    /**
-     * Generic method to handle unsubscribe requests.
-     *
-     * @param method The unsubscribe method name
-     * @param subscriptionId The ID of the subscription to cancel
-     */
-    private void unsubscribe(String method, String subscriptionId) {
-        List<Object> params = new ArrayList<>();
-        params.add(Long.parseLong(subscriptionId));
-        RpcRequest unsubRequest = new RpcRequest(method, params);
-        JsonAdapter<RpcRequest> rpcRequestJsonAdapter = moshi.adapter(RpcRequest.class);
-        send(rpcRequestJsonAdapter.toJson(unsubRequest));
-
-        subscriptionLock.lock();
-        try {
-            activeSubscriptions.remove(subscriptionId);
-            subscriptionListeners.remove(Long.parseLong(subscriptionId));
-        } finally {
-            subscriptionLock.unlock();
-        }
-        LOGGER.info("Unsubscribed from " + method + " with ID: " + subscriptionId);
+        CustomRpcRequest rpcRequest = new CustomRpcRequest("voteSubscribe", new ArrayList<>());
+        addSubscription(rpcRequest, listener, "voteSubscribe", "voteUnsubscribe");
     }
 
     /**
@@ -364,154 +511,131 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
      *
      * @param rpcRequest The RPC request for the subscription
      * @param listener The listener for notification events
+     * @param method The subscription method name
+     * @param unsubscribeMethod The unsubscribe method name
      */
-    public void addSubscription(RpcRequest rpcRequest, NotificationEventListener listener) {
-        String subscriptionId = rpcRequest.getId();
-        subscriptionLock.lock();
-        try {
-            activeSubscriptions.put(subscriptionId, new SubscriptionParams(rpcRequest, listener));
-            subscriptions.put(subscriptionId, new SubscriptionParams(rpcRequest, listener));
-            subscriptionIds.put(subscriptionId, 0L);
-        } finally {
-            subscriptionLock.unlock();
-        }
-        updateSubscriptions();
-    }
-
-    /**
-     * Handles the WebSocket connection opening.
-     *
-     * @param handshakedata The server handshake data
-     */
-    @Override
-    public void onOpen(ServerHandshake handshakedata) {
-        LOGGER.info("WebSocket connection opened");
-        reconnectDelay = INITIAL_RECONNECT_DELAY;
-        startHeartbeat();
-        connectLatch.countDown();
-    }
-
-    /**
-     * Handles incoming WebSocket messages.
-     *
-     * @param message The received message
-     */
-    @Override
-    public void onMessage(String message) {
-        try {
-            JsonAdapter<RpcResponse<Long>> resultAdapter = moshi.adapter(
-                    Types.newParameterizedType(RpcResponse.class, Long.class));
-            RpcResponse<Long> rpcResult = resultAdapter.fromJson(message);
-            if(rpcResult!=null && rpcResult.getError()!=null){
-                throw new IllegalStateException(rpcResult.getError().toString());
-            }
-            if (rpcResult != null && rpcResult.getId() != null) {
-                handleSubscriptionResponse(rpcResult);
-            } else {
-                handleNotification(message);
-            }
-        } catch (Exception ex) {
-            LOGGER.log(Level.SEVERE, "Error processing message", ex);
+    private void addSubscription(CustomRpcRequest rpcRequest, NotificationEventListener listener, String method, String unsubscribeMethod) {
+        String requestId = String.valueOf(requestIdCounter.getAndIncrement());
+        rpcRequest.setId(requestId);
+        
+        SubscriptionInfo info = new SubscriptionInfo(rpcRequest, listener, method, unsubscribeMethod);
+        subscriptions.put(requestId, info);
+        
+        if (isConnected.get()) {
+            sendRequest(rpcRequest);
         }
     }
 
     /**
-     * Handles subscription responses.
+     * Sends an RPC request over the WebSocket connection.
      *
-     * @param rpcResult The RPC response
+     * @param request The RPC request to send
      */
-    private void handleSubscriptionResponse(RpcResponse<Long> rpcResult) {
-        String rpcResultId = rpcResult.getId();
-        if (subscriptionIds.containsKey(rpcResultId)) {
-            subscriptionIds.put(rpcResultId, rpcResult.getResult());
-            SubscriptionParams params = subscriptions.get(rpcResultId);
-            if (params != null) {
-                subscriptionListeners.put(rpcResult.getResult(), params.listener);
-                subscriptions.remove(rpcResultId);
-                // Update the activeSubscriptions map with the new subscription ID
-                activeSubscriptions.put(String.valueOf(rpcResult.getResult()), params);
-                activeSubscriptions.remove(rpcResultId);
-            }
-        }
-    }
-
-    /**
-     * Handles notification messages.
-     *
-     * @param message The notification message
-     * @throws Exception If an error occurs while processing the notification
-     */
-    private void handleNotification(String message) throws Exception {
-        JsonAdapter<RpcNotificationResult> notificationResultAdapter = moshi.adapter(RpcNotificationResult.class);
-        RpcNotificationResult result = notificationResultAdapter.fromJson(message);
-        if (result != null) {
-            Long subscriptionId = result.getParams().getSubscription();
-            listenerLock.lock();
+    private void sendRequest(CustomRpcRequest request) {
+        if (webSocket != null && isConnected.get()) {
             try {
-                NotificationEventListener listener = subscriptionListeners.get(subscriptionId);
-                if (listener != null) {
-                    Map<String, Object> value = (Map<String, Object>) result.getParams().getResult().getValue();
-                    switch (result.getMethod()) {
-                        case "signatureNotification":
-                            listener.onNotificationEvent(new SignatureNotification(value.get("err")));
-                            break;
-                        case "accountNotification":
-                        case "logsNotification":
-                        case "blockNotification":
-                        case "programNotification":
-                        case "rootNotification":
-                        case "slotNotification":
-                        case "slotsUpdatesNotification":
-                        case "voteNotification":
-                            listener.onNotificationEvent(value);
-                            break;
-                        default:
-                            LOGGER.warning("Unknown notification method: " + result.getMethod());
-                    }
-                } else {
-                    LOGGER.warning("No listener found for subscription ID: " + subscriptionId);
-                }
-            } finally {
-                listenerLock.unlock();
+                String json = objectMapper.writeValueAsString(request);
+                LOGGER.info("Sending WebSocket request: " + json);
+                webSocket.send(json);
+            } catch (Exception ex) {
+                LOGGER.log(Level.SEVERE, "Error sending WebSocket request", ex);
             }
-        } else {
-            LOGGER.warning("Received null notification result");
         }
     }
 
     /**
-     * Handles WebSocket connection closure.
+     * Unsubscribes from a subscription.
      *
-     * @param code The status code indicating why the connection was closed
-     * @param reason A human-readable explanation for the closure
-     * @param remote Whether the closure was initiated by the remote endpoint
+     * @param subscriptionId The subscription ID to unsubscribe from
      */
-    @Override
-    public void onClose(int code, String reason, boolean remote) {
-        LOGGER.info("Connection closed by " + (remote ? "remote peer" : "us") + " Code: " + code + " Reason: " + reason);
-        stopHeartbeat();
-        if (remote || code != CloseFrame.NORMAL) {
-            scheduleReconnect();
+    public void unsubscribe(String subscriptionId) {
+        Long subId = Long.parseLong(subscriptionId);
+        NotificationEventListener listener = subscriptionListeners.remove(subId);
+        String account = subscriptionToAccount.remove(subId);
+        
+        if (listener != null) {
+            List<Object> params = new ArrayList<>();
+            params.add(subId);
+            
+            // Find the unsubscribe method for this subscription
+            String unsubscribeMethod = "accountUnsubscribe"; // Default
+            for (SubscriptionInfo info : subscriptions.values()) {
+                if (info.listener == listener) {
+                    unsubscribeMethod = info.unsubscribeMethod;
+                    break;
+                }
+            }
+            
+            CustomRpcRequest unsubRequest = new CustomRpcRequest(unsubscribeMethod, params);
+            unsubRequest.setId(String.valueOf(requestIdCounter.getAndIncrement()));
+            
+            sendRequest(unsubRequest);
+            LOGGER.info("Unsubscribed from subscription: " + subscriptionId + " for account: " + account);
+        } else {
+            LOGGER.warning("Attempted to unsubscribe from non-existent subscription: " + subscriptionId);
         }
     }
 
     /**
-     * Handles WebSocket errors.
+     * Gets the subscription ID for a given account.
      *
-     * @param ex The exception that describes the error
+     * @param account The account to get the subscription ID for
+     * @return The subscription ID, or null if not found
      */
-    @Override
-    public void onError(Exception ex) {
-        LOGGER.log(Level.SEVERE, "WebSocket error occurred", ex);
-        if (ex instanceof org.java_websocket.exceptions.WebsocketNotConnectedException) {
-            LOGGER.severe("WebSocket is not connected. Attempting to reconnect...");
-            reconnect();
-        } else if (ex instanceof org.java_websocket.exceptions.IncompleteHandshakeException) {
-            LOGGER.severe("Incomplete handshake. Check your connection parameters.");
-        } else if (ex instanceof java.net.SocketTimeoutException) {
-            LOGGER.severe("Connection timed out. Check network stability and server responsiveness.");
-        } else {
-            LOGGER.severe("Unexpected error: " + ex.getMessage());
+    public String getSubscriptionId(String account) {
+        for (Map.Entry<Long, String> entry : subscriptionToAccount.entrySet()) {
+            if (account.equals(entry.getValue())) {
+                return String.valueOf(entry.getKey());
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Starts the heartbeat mechanism to keep the connection alive.
+     */
+    private void startHeartbeat() {
+        // Solana RPC doesn't support ping/pong, so we don't send heartbeat messages
+        // The connection will be kept alive by OkHttp's built-in mechanisms
+        LOGGER.info("Heartbeat started (using OkHttp's built-in keep-alive)");
+    }
+
+    /**
+     * Stops the heartbeat mechanism.
+     */
+    private void stopHeartbeat() {
+        // Heartbeat is managed by the scheduler, no specific stop needed
+    }
+
+    /**
+     * Schedules a reconnection attempt with exponential backoff.
+     */
+    private void scheduleReconnect() {
+        scheduler.schedule(() -> {
+            if (shouldReconnect.get() && !isConnected.get()) {
+                LOGGER.info("Attempting to reconnect...");
+                connect();
+                reconnectDelay = Math.min(reconnectDelay * 2, MAX_RECONNECT_DELAY);
+            }
+        }, reconnectDelay, TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * Resubscribes to all active subscriptions after reconnection.
+     */
+    private void resubscribeAll() {
+        LOGGER.info("Resubscribing to all active subscriptions");
+        Map<String, SubscriptionInfo> currentSubscriptions = new ConcurrentHashMap<>(subscriptions);
+        subscriptions.clear();
+        
+        for (SubscriptionInfo info : currentSubscriptions.values()) {
+            String requestId = String.valueOf(requestIdCounter.getAndIncrement());
+            CustomRpcRequest newRequest = new CustomRpcRequest(info.request.getMethod(), info.request.getParams());
+            newRequest.setId(requestId);
+            
+            SubscriptionInfo newInfo = new SubscriptionInfo(newRequest, info.listener, info.method, info.unsubscribeMethod);
+            subscriptions.put(requestId, newInfo);
+            sendRequest(newRequest);
         }
     }
 
@@ -519,68 +643,11 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
      * Attempts to reconnect to the WebSocket server.
      */
     public void reconnect() {
-        LOGGER.info("Attempting to reconnect...");
-        try {
-            final boolean reconnectBlocking = reconnectBlocking();
-            if(reconnectBlocking){
-                resubscribeAll();
-            }
-        } catch (InterruptedException e) {
-            LOGGER.warning("Reconnection interrupted: " + e.getMessage());
-            Thread.currentThread().interrupt();
+        shouldReconnect.set(true);
+        if (webSocket != null) {
+            webSocket.close(1000, "Reconnecting");
         }
-    }
-
-    /**
-     * Starts the heartbeat mechanism to keep the connection alive.
-     */
-    private void startHeartbeat() {
-        executor.scheduleAtFixedRate(this::sendPing, HEARTBEAT_INTERVAL, HEARTBEAT_INTERVAL, TimeUnit.SECONDS);
-    }
-
-    /**
-     * Stops the heartbeat mechanism.
-     */
-    private void stopHeartbeat() {
-        executor.shutdown();
-        try {
-            if (!executor.awaitTermination(800, TimeUnit.MILLISECONDS)) {
-                executor.shutdownNow();
-            }
-        } catch (InterruptedException e) {
-            executor.shutdownNow();
-            Thread.currentThread().interrupt();
-        }
-    }
-
-    /**
-     * Updates all active subscriptions.
-     */
-    private void updateSubscriptions() {
-        if (isOpen()) {
-            JsonAdapter<RpcRequest> rpcRequestJsonAdapter = moshi.adapter(RpcRequest.class);
-            for (SubscriptionParams sub : subscriptions.values()) {
-                send(rpcRequestJsonAdapter.toJson(sub.request));
-            }
-            for (Map.Entry<String, Long> entry : subscriptionIds.entrySet()) {
-                if (entry.getValue() != 0L) {
-                    SubscriptionParams params = subscriptions.get(entry.getKey());
-                    if (params != null) {
-                        send(rpcRequestJsonAdapter.toJson(params.request));
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Schedules a reconnection attempt with exponential backoff.
-     */
-    private void scheduleReconnect() {
-        executor.schedule(() -> {
-            reconnect();
-            reconnectDelay = Math.min(reconnectDelay * 2, MAX_RECONNECT_DELAY);
-        }, reconnectDelay, TimeUnit.MILLISECONDS);
+        connect();
     }
 
     /**
@@ -595,90 +662,45 @@ public class SubscriptionWebSocketClient extends WebSocketClient {
         return connectLatch.await(timeout, unit);
     }
 
-    private void resubscribeAll() {
-        LOGGER.info("Resubscribing to all active subscriptions");
-        cleanSubscriptions();
-        final Map<String, SubscriptionParams> activeSubscriptionsResubscribe = new HashMap<>();
-        for (Map.Entry<String, SubscriptionParams> entry : activeSubscriptions.entrySet()) {
-            SubscriptionParams paramsOld = entry.getValue();
-            final RpcRequest rpcRequest = paramsOld.request;
-            final NotificationEventListener notificationEventListener = paramsOld.listener;
-            final RpcRequest request = new RpcRequest(rpcRequest.getMethod(), rpcRequest.getParams());
-            final String subscriptionId = request.getId();
-            final SubscriptionParams params = new SubscriptionParams(
-                    request,
-                    notificationEventListener);
-            subscriptions.put(subscriptionId, params);
-            subscriptionIds.put(subscriptionId, 0L);
-            activeSubscriptionsResubscribe.put(subscriptionId, params);
-        }
-        activeSubscriptions.clear();
-        activeSubscriptions.putAll(activeSubscriptionsResubscribe);
-        updateSubscriptions();
-    }
-
-    private void cleanSubscriptions(){
-        subscriptions.clear();
-        subscriptionIds.clear();
-        subscriptionListeners.clear();
-    }
-
-    public void unsubscribe(String subscriptionId) {
-        SubscriptionParams params = activeSubscriptions.remove(subscriptionId);
-        if (params != null) {
-            // Send an unsubscribe request to the server
-            List<Object> unsubParams = new ArrayList<>();
-            unsubParams.add(Long.parseLong(subscriptionId));
-            RpcRequest unsubRequest = new RpcRequest(getUnsubscribeMethod(params.request.getMethod()), unsubParams);
-            JsonAdapter<RpcRequest> rpcRequestJsonAdapter = moshi.adapter(RpcRequest.class);
-            send(rpcRequestJsonAdapter.toJson(unsubRequest));
-
-            // Remove the subscription from subscriptionListeners
-            subscriptionListeners.remove(Long.parseLong(subscriptionId));
-            LOGGER.info("Unsubscribed from subscription: " + subscriptionId);
-        } else {
-            LOGGER.warning("Attempted to unsubscribe from non-existent subscription: " + subscriptionId);
-        }
-    }
-
-    private String getUnsubscribeMethod(String subscribeMethod) {
-        switch (subscribeMethod) {
-            case "accountSubscribe":
-                return "accountUnsubscribe";
-            case "logsSubscribe":
-                return "logsUnsubscribe";
-            case "signatureSubscribe":
-                return "signatureUnsubscribe";
-            case "blockSubscribe":
-                return "blockUnsubscribe";
-            case "programSubscribe":
-                return "programUnsubscribe";
-            case "rootSubscribe":
-                return "rootUnsubscribe";
-            case "slotSubscribe":
-                return "slotUnsubscribe";
-            case "slotsUpdatesSubscribe":
-                return "slotsUpdatesUnsubscribe";
-            case "voteSubscribe":
-                return "voteUnsubscribe";
-            // Add more cases for other subscription types as needed
-            default:
-                throw new IllegalArgumentException("Unknown subscribe method: " + subscribeMethod);
-        }
+    /**
+     * Checks if the WebSocket connection is open.
+     *
+     * @return true if the connection is open, false otherwise
+     */
+    public boolean isOpen() {
+        return isConnected.get();
     }
 
     /**
-     * Gets the subscription ID for a given account.
-     *
-     * @param account The account to get the subscription ID for
-     * @return The subscription ID, or null if not found
+     * Closes the WebSocket connection.
      */
-    public String getSubscriptionId(String account) {
-        for (Map.Entry<String, SubscriptionParams> entry : activeSubscriptions.entrySet()) {
-            if (entry.getValue().request.getParams().get(0).equals(account)) {
-                return entry.getKey();
-            }
+    public void close() {
+        shouldReconnect.set(false);
+        isConnected.set(false);
+        
+        if (webSocket != null) {
+            webSocket.close(1000, "Client closing");
+            webSocket = null;
         }
-        return null;
+        
+        scheduler.shutdown();
+        try {
+            if (!scheduler.awaitTermination(5, TimeUnit.SECONDS)) {
+                scheduler.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            scheduler.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
+        
+        httpClient.dispatcher().executorService().shutdown();
+        try {
+            if (!httpClient.dispatcher().executorService().awaitTermination(5, TimeUnit.SECONDS)) {
+                httpClient.dispatcher().executorService().shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            httpClient.dispatcher().executorService().shutdownNow();
+            Thread.currentThread().interrupt();
+        }
     }
 }

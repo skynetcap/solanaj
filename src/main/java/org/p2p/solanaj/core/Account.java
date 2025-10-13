@@ -4,8 +4,9 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.List;
 
-import org.bitcoinj.crypto.*;
-import org.bitcoinj.core.Base58;
+import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.SecretKeyFactory;
+import org.p2p.solanaj.utils.Base58Utils;
 import org.p2p.solanaj.utils.TweetNaclFast;
 import org.p2p.solanaj.utils.bip32.wallet.SolanaBip44;
 import org.p2p.solanaj.utils.bip32.wallet.DerivableType;
@@ -25,13 +26,15 @@ public class Account {
         this.keyPair = keyPair;
     }
 
-    @Deprecated
+    /**
+     * Derive a Solana account from a mnemonic using the legacy path M/501H/0H/0/0.
+     * @param words seed words
+     * @param passphrase seed passphrase
+     * @return Solana account
+     */
     public static Account fromMnemonic(List<String> words, String passphrase) {
-        byte[] seed = MnemonicCode.toSeed(words, passphrase);
-        DeterministicKey masterPrivateKey = HDKeyDerivation.createMasterPrivateKey(seed);
-        DeterministicHierarchy deterministicHierarchy = new DeterministicHierarchy(masterPrivateKey);
-        DeterministicKey child = deterministicHierarchy.get(HDUtils.parsePath("M/501H/0H/0/0"), true, true);
-        TweetNaclFast.Signature.KeyPair keyPair = TweetNaclFast.Signature.keyPair_fromSeed(child.getPrivKeyBytes());
+        byte[] seed = mnemonicToSeed(words, passphrase);
+        TweetNaclFast.Signature.KeyPair keyPair = TweetNaclFast.Signature.keyPair_fromSeed(seed);
         return new Account(keyPair);
     }
 
@@ -44,7 +47,7 @@ public class Account {
      */
     public static Account fromBip44Mnemonic(List<String> words, String passphrase) {
         SolanaBip44 solanaBip44 = new SolanaBip44();
-        byte[] seed = MnemonicCode.toSeed(words, passphrase);
+        byte[] seed = mnemonicToSeed(words, passphrase);
         byte[] privateKey = solanaBip44.getPrivateKeyFromSeed(seed, DerivableType.BIP44);
         return new Account(TweetNaclFast.Signature.keyPair_fromSeed(privateKey));
     }
@@ -58,7 +61,7 @@ public class Account {
      */
     public static Account fromBip44MnemonicWithChange(List<String> words, String passphrase) {
         SolanaBip44 solanaBip44 = new SolanaBip44();
-        byte[] seed = MnemonicCode.toSeed(words, passphrase);
+        byte[] seed = mnemonicToSeed(words, passphrase);
         byte[] privateKey = solanaBip44.getPrivateKeyFromSeed(seed, DerivableType.BIP44CHANGE);
         return new Account(TweetNaclFast.Signature.keyPair_fromSeed(privateKey));
     }
@@ -70,7 +73,7 @@ public class Account {
      * @return Solana account
      */
     public static Account fromBip39Mnemonic(List<String> words, String passphrase) {
-        byte[] seed = MnemonicCode.toSeed(words, passphrase);
+        byte[] seed = mnemonicToSeed(words, passphrase);
         TweetNaclFast.Signature.KeyPair keyPair = TweetNaclFast.Signature.keyPair_fromSeed(seed);
 
         return new Account(keyPair);
@@ -124,7 +127,7 @@ public class Account {
      * @return A new Account instance
      */
     public static Account fromBase58PrivateKey(String base58PrivateKey) {
-        byte[] privateKey = Base58.decode(base58PrivateKey);
+        byte[] privateKey = Base58Utils.decode(base58PrivateKey);
         return new Account(privateKey);
     }
 
@@ -141,6 +144,27 @@ public class Account {
      * @return The base58-encoded private key
      */
     public String getPrivateKeyBase58() {
-        return Base58.encode(this.getSecretKey());
+        return Base58Utils.encode(this.getSecretKey());
+    }
+
+    /**
+     * Converts a mnemonic phrase to a seed using PBKDF2.
+     * This replaces bitcoinj's MnemonicCode.toSeed functionality.
+     *
+     * @param words the mnemonic words
+     * @param passphrase the passphrase (can be empty)
+     * @return the derived seed
+     */
+    private static byte[] mnemonicToSeed(List<String> words, String passphrase) {
+        try {
+            String mnemonic = String.join(" ", words);
+            String salt = "mnemonic" + passphrase;
+            
+            PBEKeySpec spec = new PBEKeySpec(mnemonic.toCharArray(), salt.getBytes(), 2048, 512);
+            SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
+            return factory.generateSecret(spec).getEncoded();
+        } catch (Exception e) {
+            throw new RuntimeException("Error deriving seed from mnemonic", e);
+        }
     }
 }

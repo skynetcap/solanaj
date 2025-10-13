@@ -1,6 +1,6 @@
 package org.p2p.solanaj.core;
 
-import org.bitcoinj.core.Base58;
+import org.p2p.solanaj.utils.Base58Utils;
 import org.p2p.solanaj.utils.ShortvecEncoding;
 
 import java.nio.ByteBuffer;
@@ -129,7 +129,7 @@ public class Message {
         out.put(accountAddressesLength);
         out.put(accountKeysBuff.array());
 
-        out.put(Base58.decode(recentBlockhash));
+        out.put(Base58Utils.decode(recentBlockhash));
 
         out.put(instructionsLength);
         for (CompiledInstruction compiledInstruction : compiledInstructions) {

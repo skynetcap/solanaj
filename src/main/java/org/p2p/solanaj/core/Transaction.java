@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-import org.bitcoinj.core.Base58;
+import org.p2p.solanaj.utils.Base58Utils;
 import org.p2p.solanaj.utils.ShortvecEncoding;
 import org.p2p.solanaj.utils.TweetNaclFast;
 
@@ -84,7 +84,7 @@ public class Transaction {
             try {
                 TweetNaclFast.Signature signatureProvider = new TweetNaclFast.Signature(new byte[0], signer.getSecretKey());
                 byte[] signature = signatureProvider.detached(serializedMessage);
-                signatures.add(Base58.encode(signature));
+                signatures.add(Base58Utils.encode(signature));
             } catch (Exception e) {
                 throw new RuntimeException("Error signing transaction", e); // Improve exception handling
             }
@@ -107,7 +107,7 @@ public class Transaction {
         out.put(signaturesLength);
 
         for (String signature : signatures) {
-            byte[] rawSignature = Base58.decode(signature);
+            byte[] rawSignature = Base58Utils.decode(signature);
             out.put(rawSignature);
         }
 

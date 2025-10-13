@@ -7,8 +7,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import org.bitcoinj.core.Base58;
-import org.bitcoinj.core.Sha256Hash;
+import org.p2p.solanaj.utils.Base58Utils;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import org.p2p.solanaj.utils.ByteUtils;
 import org.p2p.solanaj.utils.PublicKeySerializer;
 import org.p2p.solanaj.utils.TweetNaclFast;
@@ -24,7 +25,7 @@ public class PublicKey {
         if (pubkey.length() < PUBLIC_KEY_LENGTH) {
             throw new IllegalArgumentException("Invalid public key input: length must be at least " + PUBLIC_KEY_LENGTH);
         }
-        this.pubkey = Base58.decode(pubkey);
+        this.pubkey = Base58Utils.decode(pubkey);
     }
 
     public PublicKey(byte[] pubkey) {
@@ -44,7 +45,7 @@ public class PublicKey {
     }
 
     public String toBase58() {
-        return Base58.encode(pubkey);
+        return Base58Utils.encode(pubkey);
     }
 
     public boolean equals(PublicKey pubkey) {
@@ -79,7 +80,7 @@ public class PublicKey {
             buffer.write(programId.toByteArray());
             buffer.write("ProgramDerivedAddress".getBytes());
 
-            byte[] hash = Sha256Hash.hash(buffer.toByteArray());
+            byte[] hash = sha256Hash(buffer.toByteArray());
 
             if (TweetNaclFast.is_on_curve(hash) != 0) {
                 throw new IllegalStateException("Invalid seeds, address must fall off the curve");
@@ -101,7 +102,7 @@ public class PublicKey {
             buffer.write(seed.getBytes());
             buffer.write(programId.toByteArray());
 
-            byte[] hash = Sha256Hash.hash(buffer.toByteArray());
+            byte[] hash = sha256Hash(buffer.toByteArray());
             return new PublicKey(hash);
         } catch (IOException e) {
             throw new RuntimeException("Error creating program address", e);
@@ -145,6 +146,21 @@ public class PublicKey {
 
     public static PublicKey valueOf(String publicKey) {
         return new PublicKey(publicKey);
+    }
+
+    /**
+     * Computes SHA-256 hash of the given input.
+     *
+     * @param input the input bytes to hash
+     * @return the SHA-256 hash
+     */
+    private static byte[] sha256Hash(byte[] input) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            return digest.digest(input);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("SHA-256 algorithm not available", e);
+        }
     }
 
 }

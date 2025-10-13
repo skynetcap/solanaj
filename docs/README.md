@@ -50,7 +50,7 @@ Add the following Maven dependency to your project's `pom.xml`:
 <dependency>
     <groupId>com.mmorrell</groupId>
     <artifactId>solanaj</artifactId>
-    <version>1.24.0</version>
+    <version>1.25.1</version>
 </dependency>
 ```
 
@@ -129,7 +129,7 @@ final OrderBook bids = solUsdcMarket.getBidOrderBook();
 
 ```java
 // Create account from private key
-final Account feePayer = new Account(Base58.decode(new String(data)));
+final Account feePayer = new Account(Base58Utils.decode(new String(data)));
 final Transaction transaction = new Transaction();
 
 // Add instruction to write memo
