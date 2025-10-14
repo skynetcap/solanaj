@@ -729,24 +729,38 @@ public class SubscriptionWebSocketClient {
             webSocket = null;
         }
         
+        // Shutdown scheduler with proper cleanup
         scheduler.shutdown();
         try {
             if (!scheduler.awaitTermination(5, TimeUnit.SECONDS)) {
                 scheduler.shutdownNow();
+                // Wait a bit more for threads to terminate
+                if (!scheduler.awaitTermination(2, TimeUnit.SECONDS)) {
+                    LOGGER.warning("Scheduler did not terminate gracefully");
+                }
             }
         } catch (InterruptedException e) {
             scheduler.shutdownNow();
             Thread.currentThread().interrupt();
         }
         
+        // Shutdown OkHttp client dispatcher executor
         httpClient.dispatcher().executorService().shutdown();
         try {
             if (!httpClient.dispatcher().executorService().awaitTermination(5, TimeUnit.SECONDS)) {
                 httpClient.dispatcher().executorService().shutdownNow();
+                // Wait a bit more for threads to terminate
+                if (!httpClient.dispatcher().executorService().awaitTermination(2, TimeUnit.SECONDS)) {
+                    LOGGER.warning("OkHttp dispatcher executor did not terminate gracefully");
+                }
             }
         } catch (InterruptedException e) {
             httpClient.dispatcher().executorService().shutdownNow();
             Thread.currentThread().interrupt();
         }
+        
+        // Force close the OkHttp client to ensure all connections are closed
+        httpClient.dispatcher().cancelAll();
+        httpClient.connectionPool().evictAll();
     }
 }
