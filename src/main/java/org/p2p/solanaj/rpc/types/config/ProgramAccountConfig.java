@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.p2p.solanaj.rpc.types.config.RpcSendTransactionConfig.Encoding;
 
-import com.squareup.moshi.Json;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Getter;
 
@@ -17,7 +17,7 @@ public class ProgramAccountConfig {
 
     private String commitment = "processed";
 
-    @Json(name = "changedSinceSlot")
+    @JsonProperty("changedSinceSlot")
     private Long changedSinceSlot;
 
     public ProgramAccountConfig(List<Object> filters) {

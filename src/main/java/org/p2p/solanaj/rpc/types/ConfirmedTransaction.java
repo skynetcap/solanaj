@@ -2,7 +2,7 @@ package org.p2p.solanaj.rpc.types;
 
 import java.util.List;
 
-import com.squareup.moshi.Json;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -14,13 +14,13 @@ public class ConfirmedTransaction {
     @ToString
     public static class Header {
 
-        @Json(name = "numReadonlySignedAccounts")
+        @JsonProperty("numReadonlySignedAccounts")
         private long numReadonlySignedAccounts;
 
-        @Json(name = "numReadonlyUnsignedAccounts")
+        @JsonProperty("numReadonlyUnsignedAccounts")
         private long numReadonlyUnsignedAccounts;
 
-        @Json(name = "numRequiredSignatures")
+        @JsonProperty("numRequiredSignatures")
         private long numRequiredSignatures;
     }
 
@@ -28,13 +28,13 @@ public class ConfirmedTransaction {
     @ToString
     public static class Instruction {
 
-        @Json(name = "accounts")
+        @JsonProperty("accounts")
         private List<Long> accounts;
 
-        @Json(name = "data")
+        @JsonProperty("data")
         private String data;
 
-        @Json(name = "programIdIndex")
+        @JsonProperty("programIdIndex")
         private long programIdIndex;
     }
 
@@ -42,16 +42,16 @@ public class ConfirmedTransaction {
     @ToString
     public static class Message {
 
-        @Json(name = "accountKeys")
+        @JsonProperty("accountKeys")
         private List<String> accountKeys;
 
-        @Json(name = "header")
+        @JsonProperty("header")
         private Header header;
 
-        @Json(name = "instructions")
+        @JsonProperty("instructions")
         private List<Instruction> instructions;
 
-        @Json(name = "recentBlockhash")
+        @JsonProperty("recentBlockhash")
         private String recentBlockhash;
     }
 
@@ -59,7 +59,7 @@ public class ConfirmedTransaction {
     @ToString
     public static class Status {
 
-        @Json(name = "Ok")
+        @JsonProperty("Ok")
         private Object ok;
     }
 
@@ -67,13 +67,13 @@ public class ConfirmedTransaction {
     @ToString
     public static class TokenBalance {
 
-        @Json(name = "accountIndex")
+        @JsonProperty("accountIndex")
         private Double accountIndex;
 
-        @Json(name = "mint")
+        @JsonProperty("mint")
         private String mint;
 
-        @Json(name = "uiTokenAmount")
+        @JsonProperty("uiTokenAmount")
         private TokenResultObjects.TokenAmountInfo uiTokenAmount;
     }
 
@@ -81,28 +81,28 @@ public class ConfirmedTransaction {
     @ToString
     public static class Meta {
 
-        @Json(name = "err")
+        @JsonProperty("err")
         private Object err;
 
-        @Json(name = "fee")
+        @JsonProperty("fee")
         private long fee;
 
-        @Json(name = "innerInstructions")
+        @JsonProperty("innerInstructions")
         private List<Object> innerInstructions;
 
-        @Json(name = "preTokenBalances")
+        @JsonProperty("preTokenBalances")
         private List<TokenBalance> preTokenBalances;
 
-        @Json(name = "postTokenBalances")
+        @JsonProperty("postTokenBalances")
         private List<TokenBalance> postTokenBalances;
 
-        @Json(name = "postBalances")
+        @JsonProperty("postBalances")
         private List<Long> postBalances;
 
-        @Json(name = "preBalances")
+        @JsonProperty("preBalances")
         private List<Long> preBalances;
 
-        @Json(name = "status")
+        @JsonProperty("status")
         private Status status;
     }
 
@@ -110,25 +110,25 @@ public class ConfirmedTransaction {
     @ToString
     public static class Transaction {
 
-        @Json(name = "message")
+        @JsonProperty("message")
         private Message message;
 
-        @Json(name = "signatures")
+        @JsonProperty("signatures")
         private List<String> signatures;
 
         
-        @Json(name = "blockTime")
+        @JsonProperty("blockTime")
         private String blocktime;
 
 
     }
 
-    @Json(name = "meta")
+    @JsonProperty("meta")
     private Meta meta;
 
-    @Json(name = "slot")
+    @JsonProperty("slot")
     private long slot;
 
-    @Json(name = "transaction")
+    @JsonProperty("transaction")
     private Transaction transaction;
 }

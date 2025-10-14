@@ -1,6 +1,6 @@
 package org.p2p.solanaj.rpc.types;
 
-import com.squareup.moshi.Json;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -14,13 +14,13 @@ public class TokenAccountInfo extends RpcResultObject {
     @ToString
     public static class Value {
 
-        @Json(name = "account")
+        @JsonProperty("account")
         private TokenResultObjects.Value account;
 
-        @Json(name = "pubkey")
+        @JsonProperty("pubkey")
         private String pubkey;
     }
 
-    @Json(name = "value")
+    @JsonProperty("value")
     private List<Value> value;
 }

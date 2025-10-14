@@ -11,9 +11,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import com.squareup.moshi.JsonAdapter;
-import com.squareup.moshi.Moshi;
-import com.squareup.moshi.Types;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.zip.GZIPInputStream;
 import java.io.ByteArrayInputStream;
 
@@ -37,7 +37,7 @@ public class RpcClient {
     private OkHttpClient httpClient;
     private RpcApi rpcApi;
     private WeightedCluster cluster;
-    private final Moshi moshi; // Reuse Moshi instance
+    private final ObjectMapper objectMapper; // Reuse ObjectMapper instance
 
 
     /**
@@ -61,7 +61,9 @@ public class RpcClient {
         this.endpoint = cluster.getEndpoints().get(0).getUrl(); // Initialize endpoint from the cluster
         this.httpClient = createOptimizedClientBuilder().readTimeout(20, TimeUnit.SECONDS).build();
         this.rpcApi = new RpcApi(this);
-        this.moshi = new Moshi.Builder().build(); // Initialize Moshi
+        this.objectMapper = new ObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .configure(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS, true); // Initialize ObjectMapper
     }
 
     /**
@@ -127,7 +129,9 @@ public class RpcClient {
                 .writeTimeout(writeTimeoutMs, TimeUnit.MILLISECONDS)
                 .build();
         this.rpcApi = new RpcApi(this);
-        this.moshi = new Moshi.Builder().build(); // Initialize Moshi
+        this.objectMapper = new ObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .configure(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS, true); // Initialize ObjectMapper
     }
 
     /**
@@ -140,7 +144,9 @@ public class RpcClient {
         this.endpoint = endpoint;
         this.httpClient = httpClient;
         this.rpcApi = new RpcApi(this);
-        this.moshi = new Moshi.Builder().build(); // Initialize Moshi
+        this.objectMapper = new ObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .configure(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS, true); // Initialize ObjectMapper
     }
 
     /**
@@ -157,7 +163,9 @@ public class RpcClient {
                 .readTimeout(20, TimeUnit.SECONDS)
                 .build();
         this.rpcApi = new RpcApi(this);
-        this.moshi = new Moshi.Builder().build(); // Initialize Moshi
+        this.objectMapper = new ObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .configure(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS, true); // Initialize ObjectMapper
     }
 
     /**
@@ -172,14 +180,10 @@ public class RpcClient {
     public <T> T call(String method, List<Object> params, Class<T> clazz) throws RpcException {
         RpcRequest rpcRequest = new RpcRequest(method, params);
 
-        JsonAdapter<RpcRequest> rpcRequestJsonAdapter = moshi.adapter(RpcRequest.class);
-        JsonAdapter<RpcResponse<T>> resultAdapter = moshi.adapter(Types.newParameterizedType(RpcResponse.class, clazz));
-
-        Request request = new Request.Builder().url(getEndpoint())
-                .header("Accept-Encoding", "gzip, deflate")
-                .post(RequestBody.create(rpcRequestJsonAdapter.toJson(rpcRequest), JSON)).build();
-
         try {
+            Request request = new Request.Builder().url(getEndpoint())
+                    .header("Accept-Encoding", "gzip, deflate")
+                    .post(RequestBody.create(objectMapper.writeValueAsString(rpcRequest), JSON)).build();
             Response response = httpClient.newCall(request).execute();
             
             // Handle gzip decompression manually if needed
@@ -194,7 +198,8 @@ public class RpcClient {
                 result = response.body().string();
             }
             
-            RpcResponse<T> rpcResult = resultAdapter.fromJson(result);
+            RpcResponse<T> rpcResult = objectMapper.readValue(result, 
+                objectMapper.getTypeFactory().constructParametricType(RpcResponse.class, clazz));
             
             if (rpcResult == null || rpcResult.getError() != null) {
                 throw new RpcException(rpcResult != null ?
@@ -205,6 +210,8 @@ public class RpcClient {
         } catch (SSLHandshakeException e) {
             this.httpClient = createOptimizedClientBuilder().build();
             throw new RpcException("SSL Handshake failed: " + e.getMessage());
+        } catch (JsonProcessingException e) {
+            throw new RpcException("JSON processing error during RPC call: " + e.getMessage());
         } catch (IOException e) {
             throw new RpcException("IO error during RPC call: " + e.getMessage());
         }

@@ -1,6 +1,6 @@
 package org.p2p.solanaj.rpc.types;
 
-import com.squareup.moshi.Json;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -12,11 +12,11 @@ public class FeeCalculatorInfo extends RpcResultObject {
     @ToString
     public static class Value {
 
-        @Json(name = "feeCalculator")
+        @JsonProperty("feeCalculator")
         private RecentBlockhash.FeeCalculator feeCalculator;
     }
 
-    @Json(name = "value")
+    @JsonProperty("value")
     private Value value;
 }
 

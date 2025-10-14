@@ -1,6 +1,6 @@
 package org.p2p.solanaj.rpc.types;
 
-import com.squareup.moshi.Json;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -8,10 +8,10 @@ import lombok.ToString;
 @ToString
 public class SnapshotSlot {
 
-    @Json(name = "full")
+    @JsonProperty("full")
     private Long fullSnapshotSlot;
 
-    @Json(name = "incremental")
+    @JsonProperty("incremental")
     private Long incrementalSnapshotSlot;
 
 }

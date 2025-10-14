@@ -5,24 +5,24 @@ import java.util.Map;
 import lombok.Setter;
 import org.p2p.solanaj.rpc.types.config.RpcSendTransactionConfig.Encoding;
 
-import com.squareup.moshi.Json;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Setter
 public class SimulateTransactionConfig {
 
-    @Json(name = "encoding")
+    @JsonProperty("encoding")
     private Encoding encoding = Encoding.base64;
 
-    @Json(name = "accounts")
+    @JsonProperty("accounts")
     private Map accounts = null;
 
-    @Json(name = "commitment")
+    @JsonProperty("commitment")
     private String commitment = "finalized";
 
-    @Json(name = "sigVerify")
+    @JsonProperty("sigVerify")
     private Boolean sigVerify = false;
 
-    @Json(name = "replaceRecentBlockhash")
+    @JsonProperty("replaceRecentBlockhash")
     private Boolean replaceRecentBlockhash = false;
 
     public SimulateTransactionConfig(Map accounts) {

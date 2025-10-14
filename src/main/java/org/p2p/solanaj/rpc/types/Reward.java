@@ -1,6 +1,6 @@
 package org.p2p.solanaj.rpc.types;
 
-import com.squareup.moshi.Json;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -8,15 +8,15 @@ import lombok.ToString;
 @ToString
 public class Reward {
 
-    @Json(name = "pubkey")
+    @JsonProperty("pubkey")
     private String pubkey;
 
-    @Json(name = "lamports")
+    @JsonProperty("lamports")
     private double lamports;
 
-    @Json(name = "postBalance")
+    @JsonProperty("postBalance")
     private String postBalance;
 
-    @Json(name = "rewardType")
+    @JsonProperty("rewardType")
     private RewardType rewardType;
 }

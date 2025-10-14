@@ -3,7 +3,7 @@ package org.p2p.solanaj.rpc.types;
 import java.util.List;
 import java.util.UUID;
 
-import com.squareup.moshi.Json;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -11,16 +11,16 @@ import lombok.ToString;
 @ToString
 public class RpcRequest {
 
-    @Json(name = "jsonrpc")
+    @JsonProperty("jsonrpc")
     private String jsonrpc = "2.0";
 
-    @Json(name = "method")
+    @JsonProperty("method")
     private String method;
 
-    @Json(name = "params")
+    @JsonProperty("params")
     private List<Object> params;
 
-    @Json(name = "id")
+    @JsonProperty("id")
     private String id = UUID.randomUUID().toString();
 
     public RpcRequest(String method) {

@@ -1,6 +1,6 @@
 package org.p2p.solanaj.rpc.types;
 
-import com.squareup.moshi.Json;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -11,10 +11,10 @@ public class RpcResultObject {
     @Getter
     @ToString
     public static class Context {
-        @Json(name = "slot")
+        @JsonProperty("slot")
         private long slot;
     }
 
-    @Json(name = "context")
+    @JsonProperty("context")
     protected Context context;
 }

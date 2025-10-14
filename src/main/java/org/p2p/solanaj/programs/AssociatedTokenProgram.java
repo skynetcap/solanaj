@@ -1,6 +1,5 @@
 package org.p2p.solanaj.programs;
 
-import lombok.extern.slf4j.Slf4j;
 import org.p2p.solanaj.core.AccountMeta;
 import org.p2p.solanaj.core.PublicKey;
 import org.p2p.solanaj.core.TransactionInstruction;
@@ -10,7 +9,6 @@ import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 
-@Slf4j
 public class AssociatedTokenProgram extends Program {
 
     public static final PublicKey PROGRAM_ID = new PublicKey("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL");
@@ -112,10 +110,8 @@ public class AssociatedTokenProgram extends Program {
                     ),
                     PROGRAM_ID
             ).getAddress();
-            log.info("ATA: {}", pda.toBase58());
             return pda;
         } catch (Exception e) {
-            log.error("Error finding ATA: {}", e.getMessage());
             throw new RuntimeException("Failed to find associated token address", e);
         }
     }

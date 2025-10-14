@@ -4,7 +4,7 @@ import java.util.AbstractMap;
 import java.util.Base64;
 import java.util.List;
 
-import com.squareup.moshi.Json;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -16,6 +16,10 @@ public class AccountInfo extends RpcResultObject {
     @ToString
     public static class Value {
 
+        public Value() {
+            // Default constructor for Jackson
+        }
+
         public Value(AbstractMap am) {
             this.data = (List) am.get("data");
             this.executable = (boolean) am.get("executable");
@@ -24,23 +28,23 @@ public class AccountInfo extends RpcResultObject {
             this.rentEpoch = (double) am.get("rentEpoch");
         }
 
-        @Json(name = "data")
+        @JsonProperty("data")
         private List<String> data;
 
-        @Json(name = "executable")
+        @JsonProperty("executable")
         private boolean executable;
 
-        @Json(name = "lamports")
+        @JsonProperty("lamports")
         private double lamports;
 
-        @Json(name = "owner")
+        @JsonProperty("owner")
         private String owner;
 
-        @Json(name = "rentEpoch")
+        @JsonProperty("rentEpoch")
         private double rentEpoch;
     }
 
-    @Json(name = "value")
+    @JsonProperty("value")
     private Value value;
 
     public byte[] getDecodedData() {

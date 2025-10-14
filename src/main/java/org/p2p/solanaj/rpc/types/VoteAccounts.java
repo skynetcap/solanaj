@@ -1,6 +1,6 @@
 package org.p2p.solanaj.rpc.types;
 
-import com.squareup.moshi.Json;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -14,34 +14,34 @@ public class VoteAccounts {
     @ToString
     public static class VoteAccountValue {
 
-        @Json(name = "commission")
+        @JsonProperty("commission")
         private long commission;
 
-        @Json(name = "epochVoteAccount")
+        @JsonProperty("epochVoteAccount")
         private boolean epochVoteAccount;
 
-        @Json(name = "epochCredits")
+        @JsonProperty("epochCredits")
         private List<List<Long>> epochCredits;
 
-        @Json(name = "nodePubkey")
+        @JsonProperty("nodePubkey")
         private String nodePubkey;
 
-        @Json(name = "lastVote")
+        @JsonProperty("lastVote")
         private long lastVote;
 
-        @Json(name = "activatedStake")
+        @JsonProperty("activatedStake")
         private long activatedStake;
 
-        @Json(name = "votePubkey")
+        @JsonProperty("votePubkey")
         private String votePubkey;
 
 
     }
 
-    @Json(name = "current")
+    @JsonProperty("current")
     private List<VoteAccountValue> current;
 
-    @Json(name = "delinquent")
+    @JsonProperty("delinquent")
     private List<VoteAccountValue> delinquent;
 
 }

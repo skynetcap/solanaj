@@ -1,6 +1,6 @@
 package org.p2p.solanaj.rpc.types;
 
-import com.squareup.moshi.Json;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -8,12 +8,12 @@ import lombok.ToString;
 @ToString
 public class StakeActivation {
 
-    @Json(name = "active")
+    @JsonProperty("active")
     private long active;
 
-    @Json(name = "inactive")
+    @JsonProperty("inactive")
     private long inactive;
 
-    @Json(name = "state")
+    @JsonProperty("state")
     private String state;
 }

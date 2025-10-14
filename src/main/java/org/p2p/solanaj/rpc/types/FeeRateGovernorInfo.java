@@ -1,6 +1,6 @@
 package org.p2p.solanaj.rpc.types;
 
-import com.squareup.moshi.Json;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -11,19 +11,19 @@ public class FeeRateGovernorInfo extends RpcResultObject
     @Getter
     @ToString
     public static class FeeRateGovernor {
-        @Json(name = "burnPercent")
+        @JsonProperty("burnPercent")
         private int burnPercent;
 
-        @Json(name = "maxLamportsPerSignature")
+        @JsonProperty("maxLamportsPerSignature")
         private double maxLamportsPerSignature;
 
-        @Json(name = "minLamportsPerSignature")
+        @JsonProperty("minLamportsPerSignature")
         private double minLamportsPerSignature;
 
-        @Json(name = "targetLamportsPerSignature")
+        @JsonProperty("targetLamportsPerSignature")
         private double targetLamportsPerSignature;
 
-        @Json(name = "targetSignaturesPerSlot")
+        @JsonProperty("targetSignaturesPerSlot")
         private double targetSignaturesPerSlot;
     }
 
@@ -31,10 +31,10 @@ public class FeeRateGovernorInfo extends RpcResultObject
     @ToString
     public static class Value {
 
-        @Json(name = "feeRateGovernor")
+        @JsonProperty("feeRateGovernor")
         private FeeRateGovernor feeRateGovernor;
     }
 
-    @Json(name = "value")
+    @JsonProperty("value")
     private Value value;
 }

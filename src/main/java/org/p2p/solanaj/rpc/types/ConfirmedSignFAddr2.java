@@ -1,20 +1,20 @@
 package org.p2p.solanaj.rpc.types;
 
-import com.squareup.moshi.Json;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.p2p.solanaj.rpc.types.config.Commitment;
 
 public class ConfirmedSignFAddr2 {
 
-    @Json(name = "limit")
+    @JsonProperty("limit")
     private long limit;
 
-    @Json(name = "before")
+    @JsonProperty("before")
     private String before;
 
-    @Json(name = "until")
+    @JsonProperty("until")
     private String until;
 
-    @Json(name = "commitment")
+    @JsonProperty("commitment")
     private String commitment;
 
     public ConfirmedSignFAddr2(int limit, Commitment commitment) {

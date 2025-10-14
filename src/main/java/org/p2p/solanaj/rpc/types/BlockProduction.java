@@ -1,6 +1,6 @@
 package org.p2p.solanaj.rpc.types;
 
-import com.squareup.moshi.Json;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -14,10 +14,10 @@ public class BlockProduction {
     @Getter
     @ToString
     public static class BlockProductionRange {
-        @Json(name = "firstSlot")
+        @JsonProperty("firstSlot")
         private double firstSlot;
 
-        @Json(name = "lastSlot")
+        @JsonProperty("lastSlot")
         private double lastSlot;
 
     }
@@ -25,18 +25,18 @@ public class BlockProduction {
     @Getter
     @ToString
     public static class BlockProductionValue {
-        @Json(name = "byIdentity")
+        @JsonProperty("byIdentity")
         private Map<String, List<Double>> byIdentity;
 
         public Map<String, List<Double>> getByIdentity() {
             return byIdentity;
         }
 
-        @Json(name = "range")
+        @JsonProperty("range")
         private BlockProductionRange blockProductionRange;
 
     }
 
-    @Json(name = "value")
+    @JsonProperty("value")
     private BlockProductionValue value;
 }
