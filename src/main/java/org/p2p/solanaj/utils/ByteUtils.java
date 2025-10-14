@@ -4,6 +4,8 @@ package org.p2p.solanaj.utils;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Arrays;
 
 public class ByteUtils {
@@ -77,6 +79,15 @@ public class ByteUtils {
         byte valByte = data[posByte];
         int valInt = (valByte >> posBit) & 1;
         return valInt;
+    }
+
+
+    public static int readUint16(ByteBuffer buf) {
+        return Short.toUnsignedInt(buf.order(ByteOrder.LITTLE_ENDIAN).getShort());
+    }
+
+    public static int readUint16(byte[] bytes, int offset) {
+        return readUint16(ByteBuffer.wrap(bytes, offset, bytes.length - offset));
     }
 
 }

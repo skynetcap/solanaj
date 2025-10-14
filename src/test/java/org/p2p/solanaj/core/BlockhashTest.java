@@ -55,7 +55,7 @@ public class BlockhashTest {
         assertNotNull(latestBlockhash);
         assertNotNull(latestBlockhash.getValue());
         assertNotNull(latestBlockhash.getValue().getBlockhash());
-        assertTrue(latestBlockhash.getValue().getBlockhash().matches("^[1-9A-HJ-NP-Za-km-z]{44}$"));
+        assertTrue(latestBlockhash.getValue().getBlockhash().matches("^[1-9A-HJ-NP-Za-km-z]{43,44}$"));
         assertTrue(latestBlockhash.getValue().getLastValidBlockHeight() > 0);
     }
 
