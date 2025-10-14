@@ -44,6 +44,7 @@ public class TransactionTest {
                         )
                 )
                 .setRecentBlockHash("Eit7RCyhUixAe2hGBS8oqnw59QK3kgMMjfLME5bm9wRn")
+                .setFeePayer(signer.getPublicKey()) // note the memo program does not encode fee payer account, so it needs to be specified manually
                 .setSigners(List.of(signer))
                 .build();
 

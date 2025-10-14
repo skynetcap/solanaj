@@ -73,6 +73,11 @@ public class TransactionBuilder {
         return this;
     }
 
+    public TransactionBuilder setFeePayer(PublicKey feePayer) {
+        transaction.setFeePayer(feePayer);
+        return this;
+    }
+
     /**
      * Builds and returns the constructed Transaction object.
      *
