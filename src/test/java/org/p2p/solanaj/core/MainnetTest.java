@@ -219,9 +219,6 @@ public class MainnetTest extends AccountBasedTest {
     @Test
     @Disabled
     public void transactionMemoTest() {
-        final int lamports = 1111;
-        final PublicKey destination = solDestination;
-
         // Create account from private key
         final Account feePayer = testAccount;
 

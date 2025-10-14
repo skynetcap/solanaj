@@ -129,33 +129,6 @@ public class Base58 {
     }
 
     /**
-     * Divides a number, represented as an array of bytes each containing a single digit
-     * in the specified base, by the given divisor. The given number is modified in-place
-     * to contain the quotient, and the return value is the remainder.
-     *
-     * This is the core operation that makes Base58 encoding/decoding work. It performs
-     * long division on arrays of digits.
-     *
-     * @param number the number to divide
-     * @param firstDigit the index within the array of the first non-zero digit
-     *        (this is used for optimization by skipping the leading zeros)
-     * @param base the base in which the number's digits are represented (up to 256)
-     * @param divisor the number to divide by (up to 256)
-     * @return the remainder of the division operation
-     */
-    private static byte divmod(byte[] number, int firstDigit, int base, int divisor) {
-        // This is just long division which accounts for the base of the input digits
-        int remainder = 0;
-        for (int i = firstDigit; i < number.length; i++) {
-            int digit = (int) number[i] & 0xFF;
-            int temp = remainder * base + digit;
-            number[i] = (byte) (temp / divisor);
-            remainder = temp % divisor;
-        }
-        return (byte) remainder;
-    }
-    
-    /**
      * Optimized divmod for encoding (base 256 to base 58).
      * Uses bit shifting for division by powers of 2.
      */

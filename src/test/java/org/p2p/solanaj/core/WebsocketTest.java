@@ -99,7 +99,9 @@ public class WebsocketTest {
             LOGGER.info("Subscribing to account: " + TEST_ACCOUNT);
             client.accountSubscribe(TEST_ACCOUNT, (NotificationEventListener) data -> {
                 LOGGER.info("Received notification: " + data);
-                resultRef.set((Map<String, Object>) data);
+                @SuppressWarnings("unchecked")
+                Map<String, Object> typedData = (Map<String, Object>) data;
+                resultRef.set(typedData);
                 latch.countDown();
             });
 
@@ -143,7 +145,9 @@ public class WebsocketTest {
             NotificationEventListener listener1 = data -> {
                 LOGGER.info("Received notification for subscription 1 (TEST_ACCOUNT): " + data);
                 if (!future1.isDone()) {
-                    future1.complete((Map<String, Object>) data);
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> typedData = (Map<String, Object>) data;
+                    future1.complete(typedData);
                     latch.countDown();
                 }
             };
@@ -151,7 +155,9 @@ public class WebsocketTest {
             NotificationEventListener listener2 = data -> {
                 LOGGER.info("Received notification for subscription 2 (SYSVAR_CLOCK): " + data);
                 if (!future2.isDone()) {
-                    future2.complete((Map<String, Object>) data);
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> typedData = (Map<String, Object>) data;
+                    future2.complete(typedData);
                     latch.countDown();
                 }
             };

@@ -22,6 +22,11 @@ public class RpcApi {
         this.client = client;
     }
 
+    @SuppressWarnings("unchecked")
+    private <T> T callWithGenericType(String method, List<Object> params, Class<?> rawClass) throws RpcException {
+        return (T) client.call(method, params, rawClass);
+    }
+
     public LatestBlockhash getLatestBlockhash() throws RpcException {
         return getLatestBlockhash(null);
     }
@@ -174,7 +179,6 @@ public class RpcApi {
         return client.call("getTransaction", params, ConfirmedTransaction.class);
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     public List<SignatureInformation> getConfirmedSignaturesForAddress2(PublicKey account, int limit)
             throws RpcException {
         List<Object> params = new ArrayList<>();
@@ -182,10 +186,10 @@ public class RpcApi {
         params.add(account.toString());
         params.add(new ConfirmedSignFAddr2(limit, Commitment.CONFIRMED));
 
-        List<AbstractMap> rawResult = client.call("getConfirmedSignaturesForAddress2", params, List.class);
+        List<AbstractMap<String, Object>> rawResult = callWithGenericType("getConfirmedSignaturesForAddress2", params, List.class);
 
         List<SignatureInformation> result = new ArrayList<>();
-        for (AbstractMap item : rawResult) {
+        for (AbstractMap<String, Object> item : rawResult) {
             result.add(new SignatureInformation(item));
         }
 
@@ -204,10 +208,10 @@ public class RpcApi {
         params.add(account.toString());
         params.add(new ConfirmedSignFAddr2(limit, commitment, before, until));
 
-        List<AbstractMap> rawResult = client.call("getSignaturesForAddress", params, List.class);
+        List<AbstractMap<String, Object>> rawResult = callWithGenericType("getSignaturesForAddress", params, List.class);
 
         List<SignatureInformation> result = new ArrayList<>();
-        for (AbstractMap item : rawResult) {
+        for (AbstractMap<String, Object> item : rawResult) {
             result.add(new SignatureInformation(item));
         }
 
@@ -237,7 +241,6 @@ public class RpcApi {
         return getProgramAccounts(account, new ProgramAccountConfig(Encoding.base64));
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     public List<ProgramAccount> getProgramAccounts(PublicKey account, ProgramAccountConfig programAccountConfig)
             throws RpcException {
         List<Object> params = new ArrayList<>();
@@ -248,17 +251,16 @@ public class RpcApi {
             params.add(programAccountConfig);
         }
 
-        List<AbstractMap> rawResult = client.call("getProgramAccounts", params, List.class);
+        List<AbstractMap<String, Object>> rawResult = callWithGenericType("getProgramAccounts", params, List.class);
 
         List<ProgramAccount> result = new ArrayList<>();
-        for (AbstractMap item : rawResult) {
+        for (AbstractMap<String, Object> item : rawResult) {
             result.add(new ProgramAccount(item));
         }
 
         return result;
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     public List<ProgramAccount> getProgramAccounts(PublicKey account, List<Memcmp> memcmpList, int dataSize)
             throws RpcException {
         List<Object> params = new ArrayList<>();
@@ -276,17 +278,16 @@ public class RpcApi {
         programAccountConfig.setEncoding(Encoding.base64);
         params.add(programAccountConfig);
 
-        List<AbstractMap> rawResult = client.call("getProgramAccounts", params, List.class);
+        List<AbstractMap<String, Object>> rawResult = callWithGenericType("getProgramAccounts", params, List.class);
 
         List<ProgramAccount> result = new ArrayList<>();
-        for (AbstractMap item : rawResult) {
+        for (AbstractMap<String, Object> item : rawResult) {
             result.add(new ProgramAccount(item));
         }
 
         return result;
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     public List<ProgramAccount> getProgramAccounts(PublicKey account, List<Memcmp> memcmpList, int dataSize, long changedSinceSlot)
             throws RpcException {
         List<Object> params = new ArrayList<>();
@@ -305,17 +306,16 @@ public class RpcApi {
         programAccountConfig.setChangedSinceSlot(changedSinceSlot);
         params.add(programAccountConfig);
 
-        List<AbstractMap> rawResult = client.call("getProgramAccounts", params, List.class);
+        List<AbstractMap<String, Object>> rawResult = callWithGenericType("getProgramAccounts", params, List.class);
 
         List<ProgramAccount> result = new ArrayList<>();
-        for (AbstractMap item : rawResult) {
+        for (AbstractMap<String, Object> item : rawResult) {
             result.add(new ProgramAccount(item));
         }
 
         return result;
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     public List<ProgramAccount> getProgramAccounts(PublicKey account, List<Memcmp> memcmpList) throws RpcException {
         List<Object> params = new ArrayList<>();
 
@@ -330,10 +330,10 @@ public class RpcApi {
         programAccountConfig.setEncoding(Encoding.base64);
         params.add(programAccountConfig);
 
-        List<AbstractMap> rawResult = client.call("getProgramAccounts", params, List.class);
+        List<AbstractMap<String, Object>> rawResult = callWithGenericType("getProgramAccounts", params, List.class);
 
         List<ProgramAccount> result = new ArrayList<>();
-        for (AbstractMap item : rawResult) {
+        for (AbstractMap<String, Object> item : rawResult) {
             result.add(new ProgramAccount(item));
         }
 
@@ -556,7 +556,7 @@ public class RpcApi {
             params.add(addresses.stream().map(PublicKey::toBase58).toList());
         }
 
-        List<Map<String, Object>> rawResult = client.call("getRecentPrioritizationFees", params, List.class);
+        List<Map<String, Object>> rawResult = callWithGenericType("getRecentPrioritizationFees", params, List.class);
 
         List<RecentPrioritizationFees> result = new ArrayList<>();
         for (Map<String, Object> item : rawResult) {
@@ -658,10 +658,10 @@ public class RpcApi {
         List<Object> params = new ArrayList<>();
 
         // TODO - fix uncasted type stuff
-        List<AbstractMap> rawResult = client.call("getClusterNodes", params, List.class);
+        List<AbstractMap<String, Object>> rawResult = callWithGenericType("getClusterNodes", params, List.class);
 
         List<ClusterNode> result = new ArrayList<>();
-        for (AbstractMap item : rawResult) {
+        for (AbstractMap<String, Object> item : rawResult) {
             result.add(new ClusterNode(item));
         }
 
@@ -755,12 +755,13 @@ public class RpcApi {
         params.add(parameterMap);
         params.add(Map.of("encoding", "jsonParsed"));
 
-        Map<String, Object> rawResult = client.call("getTokenAccountsByOwner", params, Map.class);
+        Map<String, Object> rawResult = callWithGenericType("getTokenAccountsByOwner", params, Map.class);
 
         PublicKey tokenAccountKey;
 
         try {
-            String base58 = (String) ((Map) ((List) rawResult.get("value")).get(0)).get("pubkey");
+            @SuppressWarnings("unchecked")
+            String base58 = (String) ((Map<String, Object>) ((List<?>) rawResult.get("value")).get(0)).get("pubkey");
             tokenAccountKey = new PublicKey(base58);
 
         } catch (Exception ex) {
@@ -807,10 +808,10 @@ public class RpcApi {
         }
         params.add(rpcEpochConfig);
 
-        List<AbstractMap> rawResult = client.call("getInflationReward", params, List.class);
+        List<AbstractMap<String, Object>> rawResult = callWithGenericType("getInflationReward", params, List.class);
 
         List<InflationReward> result = new ArrayList<>();
-        for (AbstractMap item : rawResult) {
+        for (AbstractMap<String, Object> item : rawResult) {
             if (item != null) {
                 result.add(new InflationReward(item));
             }
@@ -853,7 +854,7 @@ public class RpcApi {
         params.add(startSlot);
         params.add(limit);
 
-        List<String> rawResult = client.call("getSlotLeaders", params, List.class);
+        List<String> rawResult = callWithGenericType("getSlotLeaders", params, List.class);
 
         List<PublicKey> result = new ArrayList<>();
         for (String item : rawResult) {
@@ -873,7 +874,7 @@ public class RpcApi {
     }
 
     public PublicKey getIdentity() throws RpcException {
-        Map<String, Object> rawResult = client.call("getIdentity", new ArrayList<>(), Map.class);
+        Map<String, Object> rawResult = callWithGenericType("getIdentity", new ArrayList<>(), Map.class);
 
         PublicKey identity;
         try {
@@ -917,7 +918,7 @@ public class RpcApi {
     public List<Double> getConfirmedBlocks(Integer start, Integer end) throws RpcException {
         List<Object> params;
         params = (end == null ? Arrays.asList(start) : Arrays.asList(start, end));
-        return this.client.call("getConfirmedBlocks", params, List.class);
+        return callWithGenericType("getConfirmedBlocks", params, List.class);
     }
     /**
      * Returns a list of confirmed blocks between two slots
@@ -940,9 +941,11 @@ public class RpcApi {
             params.add(Map.of("commitment", commitment.getValue()));
         }
 
-        Map<String, Object> rawResult = client.call("getTokenAccountBalance", params, Map.class);
+        Map<String, Object> rawResult = callWithGenericType("getTokenAccountBalance", params, Map.class);
 
-        return new TokenAmountInfo((AbstractMap) rawResult.get("value"));
+        @SuppressWarnings("unchecked")
+        AbstractMap<String, Object> value = (AbstractMap<String, Object>) rawResult.get("value");
+        return new TokenAmountInfo(value);
     }
 
     public TokenAmountInfo getTokenSupply(PublicKey tokenMint) throws RpcException {
@@ -957,9 +960,11 @@ public class RpcApi {
             params.add(Map.of("commitment", commitment.getValue()));
         }
 
-        Map<String, Object> rawResult =  client.call("getTokenSupply", params, Map.class);
+        Map<String, Object> rawResult = callWithGenericType("getTokenSupply", params, Map.class);
 
-        return new TokenAmountInfo((AbstractMap) rawResult.get("value"));
+        @SuppressWarnings("unchecked")
+        AbstractMap<String, Object> value = (AbstractMap<String, Object>) rawResult.get("value");
+        return new TokenAmountInfo(value);
     }
 
     public List<TokenAccount> getTokenLargestAccounts(PublicKey tokenMint) throws RpcException {
@@ -974,10 +979,12 @@ public class RpcApi {
             params.add(Map.of("commitment", commitment.getValue()));
         }
 
-        Map<String, Object> rawResult = client.call("getTokenLargestAccounts", params, Map.class);
+        Map<String, Object> rawResult = callWithGenericType("getTokenLargestAccounts", params, Map.class);
 
         List<TokenAccount> result = new ArrayList<>();
-        for (AbstractMap item : (List<AbstractMap>) rawResult.get("value")) {
+        @SuppressWarnings("unchecked")
+        List<AbstractMap<String, Object>> valueList = (List<AbstractMap<String, Object>>) rawResult.get("value");
+        for (AbstractMap<String, Object> item : valueList) {
             result.add(new TokenAccount(item));
         }
 
@@ -1079,10 +1086,10 @@ public class RpcApi {
     public List<PerformanceSample> getRecentPerformanceSamples() throws RpcException {
         List<Object> params = new ArrayList<>();
 
-        List<AbstractMap> rawResult = client.call("getRecentPerformanceSamples", params, List.class);
+        List<AbstractMap<String, Object>> rawResult = callWithGenericType("getRecentPerformanceSamples", params, List.class);
 
         List<PerformanceSample> result = new ArrayList<>();
-        for (AbstractMap item : rawResult) {
+        for (AbstractMap<String, Object> item : rawResult) {
             result.add(new PerformanceSample(item));
         }
 
@@ -1093,10 +1100,10 @@ public class RpcApi {
         List<Object> params = new ArrayList<>();
         params.add(limit);
 
-        List<AbstractMap> rawResult = client.call("getRecentPerformanceSamples", params, List.class);
+        List<AbstractMap<String, Object>> rawResult = callWithGenericType("getRecentPerformanceSamples", params, List.class);
 
         List<PerformanceSample> result = new ArrayList<>();
-        for (AbstractMap item : rawResult) {
+        for (AbstractMap<String, Object> item : rawResult) {
             result.add(new PerformanceSample(item));
         }
 
@@ -1126,10 +1133,12 @@ public class RpcApi {
         }
         params.add(largestAccountConfig);
 
-        Map<String, Object> rawResult = client.call("getLargestAccounts", params, Map.class);
+        Map<String, Object> rawResult = callWithGenericType("getLargestAccounts", params, Map.class);
 
         List<LargeAccount> result = new ArrayList<>();
-        for (AbstractMap item : (List<AbstractMap>) rawResult.get("value")) {
+        @SuppressWarnings("unchecked")
+        List<AbstractMap<String, Object>> valueList = (List<AbstractMap<String, Object>>) rawResult.get("value");
+        for (AbstractMap<String, Object> item : valueList) {
             result.add(new LargeAccount(item));
         }
 
@@ -1156,11 +1165,13 @@ public class RpcApi {
         }
         params.add(leaderScheduleConfig);
 
-        Map<String, Object> rawResult = client.call("getLeaderSchedule", params, Map.class);
+        Map<String, Object> rawResult = callWithGenericType("getLeaderSchedule", params, Map.class);
 
         List<LeaderSchedule> result = new ArrayList<>();
         rawResult.forEach((key, value) -> {
-            result.add(new LeaderSchedule(key, (List<Double>) value));
+            @SuppressWarnings("unchecked")
+            List<Double> doubleList = (List<Double>) value;
+            result.add(new LeaderSchedule(key, doubleList));
         });
 
         return result;
@@ -1188,10 +1199,12 @@ public class RpcApi {
 
         params.add(parameterMap);
 
-        Map<String, Object> rawResult = client.call("getMultipleAccounts", params, Map.class);
+        Map<String, Object> rawResult = callWithGenericType("getMultipleAccounts", params, Map.class);
         List<AccountInfo.Value> result = new ArrayList<>();
 
-        for (AbstractMap item : (List<AbstractMap>) rawResult.get("value")) {
+        @SuppressWarnings("unchecked")
+        List<AbstractMap<String, Object>> valueList = (List<AbstractMap<String, Object>>) rawResult.get("value");
+        for (AbstractMap<String, Object> item : valueList) {
             if (item != null) {
                 result.add(new AccountInfo.Value(item));
             }
@@ -1209,8 +1222,9 @@ public class RpcApi {
         parameterMap.put("encoding", "base64");
         params.add(parameterMap);
 
-        Map<String, Object> rawResult = client.call("getMultipleAccounts", params, Map.class);
+        Map<String, Object> rawResult = callWithGenericType("getMultipleAccounts", params, Map.class);
 
+        @SuppressWarnings("unchecked")
         List<AbstractMap<String, Object>> resultList = (List<AbstractMap<String, Object>>) rawResult.get("value");
         for (int i = 0; i < resultList.size(); i++) {
             if (resultList.get(i) == null) {
@@ -1227,7 +1241,6 @@ public class RpcApi {
         return isBlockhashValid(blockHash, null, null);
     }
 
-    @SuppressWarnings("unchecked")
     public boolean isBlockhashValid(String blockHash, Commitment commitment, Long minContextSlot) throws RpcException {
         Map<String, Object> parameterMap = new HashMap<>();
         if (commitment != null) {
@@ -1241,7 +1254,7 @@ public class RpcApi {
         params.add(blockHash);
         params.add(parameterMap);
 
-        Map<Object, Object> call = client.call("isBlockhashValid", params, Map.class);
+        Map<Object, Object> call = callWithGenericType("isBlockhashValid", params, Map.class);
         Boolean result = (Boolean) call.get("value");
 
         return result;
@@ -1277,7 +1290,7 @@ public class RpcApi {
             params.add(Map.of("commitment", commitment.getValue()));
         }
 
-        List<Double> result = client.call("getBlocks", params, List.class);
+        List<Double> result = callWithGenericType("getBlocks", params, List.class);
         return result.stream().map(Double::longValue).collect(Collectors.toList());
     }
 
@@ -1311,7 +1324,7 @@ public class RpcApi {
             params.add(Map.of("commitment", commitment.getValue()));
         }
 
-        List<Double> result = client.call("getBlocksWithLimit", params, List.class);
+        List<Double> result = callWithGenericType("getBlocksWithLimit", params, List.class);
         return result.stream().map(Double::longValue).collect(Collectors.toList());
     }
 

@@ -12,10 +12,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import com.squareup.moshi.JsonAdapter;
-import com.squareup.moshi.JsonReader;
 import com.squareup.moshi.Moshi;
 import com.squareup.moshi.Types;
-import okio.Buffer;
 import java.util.zip.GZIPInputStream;
 import java.io.ByteArrayInputStream;
 
@@ -179,7 +177,7 @@ public class RpcClient {
 
         Request request = new Request.Builder().url(getEndpoint())
                 .header("Accept-Encoding", "gzip, deflate")
-                .post(RequestBody.create(JSON, rpcRequestJsonAdapter.toJson(rpcRequest))).build();
+                .post(RequestBody.create(rpcRequestJsonAdapter.toJson(rpcRequest), JSON)).build();
 
         try {
             Response response = httpClient.newCall(request).execute();
@@ -196,18 +194,14 @@ public class RpcClient {
                 result = response.body().string();
             }
             
-            try (Buffer buffer = new Buffer().writeUtf8(result)) {
-                JsonReader reader = JsonReader.of(buffer);
-                reader.setLenient(true);
-                RpcResponse<T> rpcResult = resultAdapter.fromJson(reader);
-          
-                if (rpcResult == null || rpcResult.getError() != null) {
-                    throw new RpcException(rpcResult != null ?
-                    rpcResult.getError().getMessage() : "RPC response is null");
-                }
-          
-                return rpcResult.getResult();
+            RpcResponse<T> rpcResult = resultAdapter.fromJson(result);
+            
+            if (rpcResult == null || rpcResult.getError() != null) {
+                throw new RpcException(rpcResult != null ?
+                rpcResult.getError().getMessage() : "RPC response is null");
             }
+            
+            return rpcResult.getResult();
         } catch (SSLHandshakeException e) {
             this.httpClient = createOptimizedClientBuilder().build();
             throw new RpcException("SSL Handshake failed: " + e.getMessage());

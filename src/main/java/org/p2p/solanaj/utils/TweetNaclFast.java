@@ -15,15 +15,11 @@ import java.util.concurrent.atomic.AtomicLong;
  * */
 public final class TweetNaclFast {
 
-	private final static String TAG = "TweetNaclFast";
-
 	/*
 	 * @description 
 	 *   Box algorithm, Public-key authenticated encryption 
 	 * */
 	public static final class Box {
-
-		private final static String TAG = "Box";
 
 		private AtomicLong nonce;
 
@@ -388,8 +384,6 @@ public final class TweetNaclFast {
 	 * */
 	public static final class SecretBox {
 
-		private final static String TAG = "SecretBox";
-
 		private AtomicLong nonce;
 
 		private byte [] key;
@@ -595,8 +589,6 @@ public final class TweetNaclFast {
 	 * */
 	public static final class ScalarMult {
 
-		private final static String TAG = "ScalarMult";
-
 		/*
 		 * @description
 		 *   Multiplies an integer n by a group element p and 
@@ -650,8 +642,6 @@ public final class TweetNaclFast {
 	 * */
 	public static final class Hash {
 
-		private final static String TAG = "Hash";
-
 		/*
 		 * @description
 		 *   Returns SHA-512 hash of the message.
@@ -684,8 +674,6 @@ public final class TweetNaclFast {
 	 *   Signature algorithm, Implements ed25519.
 	 * */
 	public static final class Signature {
-
-		private final static String TAG = "Signature";
 
 		private byte [] theirPublicKey;
 		private byte [] mySecretKey;
@@ -1871,7 +1859,6 @@ public final class TweetNaclFast {
 
 	public static int crypto_secretbox(byte [] c, byte [] m, int /*long*/ d, byte [] n, byte [] k)
 	{
-		int i;
 		if (d < 32) return -1;
 		crypto_stream_xor(c,0,m,0,d,n,k);
 		crypto_onetimeauth(c,16, c,32, d-32, c);
@@ -1881,7 +1868,6 @@ public final class TweetNaclFast {
 
 	public static int crypto_secretbox_open(byte []m,byte []c,int /*long*/ d,byte []n,byte []k)
 	{
-		int i;
 		byte[] x = new byte[32];
 		if (d < 32) return -1;
 		crypto_stream(x,0,32,n,k);

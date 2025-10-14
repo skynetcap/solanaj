@@ -139,7 +139,7 @@ public class BPFLoaderTest {
                 )
         );
 
-        String hash = client.getApi().getRecentBlockhash();
+        String hash = client.getApi().getLatestBlockhash().getValue().getBlockhash();
         transaction.setRecentBlockHash(hash);
 
         String txId = client.getApi().sendTransaction(transaction, List.of(account, bufferAccount), hash);
