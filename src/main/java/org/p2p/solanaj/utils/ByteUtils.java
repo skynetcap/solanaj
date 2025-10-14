@@ -21,7 +21,7 @@ public class ByteUtils {
         return new BigInteger(reverseBytes(readBytes(buf, offset, UINT_64_LENGTH)));
     }
 
-    private static byte[] reverseBytes(byte[] bytes) {
+    public static byte[] reverseBytes(byte[] bytes) {
         byte[] reversed = new byte[bytes.length];
         for (int i = 0; i < bytes.length; i++) {
             reversed[i] = bytes[bytes.length - 1 - i];
