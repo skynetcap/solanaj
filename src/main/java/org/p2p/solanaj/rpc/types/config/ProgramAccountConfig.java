@@ -6,6 +6,9 @@ import org.p2p.solanaj.rpc.types.config.RpcSendTransactionConfig.Encoding;
 
 import com.squareup.moshi.Json;
 
+import lombok.Getter;
+
+@Getter
 public class ProgramAccountConfig {
 
     private Encoding encoding = null;

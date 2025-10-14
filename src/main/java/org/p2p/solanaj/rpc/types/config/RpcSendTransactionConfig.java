@@ -3,11 +3,13 @@ package org.p2p.solanaj.rpc.types.config;
 import com.squareup.moshi.Json;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Getter
 public class RpcSendTransactionConfig {
 
     public static enum Encoding {
@@ -27,12 +29,15 @@ public class RpcSendTransactionConfig {
     }
 
     @Json(name = "encoding")
+    @Builder.Default
     private Encoding encoding = Encoding.base64;
 
     @Json(name ="skipPreflight")
-    private boolean skipPreFlight = true;
+    @Builder.Default
+    private boolean skipPreflight = true;
 
     @Json(name = "maxRetries")
+    @Builder.Default
     private long maxRetries = 0;
 
 }

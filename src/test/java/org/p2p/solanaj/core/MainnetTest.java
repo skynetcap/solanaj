@@ -445,7 +445,7 @@ public class MainnetTest extends AccountBasedTest {
     @Test
     @Disabled
     public void getSnapshotSlotTest() throws RpcException {
-        long snapshotSlot = client.getApi().getSnapshotSlot();
+        long snapshotSlot = client.getApi().getHighestSnapshotSlot().getFullSnapshotSlot();
         LOGGER.info(String.format("Snapshot slot = %d", snapshotSlot));
         assertTrue(snapshotSlot > 0);
     }
@@ -566,8 +566,9 @@ public class MainnetTest extends AccountBasedTest {
     @Test
     @Disabled
     public void getFeeCalculatorForBlockhashTest() throws RpcException, InterruptedException {
-        String recentBlockHash = client.getApi().getRecentBlockhash();
+        String recentBlockHash = client.getApi().getLatestBlockhash().getValue().getBlockhash();
         Thread.sleep(20000L);
+        @SuppressWarnings("deprecation")
         FeeCalculatorInfo feeCalculatorInfo = client.getApi().getFeeCalculatorForBlockhash(recentBlockHash);
         LOGGER.info(feeCalculatorInfo.getValue().getFeeCalculator().toString());
 
@@ -578,6 +579,7 @@ public class MainnetTest extends AccountBasedTest {
     @Test
     @Disabled
     public void getFeesRateGovernorTest() throws RpcException {
+        @SuppressWarnings("deprecation")
         FeeRateGovernorInfo feeRateGovernorInfo = client.getApi().getFeeRateGovernor();
         LOGGER.info(feeRateGovernorInfo.getValue().getFeeRateGovernor().toString());
 
@@ -592,6 +594,7 @@ public class MainnetTest extends AccountBasedTest {
     @Test
     @Disabled
     public void getFeesInfoTest() throws RpcException {
+        @SuppressWarnings("deprecation")
         FeesInfo feesInfo = client.getApi().getFees();
         LOGGER.info(feesInfo.toString());
 
@@ -629,6 +632,7 @@ public class MainnetTest extends AccountBasedTest {
         assertTrue(minimumBalance > 0);
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     @Disabled
     public void getRecentBlockhashTest() throws RpcException {
@@ -637,6 +641,7 @@ public class MainnetTest extends AccountBasedTest {
         assertNotNull(recentBlockhash);
     }
 
+    @SuppressWarnings("deprecation")
     @Disabled
     @Test
     public void getStakeActivationTest() throws RpcException {
@@ -734,6 +739,7 @@ public class MainnetTest extends AccountBasedTest {
     @Test
     @Disabled
     public void getConfirmedBlockTest() throws RpcException {
+        @SuppressWarnings("deprecation")
         ConfirmedBlock block = this.client.getApi().getConfirmedBlock(124398367);
         assertEquals(124398367, block.getParentSlot());
     }
@@ -767,7 +773,9 @@ public class MainnetTest extends AccountBasedTest {
     @Test
     @Disabled
     public void getConfirmedBlocksTest() throws RpcException {
+        @SuppressWarnings("deprecation")
         List<Double> blocks = this.client.getApi().getConfirmedBlocks(5);
+        @SuppressWarnings("deprecation")
         List<Double> singleBlock = this.client.getApi().getConfirmedBlocks(5, 5);
         assertEquals(Double.valueOf(5), Double.valueOf(blocks.get(0)));
         assertEquals(Double.valueOf(5), Double.valueOf(singleBlock.get(0)));
@@ -901,6 +909,7 @@ public class MainnetTest extends AccountBasedTest {
         assertEquals("6QcgNYEqHeUohoJWR5ppuRg9Ugh6scMzJY4j4tFnrZMu", toKeyCommitted);
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     @Disabled
     public void isBlockhashValidTest() throws RpcException, InterruptedException {
