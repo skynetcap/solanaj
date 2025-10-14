@@ -47,20 +47,20 @@ import org.p2p.solanaj.ws.listeners.NotificationEventListener;
  * SubscriptionWebSocketClient client = SubscriptionWebSocketClient.getInstance("wss://api.devnet.solana.com");
  * 
  * // Subscribe to logs and get the subscription ID
- * CompletableFuture<String> subscriptionFuture = client.logsSubscribe("So11111111111111111111111111111111111111112", 
+ * CompletableFuture<Long> subscriptionFuture = client.logsSubscribe("So11111111111111111111111111111111111111112", 
  *     data -> {
  *         System.out.println("Received log: " + data);
  *     });
  * 
  * // Wait for subscription to be established
- * String subscriptionId = subscriptionFuture.get(10, TimeUnit.SECONDS);
+ * Long subscriptionId = subscriptionFuture.get(10, TimeUnit.SECONDS);
  * System.out.println("Subscription ID: " + subscriptionId);
  * 
  * // Later, unsubscribe using the subscription ID
  * client.unsubscribe(subscriptionId);
  * 
  * // Or unsubscribe by account
- * String id = client.getSubscriptionId("So11111111111111111111111111111111111111112");
+ * Long id = client.getSubscriptionId("So11111111111111111111111111111111111111112");
  * if (id != null) {
  *     client.unsubscribe(id);
  * }
@@ -100,9 +100,9 @@ public class SubscriptionWebSocketClient {
         final NotificationEventListener listener;
         final String method;
         final String unsubscribeMethod;
-        final CompletableFuture<String> subscriptionFuture;
+        final CompletableFuture<Long> subscriptionFuture;
 
-        SubscriptionInfo(RpcRequest request, NotificationEventListener listener, String method, String unsubscribeMethod, CompletableFuture<String> subscriptionFuture) {
+        SubscriptionInfo(RpcRequest request, NotificationEventListener listener, String method, String unsubscribeMethod, CompletableFuture<Long> subscriptionFuture) {
             this.request = request;
             this.listener = listener;
             this.method = method;
@@ -262,7 +262,7 @@ public class SubscriptionWebSocketClient {
                         }
                         
                         // Complete the future with the subscription ID
-                        info.subscriptionFuture.complete(String.valueOf(subscriptionId));
+                        info.subscriptionFuture.complete((long) subscriptionId);
                         
                         LOGGER.info("Subscription established with ID: " + subscriptionId + " for account: " + account);
                     }
@@ -392,7 +392,7 @@ public class SubscriptionWebSocketClient {
      * @param encoding The encoding format for Account data
      * @return A CompletableFuture that will complete with the subscription ID when the subscription is established
      */
-    public CompletableFuture<String> accountSubscribe(String key, NotificationEventListener listener, Commitment commitment, String encoding) {
+    public CompletableFuture<Long> accountSubscribe(String key, NotificationEventListener listener, Commitment commitment, String encoding) {
         List<Object> params = new ArrayList<>();
         params.add(key);
         params.add(Map.of("encoding", encoding, "commitment", commitment.getValue()));
@@ -402,11 +402,11 @@ public class SubscriptionWebSocketClient {
     }
 
     // Overload methods to maintain backwards compatibility
-    public CompletableFuture<String> accountSubscribe(String key, NotificationEventListener listener, Commitment commitment) {
+    public CompletableFuture<Long> accountSubscribe(String key, NotificationEventListener listener, Commitment commitment) {
         return accountSubscribe(key, listener, commitment, "jsonParsed");
     }
 
-    public CompletableFuture<String> accountSubscribe(String key, NotificationEventListener listener) {
+    public CompletableFuture<Long> accountSubscribe(String key, NotificationEventListener listener) {
         return accountSubscribe(key, listener, Commitment.FINALIZED, "jsonParsed");
     }
 
@@ -417,7 +417,7 @@ public class SubscriptionWebSocketClient {
      * @param listener The listener to handle notifications
      * @return A CompletableFuture that will complete with the subscription ID when the subscription is established
      */
-    public CompletableFuture<String> signatureSubscribe(String signature, NotificationEventListener listener) {
+    public CompletableFuture<Long> signatureSubscribe(String signature, NotificationEventListener listener) {
         List<Object> params = new ArrayList<>();
         params.add(signature);
 
@@ -432,7 +432,7 @@ public class SubscriptionWebSocketClient {
      * @param listener The listener to handle notifications
      * @return A CompletableFuture that will complete with the subscription ID when the subscription is established
      */
-    public CompletableFuture<String> logsSubscribe(String mention, NotificationEventListener listener) {
+    public CompletableFuture<Long> logsSubscribe(String mention, NotificationEventListener listener) {
         return logsSubscribe(List.of(mention), listener);
     }
 
@@ -443,7 +443,7 @@ public class SubscriptionWebSocketClient {
      * @param listener The listener to handle notifications
      * @return A CompletableFuture that will complete with the subscription ID when the subscription is established
      */
-    public CompletableFuture<String> logsSubscribe(List<String> mentions, NotificationEventListener listener) {
+    public CompletableFuture<Long> logsSubscribe(List<String> mentions, NotificationEventListener listener) {
         List<Object> params = new ArrayList<>();
         params.add(Map.of("mentions", mentions));
         params.add(Map.of("commitment", "processed"));
@@ -460,7 +460,7 @@ public class SubscriptionWebSocketClient {
      * @param encoding The encoding format for block data
      * @return A CompletableFuture that will complete with the subscription ID when the subscription is established
      */
-    public CompletableFuture<String> blockSubscribe(NotificationEventListener listener, Commitment commitment, String encoding) {
+    public CompletableFuture<Long> blockSubscribe(NotificationEventListener listener, Commitment commitment, String encoding) {
         List<Object> params = new ArrayList<>();
         params.add(Map.of("encoding", encoding, "commitment", commitment.getValue()));
 
@@ -468,11 +468,11 @@ public class SubscriptionWebSocketClient {
         return addSubscription(rpcRequest, listener, "blockSubscribe", "blockUnsubscribe");
     }
 
-    public CompletableFuture<String> blockSubscribe(NotificationEventListener listener, Commitment commitment) {
+    public CompletableFuture<Long> blockSubscribe(NotificationEventListener listener, Commitment commitment) {
         return blockSubscribe(listener, commitment, "json");
     }
 
-    public CompletableFuture<String> blockSubscribe(NotificationEventListener listener) {
+    public CompletableFuture<Long> blockSubscribe(NotificationEventListener listener) {
         return blockSubscribe(listener, Commitment.FINALIZED, "json");
     }
 
@@ -485,7 +485,7 @@ public class SubscriptionWebSocketClient {
      * @param encoding The encoding format for program data
      * @return A CompletableFuture that will complete with the subscription ID when the subscription is established
      */
-    public CompletableFuture<String> programSubscribe(String programId, NotificationEventListener listener, Commitment commitment, String encoding) {
+    public CompletableFuture<Long> programSubscribe(String programId, NotificationEventListener listener, Commitment commitment, String encoding) {
         List<Object> params = new ArrayList<>();
         params.add(programId);
         params.add(Map.of("encoding", encoding, "commitment", commitment.getValue()));
@@ -494,11 +494,11 @@ public class SubscriptionWebSocketClient {
         return addSubscription(rpcRequest, listener, "programSubscribe", "programUnsubscribe");
     }
 
-    public CompletableFuture<String> programSubscribe(String programId, NotificationEventListener listener, Commitment commitment) {
+    public CompletableFuture<Long> programSubscribe(String programId, NotificationEventListener listener, Commitment commitment) {
         return programSubscribe(programId, listener, commitment, "base64");
     }
 
-    public CompletableFuture<String> programSubscribe(String programId, NotificationEventListener listener) {
+    public CompletableFuture<Long> programSubscribe(String programId, NotificationEventListener listener) {
         return programSubscribe(programId, listener, Commitment.FINALIZED, "base64");
     }
 
@@ -508,7 +508,7 @@ public class SubscriptionWebSocketClient {
      * @param listener The listener to handle notifications
      * @return A CompletableFuture that will complete with the subscription ID when the subscription is established
      */
-    public CompletableFuture<String> rootSubscribe(NotificationEventListener listener) {
+    public CompletableFuture<Long> rootSubscribe(NotificationEventListener listener) {
         CustomRpcRequest rpcRequest = new CustomRpcRequest("rootSubscribe", new ArrayList<>());
         return addSubscription(rpcRequest, listener, "rootSubscribe", "rootUnsubscribe");
     }
@@ -519,7 +519,7 @@ public class SubscriptionWebSocketClient {
      * @param listener The listener to handle notifications
      * @return A CompletableFuture that will complete with the subscription ID when the subscription is established
      */
-    public CompletableFuture<String> slotSubscribe(NotificationEventListener listener) {
+    public CompletableFuture<Long> slotSubscribe(NotificationEventListener listener) {
         CustomRpcRequest rpcRequest = new CustomRpcRequest("slotSubscribe", new ArrayList<>());
         return addSubscription(rpcRequest, listener, "slotSubscribe", "slotUnsubscribe");
     }
@@ -530,7 +530,7 @@ public class SubscriptionWebSocketClient {
      * @param listener The listener to handle notifications
      * @return A CompletableFuture that will complete with the subscription ID when the subscription is established
      */
-    public CompletableFuture<String> slotsUpdatesSubscribe(NotificationEventListener listener) {
+    public CompletableFuture<Long> slotsUpdatesSubscribe(NotificationEventListener listener) {
         CustomRpcRequest rpcRequest = new CustomRpcRequest("slotsUpdatesSubscribe", new ArrayList<>());
         return addSubscription(rpcRequest, listener, "slotsUpdatesSubscribe", "slotsUpdatesUnsubscribe");
     }
@@ -541,7 +541,7 @@ public class SubscriptionWebSocketClient {
      * @param listener The listener to handle notifications
      * @return A CompletableFuture that will complete with the subscription ID when the subscription is established
      */
-    public CompletableFuture<String> voteSubscribe(NotificationEventListener listener) {
+    public CompletableFuture<Long> voteSubscribe(NotificationEventListener listener) {
         CustomRpcRequest rpcRequest = new CustomRpcRequest("voteSubscribe", new ArrayList<>());
         return addSubscription(rpcRequest, listener, "voteSubscribe", "voteUnsubscribe");
     }
@@ -555,11 +555,11 @@ public class SubscriptionWebSocketClient {
      * @param unsubscribeMethod The unsubscribe method name
      * @return A CompletableFuture that will complete with the subscription ID when the subscription is established
      */
-    private CompletableFuture<String> addSubscription(CustomRpcRequest rpcRequest, NotificationEventListener listener, String method, String unsubscribeMethod) {
+    private CompletableFuture<Long> addSubscription(CustomRpcRequest rpcRequest, NotificationEventListener listener, String method, String unsubscribeMethod) {
         String requestId = String.valueOf(requestIdCounter.getAndIncrement());
         rpcRequest.setId(requestId);
         
-        CompletableFuture<String> subscriptionFuture = new CompletableFuture<>();
+        CompletableFuture<Long> subscriptionFuture = new CompletableFuture<>();
         
         SubscriptionInfo info = new SubscriptionInfo(rpcRequest, listener, method, unsubscribeMethod, subscriptionFuture);
         subscriptions.put(requestId, info);
@@ -593,14 +593,13 @@ public class SubscriptionWebSocketClient {
      *
      * @param subscriptionId The subscription ID to unsubscribe from
      */
-    public void unsubscribe(String subscriptionId) {
-        Long subId = Long.parseLong(subscriptionId);
-        NotificationEventListener listener = subscriptionListeners.remove(subId);
-        String account = subscriptionToAccount.remove(subId);
+    public void unsubscribe(Long subscriptionId) {
+        NotificationEventListener listener = subscriptionListeners.remove(subscriptionId);
+        String account = subscriptionToAccount.remove(subscriptionId);
         
         if (listener != null) {
             List<Object> params = new ArrayList<>();
-            params.add(subId);
+            params.add(subscriptionId);
             
             // Find the unsubscribe method for this subscription
             String unsubscribeMethod = "accountUnsubscribe"; // Default
@@ -627,10 +626,10 @@ public class SubscriptionWebSocketClient {
      * @param account The account to get the subscription ID for
      * @return The subscription ID, or null if not found
      */
-    public String getSubscriptionId(String account) {
+    public Long getSubscriptionId(String account) {
         for (Map.Entry<Long, String> entry : subscriptionToAccount.entrySet()) {
             if (account.equals(entry.getValue())) {
-                return String.valueOf(entry.getKey());
+                return entry.getKey();
             }
         }
         return null;
@@ -679,7 +678,7 @@ public class SubscriptionWebSocketClient {
             newRequest.setId(requestId);
             
             // Create a new CompletableFuture for the resubscription
-            CompletableFuture<String> newFuture = new CompletableFuture<>();
+            CompletableFuture<Long> newFuture = new CompletableFuture<>();
             SubscriptionInfo newInfo = new SubscriptionInfo(newRequest, info.listener, info.method, info.unsubscribeMethod, newFuture);
             subscriptions.put(requestId, newInfo);
             sendRequest(newRequest);

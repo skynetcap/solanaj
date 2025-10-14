@@ -89,13 +89,13 @@ class SubscriptionWebSocketClientTest {
         CountDownLatch notificationLatch = new CountDownLatch(1);
         
         // Subscribe to a more active account that should generate logs
-        CompletableFuture<String> subscriptionFuture = client.logsSubscribe("So11111111111111111111111111111111111111112", data -> {
+        CompletableFuture<Long> subscriptionFuture = client.logsSubscribe("So11111111111111111111111111111111111111112", data -> {
             LOGGER.info("Received notification: " + data);
             notificationLatch.countDown();
         });
         
         // Wait for subscription to be established and get the subscription ID
-        String subscriptionId = subscriptionFuture.get(10, TimeUnit.SECONDS);
+        Long subscriptionId = subscriptionFuture.get(10, TimeUnit.SECONDS);
         LOGGER.info("Subscription established with ID: " + subscriptionId);
         assertNotNull(subscriptionId, "Subscription ID should not be null");
         
@@ -108,7 +108,7 @@ class SubscriptionWebSocketClientTest {
         LOGGER.info("Successfully unsubscribed from subscription: " + subscriptionId);
         
         // Verify we can get the subscription ID by account
-        String retrievedId = client.getSubscriptionId("So11111111111111111111111111111111111111112");
+        Long retrievedId = client.getSubscriptionId("So11111111111111111111111111111111111111112");
         assertNull(retrievedId, "Subscription should be removed after unsubscribe");
     }
 
@@ -137,7 +137,7 @@ class SubscriptionWebSocketClientTest {
             CountDownLatch notificationLatch = new CountDownLatch(1);
             
             // Subscribe to USDC mint account (very active on mainnet)
-            CompletableFuture<String> subscriptionFuture = mainnetClient.accountSubscribe(
+            CompletableFuture<Long> subscriptionFuture = mainnetClient.accountSubscribe(
                 USDC_MINT, 
                 data -> {
                     LOGGER.info("Received USDC account update: " + data);
@@ -146,7 +146,7 @@ class SubscriptionWebSocketClientTest {
             );
             
             // Wait for subscription to be established
-            String subscriptionId = subscriptionFuture.get(10, TimeUnit.SECONDS);
+            Long subscriptionId = subscriptionFuture.get(10, TimeUnit.SECONDS);
             LOGGER.info("Mainnet account subscription established with ID: " + subscriptionId);
             assertNotNull(subscriptionId, "Subscription ID should not be null");
             
@@ -159,7 +159,7 @@ class SubscriptionWebSocketClientTest {
             LOGGER.info("Successfully unsubscribed from mainnet account subscription: " + subscriptionId);
             
             // Verify subscription is removed
-            String retrievedId = mainnetClient.getSubscriptionId(USDC_MINT);
+            Long retrievedId = mainnetClient.getSubscriptionId(USDC_MINT);
             assertNull(retrievedId, "Subscription should be removed after unsubscribe");
         }
         
@@ -169,7 +169,7 @@ class SubscriptionWebSocketClientTest {
             CountDownLatch notificationLatch = new CountDownLatch(1);
             
             // Subscribe to logs mentioning USDC mint (very active on mainnet)
-            CompletableFuture<String> subscriptionFuture = mainnetClient.logsSubscribe(
+            CompletableFuture<Long> subscriptionFuture = mainnetClient.logsSubscribe(
                 List.of(USDC_MINT), 
                 data -> {
                     LOGGER.info("Received USDC log: " + data);
@@ -178,7 +178,7 @@ class SubscriptionWebSocketClientTest {
             );
             
             // Wait for subscription to be established
-            String subscriptionId = subscriptionFuture.get(10, TimeUnit.SECONDS);
+            Long subscriptionId = subscriptionFuture.get(10, TimeUnit.SECONDS);
             LOGGER.info("Mainnet logs subscription established with ID: " + subscriptionId);
             assertNotNull(subscriptionId, "Subscription ID should not be null");
             
@@ -191,7 +191,7 @@ class SubscriptionWebSocketClientTest {
             LOGGER.info("Successfully unsubscribed from mainnet logs subscription: " + subscriptionId);
             
             // Verify subscription is removed
-            String retrievedId = mainnetClient.getSubscriptionId(USDC_MINT);
+            Long retrievedId = mainnetClient.getSubscriptionId(USDC_MINT);
             assertNull(retrievedId, "Subscription should be removed after unsubscribe");
         }
         
@@ -201,7 +201,7 @@ class SubscriptionWebSocketClientTest {
             CountDownLatch notificationLatch = new CountDownLatch(1);
             
             // Subscribe to Token Program updates (very active on mainnet)
-            CompletableFuture<String> subscriptionFuture = mainnetClient.programSubscribe(
+            CompletableFuture<Long> subscriptionFuture = mainnetClient.programSubscribe(
                 TOKEN_PROGRAM, 
                 data -> {
                     LOGGER.info("Received Token Program update: " + data);
@@ -210,7 +210,7 @@ class SubscriptionWebSocketClientTest {
             );
             
             // Wait for subscription to be established
-            String subscriptionId = subscriptionFuture.get(10, TimeUnit.SECONDS);
+            Long subscriptionId = subscriptionFuture.get(10, TimeUnit.SECONDS);
             LOGGER.info("Mainnet program subscription established with ID: " + subscriptionId);
             assertNotNull(subscriptionId, "Subscription ID should not be null");
             
@@ -223,7 +223,7 @@ class SubscriptionWebSocketClientTest {
             LOGGER.info("Successfully unsubscribed from mainnet program subscription: " + subscriptionId);
             
             // Verify subscription is removed
-            String retrievedId = mainnetClient.getSubscriptionId(TOKEN_PROGRAM);
+            Long retrievedId = mainnetClient.getSubscriptionId(TOKEN_PROGRAM);
             assertNull(retrievedId, "Subscription should be removed after unsubscribe");
         }
         
@@ -234,7 +234,7 @@ class SubscriptionWebSocketClientTest {
             CountDownLatch usdtLatch = new CountDownLatch(1);
             
             // Subscribe to USDC account
-            CompletableFuture<String> usdcFuture = mainnetClient.accountSubscribe(
+            CompletableFuture<Long> usdcFuture = mainnetClient.accountSubscribe(
                 USDC_MINT, 
                 data -> {
                     LOGGER.info("USDC account update: " + data);
@@ -243,7 +243,7 @@ class SubscriptionWebSocketClientTest {
             );
             
             // Subscribe to USDT account
-            CompletableFuture<String> usdtFuture = mainnetClient.accountSubscribe(
+            CompletableFuture<Long> usdtFuture = mainnetClient.accountSubscribe(
                 USDT_MINT, 
                 data -> {
                     LOGGER.info("USDT account update: " + data);
@@ -252,8 +252,8 @@ class SubscriptionWebSocketClientTest {
             );
             
             // Wait for both subscriptions to be established
-            String usdcId = usdcFuture.get(10, TimeUnit.SECONDS);
-            String usdtId = usdtFuture.get(10, TimeUnit.SECONDS);
+            Long usdcId = usdcFuture.get(10, TimeUnit.SECONDS);
+            Long usdtId = usdtFuture.get(10, TimeUnit.SECONDS);
             
             LOGGER.info("USDC subscription ID: " + usdcId);
             LOGGER.info("USDT subscription ID: " + usdtId);
@@ -274,8 +274,8 @@ class SubscriptionWebSocketClientTest {
             LOGGER.info("Unsubscribed from USDC subscription: " + usdcId);
             
             // Verify USDC subscription is removed but USDT still exists
-            String retrievedUsdcId = mainnetClient.getSubscriptionId(USDC_MINT);
-            String retrievedUsdtId = mainnetClient.getSubscriptionId(USDT_MINT);
+            Long retrievedUsdcId = mainnetClient.getSubscriptionId(USDC_MINT);
+            Long retrievedUsdtId = mainnetClient.getSubscriptionId(USDT_MINT);
             
             assertNull(retrievedUsdcId, "USDC subscription should be removed");
             assertEquals(usdtId, retrievedUsdtId, "USDT subscription should still exist");
@@ -291,7 +291,7 @@ class SubscriptionWebSocketClientTest {
             CountDownLatch notificationLatch = new CountDownLatch(3); // Wait for 3 slot updates
             
             // Subscribe to slot updates
-            CompletableFuture<String> subscriptionFuture = mainnetClient.slotSubscribe(
+            CompletableFuture<Long> subscriptionFuture = mainnetClient.slotSubscribe(
                 data -> {
                     LOGGER.info("Received slot update: " + data);
                     notificationLatch.countDown();
@@ -299,7 +299,7 @@ class SubscriptionWebSocketClientTest {
             );
             
             // Wait for subscription to be established
-            String subscriptionId = subscriptionFuture.get(10, TimeUnit.SECONDS);
+            Long subscriptionId = subscriptionFuture.get(10, TimeUnit.SECONDS);
             LOGGER.info("Mainnet slot subscription established with ID: " + subscriptionId);
             assertNotNull(subscriptionId, "Subscription ID should not be null");
             
@@ -318,7 +318,7 @@ class SubscriptionWebSocketClientTest {
             CountDownLatch notificationLatch = new CountDownLatch(3); // Wait for 3 root updates
             
             // Subscribe to root updates
-            CompletableFuture<String> subscriptionFuture = mainnetClient.rootSubscribe(
+            CompletableFuture<Long> subscriptionFuture = mainnetClient.rootSubscribe(
                 data -> {
                     LOGGER.info("Received root update: " + data);
                     notificationLatch.countDown();
@@ -326,7 +326,7 @@ class SubscriptionWebSocketClientTest {
             );
             
             // Wait for subscription to be established
-            String subscriptionId = subscriptionFuture.get(10, TimeUnit.SECONDS);
+            Long subscriptionId = subscriptionFuture.get(10, TimeUnit.SECONDS);
             LOGGER.info("Mainnet root subscription established with ID: " + subscriptionId);
             assertNotNull(subscriptionId, "Subscription ID should not be null");
             
