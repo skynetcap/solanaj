@@ -1,6 +1,6 @@
 package org.p2p.solanaj.rpc.types;
 
-import com.squareup.moshi.Json;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -8,18 +8,18 @@ import lombok.ToString;
 @ToString
 public class EpochSchedule {
 
-    @Json(name = "slotsPerEpoch")
+    @JsonProperty("slotsPerEpoch")
     private long slotsPerEpoch;
 
-    @Json(name = "leaderScheduleSlotOffset")
+    @JsonProperty("leaderScheduleSlotOffset")
     private long leaderScheduleSlotOffset;
 
-    @Json(name = "warmup")
+    @JsonProperty("warmup")
     private boolean warmup;
 
-    @Json(name = "firstNormalEpoch")
+    @JsonProperty("firstNormalEpoch")
     private long firstNormalEpoch;
 
-    @Json(name = "firstNormalSlot")
+    @JsonProperty("firstNormalSlot")
     private long firstNormalSlot;
 }

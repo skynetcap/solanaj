@@ -1,6 +1,6 @@
 package org.p2p.solanaj.rpc.types;
 
-import com.squareup.moshi.Json;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -12,7 +12,7 @@ public class RpcNotificationResult {
     @ToString
     public static class Result extends RpcResultObject {
 
-        @Json(name = "value")
+        @JsonProperty("value")
         private Object value;
     }
 
@@ -20,19 +20,19 @@ public class RpcNotificationResult {
     @ToString
     public static class Params {
 
-        @Json(name = "result")
+        @JsonProperty("result")
         private Result result;
 
-        @Json(name = "subscription")
+        @JsonProperty("subscription")
         private long subscription;
     }
 
-    @Json(name = "jsonrpc")
+    @JsonProperty("jsonrpc")
     private String jsonrpc;
 
-    @Json(name = "method")
+    @JsonProperty("method")
     private String method;
 
-    @Json(name = "params")
+    @JsonProperty("params")
     private Params params;
 }

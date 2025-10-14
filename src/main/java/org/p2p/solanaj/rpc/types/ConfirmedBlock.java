@@ -1,6 +1,6 @@
 package org.p2p.solanaj.rpc.types;
 
-import com.squareup.moshi.Json;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -10,18 +10,18 @@ import java.util.List;
 @ToString
 public class ConfirmedBlock {
 
-    @Json(name = "blockTime")
+    @JsonProperty("blockTime")
     private int blockTime;
 
-    @Json(name = "blockhash")
+    @JsonProperty("blockhash")
     private String blockhash;
 
-    @Json(name = "parentSlot")
+    @JsonProperty("parentSlot")
     private int parentSlot;
 
-    @Json(name = "previousBlockhash")
+    @JsonProperty("previousBlockhash")
     private String previousBlockhash;
 
-    @Json(name = "transactions")
+    @JsonProperty("transactions")
     private List<ConfirmedTransaction> transactions;
 }

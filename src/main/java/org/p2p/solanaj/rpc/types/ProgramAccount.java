@@ -4,7 +4,7 @@ import java.util.AbstractMap;
 import java.util.List;
 import java.util.Base64;
 
-import com.squareup.moshi.Json;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Getter;
 import lombok.ToString;
@@ -20,19 +20,19 @@ public class ProgramAccount {
     @Getter
     @ToString
     public static class Account {
-        @Json(name = "data")
+        @JsonProperty("data")
         private String data;
 
-        @Json(name = "executable")
+        @JsonProperty("executable")
         private boolean executable;
 
-        @Json(name = "lamports")
+        @JsonProperty("lamports")
         private double lamports;
 
-        @Json(name = "owner")
+        @JsonProperty("owner")
         private String owner;
 
-        @Json(name = "rentEpoch")
+        @JsonProperty("rentEpoch")
         private double rentEpoch;
 
         private String encoding;
@@ -66,10 +66,10 @@ public class ProgramAccount {
         }
     }
 
-    @Json(name = "account")
+    @JsonProperty("account")
     private Account account;
 
-    @Json(name = "pubkey")
+    @JsonProperty("pubkey")
     private String pubkey;
 
     public PublicKey getPublicKey() {

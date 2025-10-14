@@ -1,6 +1,6 @@
 package org.p2p.solanaj.rpc.types;
 
-import com.squareup.moshi.Json;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -8,19 +8,19 @@ import lombok.ToString;
 @ToString
 public class EpochInfo {
 
-    @Json(name = "absoluteSlot")
+    @JsonProperty("absoluteSlot")
     private long absoluteSlot;
 
-    @Json(name = "blockHeight")
+    @JsonProperty("blockHeight")
     private long blockHeight;
 
-    @Json(name = "epoch")
+    @JsonProperty("epoch")
     private long epoch;
 
-    @Json(name = "slotIndex")
+    @JsonProperty("slotIndex")
     private long slotIndex;
 
-    @Json(name = "slotsInEpoch")
+    @JsonProperty("slotsInEpoch")
     private long slotsInEpoch;
 }
     

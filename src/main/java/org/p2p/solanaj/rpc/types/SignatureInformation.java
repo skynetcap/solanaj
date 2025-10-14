@@ -2,7 +2,7 @@ package org.p2p.solanaj.rpc.types;
 
 import java.util.AbstractMap;
 
-import com.squareup.moshi.Json;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -12,19 +12,19 @@ import lombok.ToString;
 @NoArgsConstructor
 public class SignatureInformation {
 
-    @Json(name = "err")
+    @JsonProperty("err")
     private Object err;
 
-    @Json(name = "memo")
+    @JsonProperty("memo")
     private Object memo;
 
-    @Json(name = "signature")
+    @JsonProperty("signature")
     private String signature;
 
-    @Json(name = "slot")
+    @JsonProperty("slot")
     private double slot;
 
-    @Json(name = "blockTime")
+    @JsonProperty("blockTime")
     private double blockTime;
 
     @SuppressWarnings({ "rawtypes" })

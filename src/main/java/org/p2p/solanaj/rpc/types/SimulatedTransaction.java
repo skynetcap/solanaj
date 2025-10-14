@@ -1,6 +1,6 @@
 package org.p2p.solanaj.rpc.types;
 
-import com.squareup.moshi.Json;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -13,13 +13,13 @@ public class SimulatedTransaction extends RpcResultObject {
     @Getter
     @ToString
     public static class Value {
-        @Json(name = "accounts")
+        @JsonProperty("accounts")
         private List<AccountInfo.Value> accounts;
 
-        @Json(name = "logs")
+        @JsonProperty("logs")
         private List<String> logs;
     }
 
-    @Json(name = "value")
+    @JsonProperty("value")
     private Value value;
 }

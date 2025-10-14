@@ -1,6 +1,6 @@
 package org.p2p.solanaj.rpc.types;
 
-import com.squareup.moshi.Json;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -12,16 +12,16 @@ import java.util.AbstractMap;
 @NoArgsConstructor
 public class InflationReward {
 
-    @Json(name = "epoch")
+    @JsonProperty("epoch")
     private double epoch;
 
-    @Json(name = "effectiveSlot")
+    @JsonProperty("effectiveSlot")
     private double effectiveSlot;
 
-    @Json(name = "amount")
+    @JsonProperty("amount")
     private double amount;
 
-    @Json(name = "postBalance")
+    @JsonProperty("postBalance")
     private double postBalance;
 
     // Constructor for deserializing into List

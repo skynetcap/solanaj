@@ -1,6 +1,6 @@
 package org.p2p.solanaj.rpc.types;
 
-import com.squareup.moshi.Json;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -15,23 +15,25 @@ public class TokenResultObjects {
     @NoArgsConstructor
     public static class TokenAmountInfo {
 
-        @Json(name = "amount")
+        @JsonProperty("amount")
         private String amount;
 
-        @Json(name = "decimals")
+        @JsonProperty("decimals")
         private int decimals;
 
-        @Json(name = "uiAmount")
+        @JsonProperty("uiAmount")
         private Double uiAmount;
 
-        @Json(name = "uiAmountString")
+        @JsonProperty("uiAmountString")
         private String uiAmountString;
 
         @SuppressWarnings({ "rawtypes" })
         public TokenAmountInfo(AbstractMap am) {
             this.amount = (String) am.get("amount");
-            this.decimals = (int) (double) am.get("decimals");
-            this.uiAmount = (Double) am.get("uiAmount");
+            Object decimalsObj = am.get("decimals");
+            this.decimals = decimalsObj instanceof Number ? ((Number) decimalsObj).intValue() : 0;
+            Object uiAmountObj = am.get("uiAmount");
+            this.uiAmount = uiAmountObj instanceof Number ? ((Number) uiAmountObj).doubleValue() : null;
             this.uiAmountString = (String) am.get("uiAmountString");
         }
     }
@@ -41,7 +43,7 @@ public class TokenResultObjects {
     @NoArgsConstructor
     public static class TokenAccount extends TokenAmountInfo {
 
-        @Json(name = "address")
+        @JsonProperty("address")
         private String address;
 
         @SuppressWarnings({ "rawtypes" })
@@ -55,38 +57,38 @@ public class TokenResultObjects {
     @ToString
     public static class TokenInfo {
 
-        @Json(name = "isNative")
+        @JsonProperty("isNative")
         private Boolean isNative;
 
-        @Json(name = "mint")
+        @JsonProperty("mint")
         private String mint;
 
-        @Json(name = "owner")
+        @JsonProperty("owner")
         private String owner;
 
-        @Json(name = "state")
+        @JsonProperty("state")
         private String state;
 
-        @Json(name = "tokenAmount")
+        @JsonProperty("tokenAmount")
         private TokenAmountInfo tokenAmount;
 
-        @Json(name = "decimals")
+        @JsonProperty("decimals")
         private int decimals;
 
-        @Json(name = "freezeAuthority")
+        @JsonProperty("freezeAuthority")
         private String freezeAuthority;
 
-        @Json(name = "mintAuthority")
+        @JsonProperty("mintAuthority")
         private String mintAuthority;
 
-        @Json(name = "supply")
+        @JsonProperty("supply")
         private String supply;  
 
-        @Json(name = "isInitialized")
+        @JsonProperty("isInitialized")
         private boolean isInitialized;
 
         // Optional extensions for token2022
-        @Json(name = "extensions")
+        @JsonProperty("extensions")
         private List<Extension> extensions;
     }
 
@@ -94,10 +96,10 @@ public class TokenResultObjects {
     @ToString
     public static class ParsedData {
 
-        @Json(name = "info")
+        @JsonProperty("info")
         private TokenInfo info;
 
-        @Json(name = "type")
+        @JsonProperty("type")
         private String type;
     }
 
@@ -105,13 +107,13 @@ public class TokenResultObjects {
     @ToString
     public static class Data {
 
-        @Json(name = "parsed")
+        @JsonProperty("parsed")
         private ParsedData parsed;
 
-        @Json(name = "program")
+        @JsonProperty("program")
         private String program;
 
-        @Json(name = "space")
+        @JsonProperty("space")
         private Integer space;
     }
 
@@ -119,19 +121,19 @@ public class TokenResultObjects {
     @ToString
     public static class Value {
 
-        @Json(name = "data")
+        @JsonProperty("data")
         private Data data;
 
-        @Json(name = "executable")
+        @JsonProperty("executable")
         private boolean executable;
 
-        @Json(name = "lamports")
+        @JsonProperty("lamports")
         private double lamports;
 
-        @Json(name = "owner")
+        @JsonProperty("owner")
         private String owner;
 
-        @Json(name = "rentEpoch")
+        @JsonProperty("rentEpoch")
         private double rentEpoch;
     }
 
@@ -139,10 +141,10 @@ public class TokenResultObjects {
     @ToString
     public static class Extension {
 
-        @Json(name = "extension")
+        @JsonProperty("extension")
         private String extensionType;
 
-        @Json(name = "state")
+        @JsonProperty("state")
         private ExtensionState state;
     }
 
@@ -151,29 +153,29 @@ public class TokenResultObjects {
     public static class ExtensionState {
         
         // For "metadataPointer" extension
-        @Json(name = "authority")
+        @JsonProperty("authority")
         private String authority;
 
-        @Json(name = "metadataAddress")
+        @JsonProperty("metadataAddress")
         private String metadataAddress;
 
         // For "tokenMetadata" extension
-        @Json(name = "additionalMetadata")
+        @JsonProperty("additionalMetadata")
         private List<Object> additionalMetadata;
 
-        @Json(name = "mint")
+        @JsonProperty("mint")
         private String mint;
 
-        @Json(name = "name")
+        @JsonProperty("name")
         private String name;
 
-        @Json(name = "symbol")
+        @JsonProperty("symbol")
         private String symbol;
 
-        @Json(name = "updateAuthority")
+        @JsonProperty("updateAuthority")
         private String updateAuthority;
 
-        @Json(name = "uri")
+        @JsonProperty("uri")
         private String uri;
     }
 }

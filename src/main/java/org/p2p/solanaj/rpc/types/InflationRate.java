@@ -1,6 +1,6 @@
 package org.p2p.solanaj.rpc.types;
 
-import com.squareup.moshi.Json;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -8,15 +8,15 @@ import lombok.ToString;
 @ToString
 public class InflationRate {
 
-    @Json(name = "total")
+    @JsonProperty("total")
     private float total;
 
-    @Json(name = "validator")
+    @JsonProperty("validator")
     private float validator;
 
-    @Json(name = "foundation")
+    @JsonProperty("foundation")
     private float foundation;
 
-    @Json(name = "epoch")
+    @JsonProperty("epoch")
     private long epoch;
 }

@@ -1,6 +1,6 @@
 package org.p2p.solanaj.rpc.types;
 
-import com.squareup.moshi.Json;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -8,18 +8,18 @@ import lombok.ToString;
 @ToString
 public class InflationGovernor {
 
-    @Json(name = "initial")
+    @JsonProperty("initial")
     private float initial;
 
-    @Json(name = "terminal")
+    @JsonProperty("terminal")
     private float terminal;
 
-    @Json(name = "taper")
+    @JsonProperty("taper")
     private float taper;
 
-    @Json(name = "foundation")
+    @JsonProperty("foundation")
     private float foundation;
 
-    @Json(name = "foundationTerm")
+    @JsonProperty("foundationTerm")
     private long foundationTerm;
 }

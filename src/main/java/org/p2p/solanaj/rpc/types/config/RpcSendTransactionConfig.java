@@ -1,6 +1,6 @@
 package org.p2p.solanaj.rpc.types.config;
 
-import com.squareup.moshi.Json;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -28,15 +28,15 @@ public class RpcSendTransactionConfig {
 
     }
 
-    @Json(name = "encoding")
+    @JsonProperty("encoding")
     @Builder.Default
     private Encoding encoding = Encoding.base64;
 
-    @Json(name ="skipPreflight")
+    @JsonProperty("skipPreflight")
     @Builder.Default
     private boolean skipPreflight = true;
 
-    @Json(name = "maxRetries")
+    @JsonProperty("maxRetries")
     @Builder.Default
     private long maxRetries = 0;
 

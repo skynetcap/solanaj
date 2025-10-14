@@ -1,6 +1,6 @@
 package org.p2p.solanaj.rpc.types;
 
-import com.squareup.moshi.Json;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -23,18 +23,18 @@ public class ClusterNode {
         this.version = (String) pa.get("version");
     }
 
-    @Json(name = "pubkey")
+    @JsonProperty("pubkey")
     private PublicKey pubkey;
 
-    @Json(name = "gossip")
+    @JsonProperty("gossip")
     private String gossip;
 
-    @Json(name = "tpu")
+    @JsonProperty("tpu")
     private String tpu;
 
-    @Json(name = "rpc")
+    @JsonProperty("rpc")
     private String rpc;
 
-    @Json(name = "version")
+    @JsonProperty("version")
     private String version;
 }

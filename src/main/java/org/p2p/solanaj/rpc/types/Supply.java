@@ -1,6 +1,6 @@
 package org.p2p.solanaj.rpc.types;
 
-import com.squareup.moshi.Json;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -13,19 +13,19 @@ public class Supply extends RpcResultObject {
     @Getter
     @ToString
     public static class Value {
-        @Json(name = "total")
+        @JsonProperty("total")
         private long total;
 
-        @Json(name = "circulating")
+        @JsonProperty("circulating")
         private long circulating;
 
-        @Json(name = "nonCirculating")
+        @JsonProperty("nonCirculating")
         private long nonCirculating;
 
-        @Json(name = "nonCirculatingAccounts")
+        @JsonProperty("nonCirculatingAccounts")
         private List<String> nonCirculatingAccounts;
     }
 
-    @Json(name = "value")
+    @JsonProperty("value")
     private Value value;
 }
