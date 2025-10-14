@@ -23,9 +23,11 @@ public class AccountInfo extends RpcResultObject {
         public Value(AbstractMap am) {
             this.data = (List) am.get("data");
             this.executable = (boolean) am.get("executable");
-            this.lamports = (double) am.get("lamports");
+            Object lamportsObj = am.get("lamports");
+            this.lamports = lamportsObj instanceof Number ? ((Number) lamportsObj).doubleValue() : 0.0;
             this.owner = (String) am.get("owner");
-            this.rentEpoch = (double) am.get("rentEpoch");
+            Object rentEpochObj = am.get("rentEpoch");
+            this.rentEpoch = rentEpochObj instanceof Number ? ((Number) rentEpochObj).doubleValue() : 0.0;
         }
 
         @JsonProperty("data")

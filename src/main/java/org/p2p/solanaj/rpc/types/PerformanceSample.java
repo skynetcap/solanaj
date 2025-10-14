@@ -14,9 +14,16 @@ public class PerformanceSample {
 
     @SuppressWarnings("rawtypes")
     public PerformanceSample(AbstractMap am) {
-        this.slot = (double) am.get("slot");
-        this.numTransactions = (double) am.get("numTransactions");
-        this.numSlots = (double) am.get("numSlots");
-        this.samplePeriodsSecs = (double) am.get("samplePeriodSecs");
+        Object slotObj = am.get("slot");
+        this.slot = slotObj instanceof Number ? ((Number) slotObj).doubleValue() : 0.0;
+        
+        Object numTransactionsObj = am.get("numTransactions");
+        this.numTransactions = numTransactionsObj instanceof Number ? ((Number) numTransactionsObj).doubleValue() : 0.0;
+        
+        Object numSlotsObj = am.get("numSlots");
+        this.numSlots = numSlotsObj instanceof Number ? ((Number) numSlotsObj).doubleValue() : 0.0;
+        
+        Object samplePeriodSecsObj = am.get("samplePeriodSecs");
+        this.samplePeriodsSecs = samplePeriodSecsObj instanceof Number ? ((Number) samplePeriodSecsObj).doubleValue() : 0.0;
     }
 }

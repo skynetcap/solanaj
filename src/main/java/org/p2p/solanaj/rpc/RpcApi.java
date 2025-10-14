@@ -918,7 +918,10 @@ public class RpcApi {
     public List<Double> getConfirmedBlocks(Integer start, Integer end) throws RpcException {
         List<Object> params;
         params = (end == null ? Arrays.asList(start) : Arrays.asList(start, end));
-        return callWithGenericType("getConfirmedBlocks", params, List.class);
+        List<Object> result = callWithGenericType("getConfirmedBlocks", params, List.class);
+        return result.stream()
+                .map(obj -> obj instanceof Number ? ((Number) obj).doubleValue() : 0.0)
+                .collect(Collectors.toList());
     }
     /**
      * Returns a list of confirmed blocks between two slots
@@ -1290,8 +1293,10 @@ public class RpcApi {
             params.add(Map.of("commitment", commitment.getValue()));
         }
 
-        List<Double> result = callWithGenericType("getBlocks", params, List.class);
-        return result.stream().map(Double::longValue).collect(Collectors.toList());
+        List<Object> result = callWithGenericType("getBlocks", params, List.class);
+        return result.stream()
+                .map(obj -> obj instanceof Number ? ((Number) obj).longValue() : 0L)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -1324,8 +1329,10 @@ public class RpcApi {
             params.add(Map.of("commitment", commitment.getValue()));
         }
 
-        List<Double> result = callWithGenericType("getBlocksWithLimit", params, List.class);
-        return result.stream().map(Double::longValue).collect(Collectors.toList());
+        List<Object> result = callWithGenericType("getBlocksWithLimit", params, List.class);
+        return result.stream()
+                .map(obj -> obj instanceof Number ? ((Number) obj).longValue() : 0L)
+                .collect(Collectors.toList());
     }
 
 }
