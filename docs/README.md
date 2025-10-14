@@ -77,7 +77,7 @@ To integrate SolanaJ into your Maven project, add the following dependency decla
 <dependency>
     <groupId>com.mmorrell</groupId>
     <artifactId>solanaj</artifactId>
-    <version>1.26.0</version>
+    <version>1.27.0</version>
 </dependency>
 ```
 
