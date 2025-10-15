@@ -37,7 +37,6 @@ public class ProgramAccount {
 
         private String encoding;
 
-        @SuppressWarnings({ "rawtypes", "unchecked" })
         public Account(Object acc) {
             AbstractMap account = (AbstractMap) acc;
 
@@ -52,9 +51,9 @@ public class ProgramAccount {
             }
 
             this.executable = (boolean) account.get("executable");
-            this.lamports = (double) account.get("lamports");
+            this.lamports = ((Number) account.get("lamports")).doubleValue();
             this.owner = (String) account.get("owner");
-            this.rentEpoch = (double) account.get("rentEpoch");
+            this.rentEpoch = ((Number) account.get("rentEpoch")).doubleValue();
         }
 
         public byte[] getDecodedData() {
@@ -76,7 +75,6 @@ public class ProgramAccount {
         return new PublicKey(pubkey);
     }
 
-    @SuppressWarnings({ "rawtypes" })
     public ProgramAccount(AbstractMap pa) {
         this.account = new Account(pa.get("account"));
         this.pubkey = (String) pa.get("pubkey");
