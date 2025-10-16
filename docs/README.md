@@ -77,7 +77,7 @@ To integrate SolanaJ into your Maven project, add the following dependency decla
 <dependency>
     <groupId>com.mmorrell</groupId>
     <artifactId>solanaj</artifactId>
-    <version>1.27.2</version>
+    <version>1.27.3</version>
 </dependency>
 ```
 
@@ -87,7 +87,7 @@ For Gradle-based projects, add the following to your `build.gradle` file:
 
 ```gradle
 dependencies {
-    implementation 'com.mmorrell:solanaj:1.26.0'
+    implementation 'com.mmorrell:solanaj:1.27.3'
 }
 ```
 

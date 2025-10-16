@@ -288,8 +288,20 @@ public class RpcApi {
         return result;
     }
 
-    public List<ProgramAccount> getProgramAccounts(PublicKey account, List<Memcmp> memcmpList, int dataSize, long changedSinceSlot)
-            throws RpcException {
+    /**
+     * With processed commitment, gets the program accounts for a given account, memcmp list, data size, and changed since slot.
+     * @param account The account to get the program accounts for.
+     * @param memcmpList The memcmp list to filter the program accounts by.
+     * @param dataSize The data size to filter the program accounts by.
+     * @param changedSinceSlot The changed since slot to filter the program accounts by.
+     * @return The list of program accounts.
+     * @throws RpcException If an error occurs during the RPC call.
+     */
+    public List<ProgramAccount> getProgramAccounts(PublicKey account, List<Memcmp> memcmpList, int dataSize, long changedSinceSlot) throws RpcException {
+        return getProgramAccounts(account, memcmpList, dataSize, changedSinceSlot, Commitment.PROCESSED);
+    }
+
+    public List<ProgramAccount> getProgramAccounts(PublicKey account, List<Memcmp> memcmpList, int dataSize, long changedSinceSlot, Commitment commitment) throws RpcException {
         List<Object> params = new ArrayList<>();
 
         params.add(account.toString());
@@ -304,6 +316,7 @@ public class RpcApi {
         ProgramAccountConfig programAccountConfig = new ProgramAccountConfig(filters);
         programAccountConfig.setEncoding(Encoding.base64);
         programAccountConfig.setChangedSinceSlot(changedSinceSlot);
+        programAccountConfig.setCommitment(commitment.getValue());
         params.add(programAccountConfig);
 
         List<AbstractMap<String, Object>> rawResult = callWithGenericType("getProgramAccounts", params, List.class);
