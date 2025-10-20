@@ -1,10 +1,8 @@
 package org.p2p.solanaj.core;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Stream;
 
 import org.p2p.solanaj.utils.Base58;
 import org.p2p.solanaj.utils.ShortvecEncoding;
@@ -19,15 +17,14 @@ public class Transaction {
     public static final int SIGNATURE_LENGTH = 64;
 
     private final Message message;
-    private final List<String> signatures;
-    private byte[] serializedMessage;
+    private final List<Account> signers; // TODO: more like Map[PublicKey,Account]
 
     /**
      * Constructs a new Transaction instance.
      */
     public Transaction() {
         this.message = new Message();
-        this.signatures = new ArrayList<>(); // Use diamond operator
+        this.signers = new ArrayList<>();
     }
 
     /**
@@ -54,14 +51,24 @@ public class Transaction {
         message.setRecentBlockHash(recentBlockhash);
     }
 
+    /** Use specific account as transaction fee payer (first signer) */
+    public void setFeePayer(PublicKey feePayer) {
+        Objects.requireNonNull(feePayer, "FeePayer cannot be null");
+        message.setFeePayer(feePayer);
+    }
+
     /**
-     * Signs the transaction with a single signer.
+     * Signs the transaction with a specific signer.
+     *
+     * Note - this method does not affect signatures order. If specific account is to be used
+     * for first signature, `setFeePayer` method should be used additionally.
      *
      * @param signer The account to sign the transaction
      * @throws NullPointerException if the signer is null
      */
     public void sign(Account signer) {
-        sign(Arrays.asList(Objects.requireNonNull(signer, "Signer cannot be null"))); // Add input validation
+        Objects.requireNonNull(signer, "Signer cannot be null");
+        this.signers.add(signer);
     }
 
     /**
@@ -71,32 +78,40 @@ public class Transaction {
      * @throws IllegalArgumentException if no signers are provided
      */
     public void sign(List<Account> signers) {
-        if (signers == null || signers.isEmpty()) {
-            throw new IllegalArgumentException("No signers provided");
-        }
-
-        Account feePayer = signers.get(0);
-        message.setFeePayer(feePayer);
-
-        serializedMessage = message.serialize();
-
-        for (Account signer : signers) {
-            try {
-                TweetNaclFast.Signature signatureProvider = new TweetNaclFast.Signature(new byte[0], signer.getSecretKey());
-                byte[] signature = signatureProvider.detached(serializedMessage);
-                signatures.add(Base58.encode(signature));
-            } catch (Exception e) {
-                throw new RuntimeException("Error signing transaction", e); // Improve exception handling
-            }
-        }
+        Objects.requireNonNull(signers, "Signer cannot be null");
+        this.signers.addAll(signers);
     }
 
     /**
-     * Serializes the transaction into a byte array.
+     * Signs and serializes the transaction into a byte array.
      *
      * @return The serialized transaction as a byte array
      */
     public byte[] serialize() {
+
+        byte[] serializedMessage = message.serialize();
+
+        // TODO: use signers lookup, fail on excessive signers
+        Stream<Account> requiredSigners = message.getAccountKeys()
+                .stream()
+                .filter(AccountMeta::isSigner)
+                .map(AccountMeta::getPublicKey)
+                .map(publicKey ->
+                        signers.stream()
+                                .filter(account -> account.getPublicKey().equals(publicKey))
+                                .findFirst()
+                                .orElseThrow(() -> new RuntimeException("Missing signer for account "+publicKey)));
+
+        // TODO: validate signature length
+        List<byte[]> signatures = requiredSigners.map(signer -> {
+                    try {
+                        TweetNaclFast.Signature signatureProvider = new TweetNaclFast.Signature(new byte[0], signer.getSecretKey());
+                        return signatureProvider.detached(serializedMessage);
+                    } catch (Exception e) {
+                        throw new RuntimeException("Error signing transaction", e);
+                    }}).toList();
+
+
         int signaturesSize = signatures.size();
         byte[] signaturesLength = ShortvecEncoding.encodeLength(signaturesSize);
 
@@ -105,11 +120,7 @@ public class Transaction {
         ByteBuffer out = ByteBuffer.allocate(totalSize);
 
         out.put(signaturesLength);
-
-        for (String signature : signatures) {
-            byte[] rawSignature = Base58.decode(signature);
-            out.put(rawSignature);
-        }
+        signatures.forEach(out::put);
 
         out.put(serializedMessage);
 
